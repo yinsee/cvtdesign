@@ -1943,7 +1943,7 @@ class Component extends DCLogic {
     const T = v.T, ch = this.state.chapter, m = v.map, k = 1 - Math.exp(-dt * 2.2);
     let tgt, cp;
     if (ch < 0 || ch >= m.stops.length) { tgt = new T.Vector3(0, 0, 0); const a = 0.6 + v.az; cp = new T.Vector3(Math.sin(a) * 150, 150, Math.cos(a) * 150); }
-    else { tgt = m.stops[ch].clone(); const a = 0.7 + ch * 0.55 + v.az; cp = tgt.clone().add(new T.Vector3(Math.sin(a) * 46, 38, Math.cos(a) * 46)); }
+    else { tgt = m.stops[ch].clone(); const a = 0.7 + ch * 0.55 + v.az; cp = tgt.clone().add(new T.Vector3(Math.sin(a) * 72, 54, Math.cos(a) * 72)); }
     v.camPos.lerp(cp, k); v.look.lerp(tgt, k); v.camera.position.copy(v.camPos); v.camera.lookAt(v.look);
     m.pins.forEach((p, i) => { const on = i === ch; const s = on ? 1.35 + 0.08 * Math.sin(now / 250) : 1; p.group.scale.setScalar(p.group.scale.x + (s - p.group.scale.x) * k); p.headM.color.set(on ? '#D62842' : '#341C5A'); });
     v.u = (v.u + dt * 0.018) % 1;
