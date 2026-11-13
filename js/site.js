@@ -619,15 +619,16 @@ return Component;
 DC["Van3D"] = (function () {
 
 const VAN_SPECS = {
-  'man-lwb-auto': { env: 'loch', name: 'MAN TGE LWB Luxury · Automatic', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#47474b', layout: 'northsouth', bath: true, rearAxle: 1.75, doors: 'barn' },
-  'man-lwb-manual': { env: 'alps', name: 'MAN TGE LWB Luxury · Manual', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#404145', layout: 'transverse', bedDepth: 1.5, bath: true, rearAxle: 1.75, doors: 'barn' },
-  'man-mwb': { env: 'lakes', name: 'MAN TGE MWB · 2 berth', L: 5.99, W: 2.04, H: 2.6, kind: 'high', paint: '#4b4c51', layout: 'transverse', bedDepth: 1.6, bath: true, rearAxle: 1.15, doors: 'barn' },
-  'crafter-auto': { env: 'coast', name: 'VW Crafter LWB · Automatic', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#eeeeec', layout: 'transverse', bedDepth: 1.4, bath: true, dinette: true, rearAxle: 1.75, doors: 'barn' },
-  'crafter-manual': { env: 'dales', name: 'VW Crafter LWB · Manual', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#c4c7cb', layout: 'transverse', bedDepth: 1.4, bath: true, dinette: true, rearAxle: 1.75, doors: 'barn' },
-  'toleno': { env: 'forest', name: 'Toleno R · 4 berth', L: 6.36, W: 2.05, H: 2.62, kind: 'high', paint: '#f4f4f2', stripes: true, layout: 'transverse', bedDepth: 1.45, bath: true, dinette: true, rearAxle: 1.5, doors: 'barn' },
-  't5-spacious': { env: 'dales', name: 'VW T5 Spacious · Pop-top', L: 4.9, W: 1.9, H: 1.97, kind: 'pop', paint: '#53575d', layout: 'rockroll', bath: false, rearAxle: 1.0, doors: 'tailgate' },
-  't5-widebed': { env: 'lakes', name: 'VW T5 Wide Bed · Pop-top', L: 4.9, W: 1.9, H: 1.97, kind: 'pop', paint: '#b3b7bd', layout: 'rockroll', wideBed: true, bath: false, rearAxle: 1.0, doors: 'tailgate' },
-  't5-compact': { env: 'coast', name: 'VW T5 Compact · Pop-top', L: 4.9, W: 1.9, H: 1.97, kind: 'pop', paint: '#efefed', layout: 'rockroll', bath: false, rearAxle: 1.0, doors: 'tailgate' }
+  // paint, trim, wheels, glazing and setting follow each van's own cover photo
+  'man-lwb-auto': { env: 'alps', name: 'MAN TGE LWB Luxury · Automatic', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#38393d', layout: 'northsouth', bath: true, rearAxle: 1.75, doors: 'barn', wheels: 'alloy' },
+  'man-lwb-manual': { env: 'dales', name: 'MAN TGE LWB Luxury · Manual', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#36383c', layout: 'transverse', bedDepth: 1.5, bath: true, rearAxle: 1.75, doors: 'barn', wheels: 'alloy', pod: true },
+  'man-mwb': { env: 'farmland', name: 'MAN TGE MWB · 2 berth', L: 5.99, W: 2.04, H: 2.6, kind: 'high', paint: '#3d3f43', layout: 'transverse', bedDepth: 1.6, bath: true, rearAxle: 1.15, doors: 'barn', wheels: 'alloy' },
+  'crafter-auto': { env: 'coast', name: 'VW Crafter LWB · Automatic', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#efefed', metal: 0.25, layout: 'transverse', bedDepth: 1.4, bath: true, dinette: true, rearAxle: 1.75, doors: 'barn', wheels: 'steel', band: '#6f7378' },
+  'crafter-manual': { env: 'grove', name: 'VW Crafter LWB · Manual', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#b7babe', metal: 0.85, layout: 'transverse', bedDepth: 1.4, bath: true, dinette: true, rearAxle: 1.75, doors: 'barn', wheels: 'steel', fullGlass: true, strip: '#1c1d20' },
+  'toleno': { env: 'forest', name: 'Toleno R · 4 berth', L: 6.36, W: 2.05, H: 2.62, kind: 'high', paint: '#f4f4f2', metal: 0.2, stripes: true, layout: 'transverse', bedDepth: 1.45, bath: true, dinette: true, rearAxle: 1.5, doors: 'barn', wheels: 'dark', band: '#1d1e21', bonnet: 0.68 },
+  't5-spacious': { env: 'dales', name: 'VW T5 Spacious · Pop-top', L: 4.9, W: 1.9, H: 1.97, kind: 'pop', paint: '#4b4e53', layout: 'rockroll', bath: false, rearAxle: 1.0, doors: 'tailgate', wheels: 'alloy', bumpers: 'body', canvas: '#3c3d40' },
+  't5-widebed': { env: 'farmland', name: 'VW T5 Wide Bed · Pop-top', L: 4.9, W: 1.9, H: 1.97, kind: 'pop', paint: '#b5b9be', metal: 0.85, layout: 'rockroll', wideBed: true, bath: false, rearAxle: 1.0, doors: 'tailgate', wheels: 'alloy', bumpers: 'body', canvas: '#2a2a2c' },
+  't5-compact': { env: 'coast', name: 'VW T5 Compact · Pop-top', L: 4.9, W: 1.9, H: 1.97, kind: 'pop', paint: '#f2f2f0', metal: 0.2, layout: 'rockroll', bath: false, rearAxle: 1.0, doors: 'tailgate', wheels: 'cover', bumpers: 'body', canvas: '#a9abad', lid: '#e4e4e0' }
 };
 const VAN_ORDER = ['man-lwb-auto', 'man-lwb-manual', 'man-mwb', 'crafter-auto', 'crafter-manual', 'toleno', 't5-spacious', 't5-widebed', 't5-compact'];
 const VIEWS = [
@@ -695,13 +696,19 @@ function buildVan(T, c) {
     return [150 * k, 122 * k, 96 * k];
   }, 1, 3); texs.push(floorTex);
 
-  const paint = P({ color: c.paint, metalness: 0.62, roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.04, envMapIntensity: 1.15 });
+  const paint = P({ color: c.paint, metalness: c.metal === undefined ? 0.45 : c.metal, roughness: 0.36, clearcoat: 0.6, clearcoatRoughness: 0.08, envMapIntensity: 0.55 });
   const plastic = S({ color: '#1b1c1f', roughness: 0.78 });
   const satin = S({ color: '#2b2c30', roughness: 0.5, metalness: 0.15 });
   const chrome = S({ color: '#dfe3e8', roughness: 0.15, metalness: 1 });
   const tyreM = S({ color: '#141416', roughness: 0.92 });
   const rimM = S({ color: '#c5c9cf', roughness: 0.25, metalness: 0.95 });
+  const darkRim = S({ color: '#1c1d20', roughness: 0.3, metalness: 0.6 }), steelRim = S({ color: '#2b2d31', roughness: 0.5, metalness: 0.5 }), coverM = S({ color: '#bfc3c8', roughness: 0.35, metalness: 0.7 });
   const glassSide = P({ color: '#0b0f14', metalness: 0.15, roughness: 0.03, transparent: true, opacity: 0.74, side: T.DoubleSide, depthWrite: false, envMapIntensity: 2.0 });
+  const tint = (side, out) => P(out
+    ? { color: '#07090c', metalness: 0.2, roughness: 0.04, transparent: true, opacity: 0.93, side, depthWrite: false, envMapIntensity: 2.2, emissive: '#ffc985', emissiveIntensity: 0 }
+    : { color: '#10161c', metalness: 0.05, roughness: 0.03, transparent: true, opacity: 0.28, side, depthWrite: false, envMapIntensity: 1.2 });
+  const tintOutF = tint(T.FrontSide, true), tintOutB = tint(T.BackSide, true), tintInF = tint(T.FrontSide, false), tintInB = tint(T.BackSide, false);
+  const bodyLow = c.bumpers === 'body';
   const glassFront = P({ color: '#30404c', metalness: 0.05, roughness: 0.03, transparent: true, opacity: 0.22, side: T.DoubleSide, depthWrite: false, envMapIntensity: 1.4 });
   const headM = P({ color: '#e8eef4', roughness: 0.05, metalness: 0.2, clearcoat: 1, emissive: '#d8e8ff', emissiveIntensity: 0.55 });
   const drlM = S({ color: '#ffffff', emissive: '#ffffff', emissiveIntensity: 2.5 });
@@ -736,10 +743,10 @@ function buildVan(T, c) {
   const pop = c.kind === 'pop';
   const rr = pop ? 0.12 : 0.25;
   const sillY = 0.34, floorY = 0.56, wheelR = pop ? 0.34 : 0.37;
-  const bonnetLen = pop ? 0.66 : 0.82, bonnetH = pop ? 1.04 : 1.12;
+  const bonnetLen = c.bonnet || (pop ? 0.66 : 0.86), bonnetH = pop ? 1.04 : 1.12;
   const wsBaseZ = half - bonnetLen;
-  const wsTopY = pop ? H - 0.1 : 2.04;
-  const wsRun = pop ? 0.66 : 0.8;
+  const wsTopY = pop ? H - 0.1 : 2.08;
+  const wsRun = pop ? 0.72 : 0.94;
   const wsTopZ = wsBaseZ - wsRun;
   const capRun = pop ? 0.04 : 0.46;
   const roofFrontZ = wsTopZ - capRun;
@@ -788,6 +795,7 @@ function buildVan(T, c) {
       return w;
     }
     const gy0 = bonnetH + 0.16, gy1 = topY - 0.2;
+    if (c.fullGlass) { const z0 = rearZ + 0.32, z1 = cabDoorRear - 0.1, n = 4, pw = (z1 - z0 - 0.09 * (n - 1)) / n; for (let k = 0; k < n; k++) w.push(rect(z0 + k * (pw + 0.09), z0 + k * (pw + 0.09) + pw, gy0, gy1)); return w; }
     w.push(rect(cabDoorRear - 1.22, cabDoorRear - 0.1, gy0, gy1));
     w.push(rect(rearZ + 0.42, cabDoorRear - 1.36, gy0, gy1));
     return w;
@@ -808,11 +816,25 @@ function buildVan(T, c) {
     const lin = toPath(rect(rearZ + 0.04, cabDoorRear, floorY, topY - 0.02), T.Shape);
     livingWins(side).forEach((h) => lin.holes.push(toPath(h, T.Path)));
     sideMesh(lin, 0.015, lining, side > 0 ? W / 2 - 0.05 : -W / 2 + 0.065, false);
-    holes.forEach((h, i) => { const sg = new T.ShapeGeometry(toPath(h, T.Shape)); sg.rotateY(-Math.PI / 2); noShadow(add(sg, i === 0 ? glassFront : glassSide, side > 0 ? W / 2 - 0.022 : -W / 2 + 0.022, 0, 0)); });
+    holes.forEach((h, i) => {
+      const sg = new T.ShapeGeometry(toPath(h, T.Shape)); sg.rotateY(-Math.PI / 2); const gx = side > 0 ? W / 2 - 0.022 : -W / 2 + 0.022;
+      if (i === 0) { noShadow(add(sg, glassFront, gx, 0, 0)); return; }
+      // the pane faces -x: seen from outside on the +x side it is the back face
+      noShadow(add(sg, side > 0 ? tintOutB : tintOutF, gx, 0, 0)); noShadow(add(sg, side > 0 ? tintInF : tintInB, gx, 0, 0));
+    });
     // arch flares
-    [fAx, rAx].forEach((z) => { const f = add(new T.TorusGeometry(archR + 0.012, 0.04, 14, 48, Math.PI), plastic, side * (W / 2 + 0.004), archY, z); f.rotation.y = Math.PI / 2; });
+    [fAx, rAx].forEach((z) => { const f = add(new T.TorusGeometry(archR + 0.012, 0.04, 14, 48, Math.PI), bodyLow ? paint : plastic, side * (W / 2 + 0.004), archY, z); f.rotation.y = Math.PI / 2; });
     // sill + rubbing strip
-    rbox(0.05, 0.1, (fAx - archR) - (rAx + archR) - 0.04, 0.02, plastic, side * (W / 2 + 0.01), sillY + 0.07, (fAx + rAx) / 2);
+    rbox(0.05, 0.1, (fAx - archR) - (rAx + archR) - 0.04, 0.02, bodyLow ? paint : plastic, side * (W / 2 + 0.01), sillY + 0.07, (fAx + rAx) / 2);
+    // lower body band (grey on the Crafter Auto, black on the Toleno), kept clear of the wheel arches
+    if (c.band) { const bandM = S({ color: c.band, roughness: 0.55, metalness: 0.2 }), bt = 0.3, segs = [[rearZ + 0.04, rAx - archR - 0.03], [rAx + archR + 0.03, fAx - archR - 0.03], [fAx + archR + 0.03, half - 0.34]];
+      segs.forEach(([z0, z1]) => { if (z1 - z0 > 0.05) noShadow(box(0.012, bt, z1 - z0, bandM, side * (W / 2 + 0.006), archY + bt / 2, (z0 + z1) / 2)); }); }
+    // black rubbing strip along the side (Crafter Manual)
+    if (c.strip) { const stM = S({ color: c.strip, roughness: 0.6 }); [[rAx + archR + 0.03, fAx - archR - 0.03], [rearZ + 0.04, rAx - archR - 0.03]].forEach(([z0, z1]) => noShadow(rbox(0.035, 0.12, z1 - z0, 0.02, stM, side * (W / 2 + 0.012), archY + 0.24, (z0 + z1) / 2))); }
+    // rear side pod (MAN Manual): a glazed extension at the back of the living area
+    if (c.pod) { const podM = P({ color: '#1d1e22', metalness: 0.3, roughness: 0.25, clearcoat: 1 }), pz = rearZ + 0.72, py = winY0 + 0.22;
+      rbox(0.2, 0.62, 1.12, 0.07, podM, side * (W / 2 + 0.07), py, pz);
+      noShadow(rbox(0.012, 0.36, 0.86, 0.02, side > 0 ? tintOutB : tintOutF, side * (W / 2 + 0.172), py + 0.04, pz)); }
     // mirror
     rbox(0.09, 0.26, 0.18, 0.03, plastic, side * (W / 2 + 0.17), bonnetH + 0.36, wsBaseZ - 0.14);
     noShadow(rbox(0.012, 0.2, 0.14, 0.004, glassSide, side * (W / 2 + 0.17) + 0.0, bonnetH + 0.36, wsBaseZ - 0.235));
@@ -823,8 +845,10 @@ function buildVan(T, c) {
     rbox(0.03, 0.035, 0.16, 0.012, satin, side * (W / 2 + 0.012), bonnetH + 0.02, cabDoorRear + 0.18);
     if (!pop && side > 0) { seam(cabDoorRear - 1.25, sillY + 0.12, topY - 0.15); rbox(0.03, 0.035, 0.18, 0.012, satin, W / 2 + 0.012, bonnetH + 0.02, cabDoorRear - 1.12); box(0.01, 0.025, cabDoorRear - 1.25 - rearZ - 0.2, plastic, W / 2 + 0.008, winY1 + 0.08, (rearZ + 0.2 + cabDoorRear - 1.25) / 2); }
     if (c.stripes) {
-      noShadow(box(0.008, 0.09, L - bonnetLen - 0.6, stripeA, side * (W / 2 + 0.003), 1.02, -bonnetLen / 2 + 0.05));
-      noShadow(box(0.008, 0.035, L - bonnetLen - 0.9, stripeB, side * (W / 2 + 0.003), 1.12, -bonnetLen / 2 - 0.1));
+      const slant = (z0, y0, len, hgt, lean, m) => { const sh = new T.Shape(); sh.moveTo(z0, y0); sh.lineTo(z0 + len, y0); sh.lineTo(z0 + len + lean, y0 + hgt); sh.lineTo(z0 + lean, y0 + hgt); sh.closePath(); const sg = new T.ShapeGeometry(sh); sg.rotateY(-Math.PI / 2); noShadow(add(sg, m, side * (W / 2 + 0.008), 0, 0)).material.side = T.DoubleSide; };
+      const grey = S({ color: '#8f949a', roughness: 0.4 }), dark = S({ color: '#3a3d43', roughness: 0.4 });
+      [[0, dark], [1, stripeA], [2, grey], [3, dark]].forEach(([k, m]) => slant(rearZ + 0.08, 1.02 + k * 0.1, 1.25 - k * 0.12, 0.055, 0.2, m));
+      [[0, dark], [1, stripeA], [2, grey]].forEach(([k, m]) => slant(cabDoorRear - 0.95 + k * 0.05, 0.86 + k * 0.08, 0.7 - k * 0.1, 0.045, 0.16, m));
     }
   });
 
@@ -845,16 +869,19 @@ function buildVan(T, c) {
   }
   box(W - 0.12, 0.02, roofFrontZ - rearZ - 0.06, ceiling, 0, topY - 0.03, (rearZ + roofFrontZ) / 2);
   if (pop) {
-    const popRear = rearZ + 0.4, popFront = roofFrontZ - 0.08, rise = 0.6, len = popFront - popRear;
-    const lid = rbox(W - 0.04, 0.07, Math.hypot(len, rise) + 0.04, 0.03, paint, 0, H + rise / 2 + 0.03, (popRear + popFront) / 2);
+    const popRear = rearZ + 0.4, popFront = roofFrontZ + 0.1, rise = 0.92, len = popFront - popRear;
+    if (c.canvas) canvasM.color.set(c.canvas);
+    const lidM = c.lid ? P({ color: c.lid, roughness: 0.35, clearcoat: 0.6 }) : paint;
+    const lid = rbox(W - 0.02, 0.08, Math.hypot(len, rise) + 0.1, 0.035, lidM, 0, H + rise / 2 + 0.03, (popRear + popFront) / 2);
     lid.rotation.x = -Math.atan2(rise, len);
     [-1, 1].forEach((side) => {
       const tri = new T.BufferGeometry(), x = side * (W / 2 - 0.08);
       tri.setAttribute('position', new T.Float32BufferAttribute([x, H, popRear, x, H, popFront, x, H + rise, popFront], 3));
       tri.computeVertexNormals(); add(tri, canvasM, 0, 0, 0);
-      noShadow(rbox(0.01, 0.22, 0.62, 0.004, glassSide, x + side * 0.004, H + 0.26, popFront - 0.46));
+      noShadow(rbox(0.01, 0.3, 0.55, 0.01, S({ color: '#24272c', roughness: 0.8 }), x + side * 0.006, H + 0.36, popFront - 0.5));
     });
     box(W - 0.16, rise, 0.01, canvasM, 0, H + rise / 2, popFront);
+    noShadow(rbox(0.7, 0.42, 0.012, 0.02, S({ color: '#2a2d32', roughness: 0.85 }), 0, H + rise * 0.55, popFront + 0.008));
   }
 
   // --- windscreen, A-pillars
@@ -871,7 +898,7 @@ function buildVan(T, c) {
     const s = new T.Shape();
     s.moveTo(wsBaseZ, bonnetH - 0.17); s.lineTo(half - 0.4, bonnetH - 0.17); s.lineTo(half - 0.4, sillY + 0.14);
     s.lineTo(half - 0.12, sillY + 0.14); s.quadraticCurveTo(half - 0.04, sillY + 0.14, half - 0.04, sillY + 0.32);
-    s.lineTo(half - 0.03, bonnetH - 0.26); s.quadraticCurveTo(half - 0.01, bonnetH - 0.03, half - 0.32, bonnetH - 0.005);
+    s.lineTo(half - 0.045, bonnetH - 0.28); s.quadraticCurveTo(half - 0.03, bonnetH - 0.14, half - 0.36, bonnetH - 0.09);
     s.lineTo(wsBaseZ, bonnetH + 0.005); s.closePath();
     const bev = 0.1, depth = W - 0.012 - 2 * bev;
     const geo = new T.ExtrudeGeometry(s, { depth, bevelEnabled: true, bevelThickness: bev, bevelSize: 0.035, bevelSegments: 8, curveSegments: 32 });
@@ -892,8 +919,8 @@ function buildVan(T, c) {
     rbox(0.12, 0.2, 0.05, 0.02, plastic, side * (W / 2 - 0.12), sillY - 0.02, fAx - archR - 0.06);
   });
   rbox(W * 0.48, 0.12, 0.05, 0.03, plastic, 0, sillY + 0.3, half - 0.04);
-  rbox(W + 0.06, 0.24, 0.3, 0.08, plastic, 0, sillY + 0.1, half - 0.1);
-  rbox(W + 0.04, 0.22, 0.22, 0.06, plastic, 0, sillY + 0.09, rearZ + 0.06);
+  rbox(W + 0.06, 0.24, 0.3, 0.08, bodyLow ? paint : plastic, 0, sillY + 0.1, half - 0.1);
+  rbox(W + 0.04, 0.22, 0.22, 0.06, bodyLow ? paint : plastic, 0, sillY + 0.09, rearZ + 0.06);
   noShadow(rbox(0.52, 0.11, 0.02, 0.012, plateM, 0, sillY + 0.15, half + 0.055));
   noShadow(rbox(0.52, 0.11, 0.02, 0.012, plateM, 0, sillY + 0.55, rearZ - 0.03));
   box(W - 0.08, 0.04, L - bonnetLen - 0.06, floorM, 0, floorY - 0.02, rearZ + (L - bonnetLen) / 2);
@@ -910,10 +937,15 @@ function buildVan(T, c) {
     const wg = new T.Group(); wg.position.set(side * (W / 2 - 0.14), wheelR, z); g.add(wg); wheels.push(wg);
     const t = add(tyreGeo, tyreM, 0, 0, 0, wg); t.rotation.z = Math.PI / 2;
     const rim = add(new T.CylinderGeometry(wheelR * 0.68, wheelR * 0.68, 0.2, 64), satin, 0, 0, 0, wg); rim.rotation.z = Math.PI / 2;
-    const lip = add(new T.TorusGeometry(wheelR * 0.66, 0.014, 10, 72), rimM, side * 0.1, 0, 0, wg); lip.rotation.y = Math.PI / 2;
-    for (let k = 0; k < 10; k++) {
+    const lip = add(new T.TorusGeometry(wheelR * 0.66, 0.014, 10, 72), c.wheels === 'dark' ? darkRim : c.wheels === 'steel' ? steelRim : rimM, side * 0.1, 0, 0, wg); lip.rotation.y = Math.PI / 2;
+    const ws = c.wheels || 'alloy', spokeM = ws === 'dark' ? darkRim : rimM;
+    if (ws === 'steel' || ws === 'cover') {
+      const face = add(new T.CylinderGeometry(wheelR * 0.62, wheelR * 0.62, 0.02, 48), ws === 'cover' ? coverM : steelRim, side * 0.1, 0, 0, wg); face.rotation.z = Math.PI / 2;
+      const cap = add(new T.CylinderGeometry(wheelR * 0.17, wheelR * 0.2, 0.04, 24), ws === 'cover' ? rimM : satin, side * 0.115, 0, 0, wg); cap.rotation.z = Math.PI / 2;
+      for (let k = 0; k < (ws === 'cover' ? 12 : 8); k++) { const a = (k / (ws === 'cover' ? 12 : 8)) * Math.PI * 2, r0 = wheelR * 0.42; const hole = add(new T.BoxGeometry(0.012, ws === 'cover' ? 0.11 : 0.05, ws === 'cover' ? 0.02 : 0.05), satin, side * 0.111, Math.cos(a) * r0, Math.sin(a) * r0, wg); hole.rotation.x = -a; }
+    } else for (let k = 0; k < 10; k++) {
       const sg = rboxGeo(T, 0.025, wheelR * 0.56, 0.035, 0.008); sg.translate(0, wheelR * 0.32, 0);
-      const sp = add(sg, rimM, side * 0.095, 0, 0, wg); sp.rotation.x = (k / 10) * Math.PI * 2;
+      const sp = add(sg, spokeM, side * 0.095, 0, 0, wg); sp.rotation.x = (k / 10) * Math.PI * 2;
     }
     const hub = add(new T.CylinderGeometry(0.07, 0.07, 0.04, 24), rimM, side * 0.1, 0, 0, wg); hub.rotation.z = Math.PI / 2;
   }));
@@ -1043,6 +1075,7 @@ function buildVan(T, c) {
   res.driver = { pos: [-0.45, floorY + 1.16, seatZ - 0.24], yaw: 0, pitch: -0.06 };
   res.passenger = { pos: [0.45, floorY + 1.16, seatZ - 0.24], yaw: 0.35, pitch: -0.06 };
   res.lights = [[0, topY - 0.25, rearZ + 1.0], [0, topY - 0.25, livingFront - 0.6]];
+  res.glow = [tintOutF, tintOutB];
   res.group = g; res.doors = doors; res.mats = mats; res.texs = texs; res.wheels = wheels; res.topY = topY; res.cabDoorRear = cabDoorRear; res.awningY = pop ? H - 0.04 : topY - 0.02;
   return res;
 }
@@ -1055,6 +1088,8 @@ const ENVS = {
   coast:  { label: 'Clifftop & sea', mirror: true, sky: ['#1464d2', '#8cc4f2', '#cfc6b0'], fog: [160, 1400], grass: ['#5d7a3a', '#8a8a4a'], accent: '#b8a874', sea: true, trees: 'tufts', ridges: [['#4e5c45', '#6b7656', 0], ['#7d8a8f', '#9aa5ab', 0]], westOnly: true },
   dales:  { label: 'Rolling countryside', sky: ['#1a66d2', '#95c8f3', '#c2b48e'], fog: [140, 1000], grass: ['#5f8a3a', '#9aa04a'], accent: '#c8b25a', fields: true, trees: 'oak', ridges: [['#56704a', '#6f8a5a', 0], ['#7f93a0', '#9eb0bb', 0]] },
   forest: { label: 'Pine forest', sky: ['#2265bd', '#98c3e9', '#8f9a84'], fog: [45, 420], grass: ['#3e5a2e', '#56693a'], accent: '#5a4a36', trees: 'dense', ridges: [['#2d3a2c', '#3c4a38', 0], ['#4a5662', '#606c78', 0]] },
+  farmland: { label: 'Open farmland', sky: ['#1b64cc', '#9ccaf3', '#c2b48e'], fog: [170, 1400], grass: ['#5f8a3a', '#8fa04a'], accent: '#b9a85a', fields: true, flatFields: true, trees: 'oak', treeN: 0.35, ridges: [['#6f8a5a', '#86a06c', 0]] },
+  grove:  { label: 'Olive groves', sky: ['#1f68c8', '#a9d0f0', '#c9b48a'], fog: [150, 1250], grass: ['#8a8a4a', '#b3a35e'], accent: '#b08a52', trees: 'olive', ridges: [['#7c7a55', '#958f68', 0], ['#8a96a0', '#a7b1b8', 0]] },
   alps:   { label: 'Alpine pass', sky: ['#0f56cc', '#94c7f5', '#c9d2d6'], fog: [160, 1300], grass: ['#5c8a3a', '#86a04e'], accent: '#9aa07a', alpine: true, trees: 'larch', ridges: [['#56606e', '#e9edf2', 2], ['#6a7486', '#f2f5f8', 2], ['#8e98ad', '#f7f9fb', 2]] }
 };
 
@@ -1174,6 +1209,19 @@ function buildArch(T, key, heightAt, MS) {
     const [bx, bz] = at(52, 15); { const p = site(bx, bz, 8, 16, 0.25, C.grit); box(8, 5, 16, C.grit, 0, 0, 0, p); roof(8.6, 3.6, 16.6, C.slate, 0, 5, 0, p); box(0.08, 3.2, 3.4, C.wood, 4.03, 0, 0, p); }
     const [fx, fz] = at(78, -17); cottage(fx, fz, 0.5, C.sand, C.slate, 6, 11, 2, C.grit);
     for (let i = 0; i < 4; i++) { const [vx, vz] = at(160 + (i % 2) * 14, -14 + i * 4); cottage(vx, vz, 0.4 + i * 0.3, i % 2 ? C.sand : C.white, i % 2 ? C.roofR : C.slate, 5, 8); }
+  } else if (key === 'farmland') {
+    // a farmstead out on the flat: barn, farmhouse and a grain silo
+    const [bx, bz] = at(58, 12); { const p = site(bx, bz, 9, 18, 0.2, C.grit); box(9, 5.5, 18, C.red, 0, 0, 0, p); roof(9.6, 3.8, 18.6, C.slate, 0, 5.5, 0, p); box(0.08, 3.4, 4, C.wood, 4.53, 0, 0, p); }
+    const [fx, fz] = at(70, 3); cottage(fx, fz, 0.35, C.white, C.slate, 6, 11, 2, C.stone);
+    const [sx, sz] = at(64, 20); { const p = site(sx, sz, 4, 4, 0, C.stone); cyl(1.8, 1.8, 9, C.harl, 0, 0, 0, p, 28); cone(2.0, 1.6, C.slate, 0, 9, 0, p, 28); }
+    const [vx, vz] = at(170, -10); church(vx, vz, 0.3, C.sand, C.slate, true);
+  } else if (key === 'grove') {
+    // a Mediterranean farmhouse in warm stucco with a terracotta roof, and a hill chapel with a bell tower
+    const ochre = mat({ color: '#d8b27a' }), terra = mat({ color: '#b2552f', roughness: 0.8 }), pale = mat({ color: '#e9dcc3' });
+    const [fx, fz] = at(58, 12); cottage(fx, fz, 0.3, ochre, terra, 7, 12, 2, C.sand);
+    const [gx, gz] = at(66, 21); cottage(gx, gz, 0.9, pale, terra, 5, 7, 1, C.sand);
+    const [kx, kz] = at(120, -9); { const p = church(kx, kz, 0.5, pale, terra, false); }
+    for (let i = 0; i < 3; i++) { const [vx, vz] = at(150 + i * 10, -18 + i * 5); cottage(vx, vz, 0.2 + i * 0.4, i % 2 ? ochre : pale, terra, 5, 8, 2, C.sand); }
   } else if (key === 'forest') {
     // a log cabin in a clearing, with a lit porch
     const [cx, cz] = at(30, 15), p = site(cx, cz, 7, 9, 0.4, C.stone);
@@ -1257,11 +1305,13 @@ function buildWorld(T, renderer, E) {
       if (x < 0) h = cl01((ax - 10) / 20) * (1.5 + 4 * fbm(x * 0.03, z * 0.03, 3));
       else { const xs = x - shoreOff(z); h = -1.4 * cl01((xs - 9) / 14) - Math.max(0, xs - 23) * 0.06; }
     } else if (E.fields) {
-      h = cl01((ax - 10) / 35) * (2 + 10 * fbm(x * 0.006 + 2, z * 0.006, 3));
+      h = cl01((ax - 10) / 35) * (2 + 10 * fbm(x * 0.006 + 2, z * 0.006, 3)) * (E.flatFields ? 0.18 : 1);
+    } else if (E.trees === 'olive') {
+      h = cl01((ax - 10) / 26) * (1.5 + 24 * fbm(x * 0.008 + 5, z * 0.008, 4));
     } else if (E.trees === 'dense') {
       h = cl01((ax - 10) / 40) * (1.5 + 6 * fbm(x * 0.01, z * 0.01, 3));
     } else if (E.alpine) {
-      if (x < 0) h = cl01((ax - 24) / 30) * (4 + 80 * fbm(x * 0.006, z * 0.006 + 3, 4) * cl01((ax - 24) / 120 + 0.2));
+      if (x < 0) h = cl01((ax - 22) / 40) * 3 * fbm(x * 0.02, z * 0.02, 2) + cl01((ax - 120) / 60) * (8 + 110 * fbm(x * 0.006, z * 0.006 + 3, 4));
       else h = cl01((x - 18) / 40) * 3 * fbm(x * 0.02, z * 0.02, 2) + cl01((x - 70) / 40) * (6 + 90 * fbm(x * 0.006 + 9, z * 0.006, 4));
     } else if (W0) {
       const fellsL = E.trees === 'mixed';
@@ -1358,7 +1408,7 @@ function buildWorld(T, renderer, E) {
   } else if (E.trees === 'dense') {
     scatter(pineG(), trunkG(), '#263a26', '#4a3a2c', 1300, (i) => [sideX(i, 11, 230, i % 2 === 0), (hash2(i, 2) - 0.5) * 700, 0.75 + hash2(i, 3) * 0.9]);
   } else if (E.trees === 'oak') {
-    scatter(roundG(), trunkTall(), '#46682e', '#4a3a2c', 260, (i) => { const cx = Math.floor(hash2(i, 8) * 8) - 4, side = cx >= 0 ? 1 : -1; return [side * 12 + cx * 45 + (hash2(i, 9) - 0.5) * 6, Math.floor((hash2(i, 10) - 0.5) * 20) * 35 + hash2(i, 11) * 35, 0.6 + hash2(i, 3) * 0.6]; });
+    scatter(roundG(), trunkTall(), '#46682e', '#4a3a2c', Math.round(260 * (E.treeN || 1)), (i) => { const cx = Math.floor(hash2(i, 8) * 8) - 4, side = cx >= 0 ? 1 : -1; return [side * 12 + cx * 45 + (hash2(i, 9) - 0.5) * 6, Math.floor((hash2(i, 10) - 0.5) * 20) * 35 + hash2(i, 11) * 35, 0.6 + hash2(i, 3) * 0.6]; });
     // hedgerows along the field edges
     const hedgeG = new T.BoxGeometry(1.1, 1.1, 1); const hedgeM = new T.MeshStandardMaterial({ color: '#3d5a2a', roughness: 1 });
     const segs = []; for (let k = -4; k <= 4; k++) { const x = k * 45; if (Math.abs(x) < 12) continue; for (let zz = -350; zz < 350; zz += 6) segs.push([x, zz, 0]); }
@@ -1366,6 +1416,13 @@ function buildWorld(T, renderer, E) {
     const hedges = new T.InstancedMesh(hedgeG, hedgeM, segs.length);
     segs.forEach((sgm, i) => { pp.set(sgm[0], heightAt(sgm[0], sgm[1]) + 0.5, sgm[1]); q.setFromAxisAngle(up, sgm[2] ? Math.PI / 2 : 0); sc.set(blocked(sgm[0], sgm[1]) ? 0.0001 : 1, 0.8 + hash2(i, 3) * 0.5, 6.2); mtx.compose(pp, q, sc); hedges.setMatrixAt(i, mtx); });
     hedges.receiveShadow = true; world.add(hedges); disposables.push(hedgeG, hedgeM);
+  } else if (E.trees === 'olive') {
+    // olive groves planted in rows on the slopes, dark cypresses standing among them
+    const oliveG = () => { const g0 = new T.IcosahedronGeometry(1.6, 1); const ps = g0.attributes.position; for (let i = 0; i < ps.count; i++) { const k = 0.8 + fbm(ps.getX(i) * 2 + 3, ps.getY(i) * 2 + ps.getZ(i) * 2, 2) * 0.45; ps.setXYZ(i, ps.getX(i) * k, ps.getY(i) * k * 0.72, ps.getZ(i) * k); } g0.translate(0, 2.1, 0); g0.computeVertexNormals(); return g0; };
+    const oliveTrunk = () => { const g0 = new T.CylinderGeometry(0.16, 0.26, 1.5, 6); g0.translate(0, 0.75, 0); return g0; };
+    scatter(oliveG(), oliveTrunk(), '#7d8c5e', '#5b4a3a', 520, (i) => { const col = i % 26, row = Math.floor(i / 26) - 10, far = i % 5 === 0; return [far ? 24 + col * 7 + hash2(i, 9) * 1.5 : -(14 + col * 7 + hash2(i, 9) * 1.5), row * 8 + (col % 2) * 4 + hash2(i, 8) * 1.2, 0.75 + hash2(i, 3) * 0.45]; });
+    const cypG = () => { const g0 = new T.ConeGeometry(0.75, 8.5, 8); g0.translate(0, 4.6, 0); return g0; };
+    scatter(cypG(), trunkG(), '#2d3d27', '#4a3a2c', 90, (i) => [sideX(i, 18, 170, i % 6 === 0), (hash2(i, 2) - 0.5) * 520, 0.7 + hash2(i, 3) * 0.7]);
   } else if (E.trees === 'larch') {
     scatter(pineG(), trunkG(), '#45633a', '#4a3a2c', 520, (i) => [sideX(i, 26, 200, i % 4 === 0), (hash2(i, 2) - 0.5) * 700, 0.6 + hash2(i, 3) * 0.8]);
   } else if (E.trees === 'tufts') {
@@ -1380,9 +1437,9 @@ function buildWorld(T, renderer, E) {
   // which glides in with the pitch as the van pulls up (the van is the thing that moves; the patch is placed relative to it).
   const patch = new T.Group(); patch.visible = false; world.add(patch);
   {
-    const dry = E.alpine ? '#7a9a4a' : E.sea ? '#a7a35e' : E.fields ? '#7c9a44' : '#5f7a3a';
+    const dry = E.alpine ? '#7a9a4a' : E.sea ? '#a7a35e' : E.trees === 'olive' ? '#a19a58' : E.fields ? '#7c9a44' : '#5f7a3a';
     const gCols = ['#ffffff', '#e8eccd', '#d2d9b0', '#f1e6c2'];
-    const fCols = E.alpine ? ['#f4f1ff', '#8f7ad8', '#f2d24a', '#e05a7a'] : E.sea ? ['#f2d24a', '#f6f3ea', '#e6a3c4'] : ['#f2d24a', '#f6f3ea', '#b48fd6', '#e05a7a', '#f2a03c'];
+    const fCols = E.alpine ? ['#f4f1ff', '#8f7ad8', '#f2d24a', '#e05a7a'] : E.trees === 'olive' ? ['#9a86d6', '#b49ae0', '#f2d24a', '#f6f3ea'] : E.sea ? ['#f2d24a', '#f6f3ea', '#e6a3c4'] : ['#f2d24a', '#f6f3ea', '#b48fd6', '#e05a7a', '#f2a03c'];
     const bCols = E.sea ? ['#5b6b2c', '#6a7a30', '#4e5d2a'] : E.alpine ? ['#4e6a34', '#5d7a3c', '#6b6a3a'] : ['#3f5a2c', '#4c6a32', '#6b6a34', '#7a6232'];
     const sightline = (x, z) => { const d = Math.hypot(x, z), along = (x * 0.78 + z * 0.62); return along > 0 && d < 40 && Math.abs(x * 0.62 - z * 0.78) < along * 0.5 + 3; };
     const wet = (x, z) => heightAt(x, z) < (W0 ? W0.y + 0.12 : E.sea ? -0.55 : -9);
@@ -1812,6 +1869,7 @@ class Component extends DCLogic {
     } else v.scene.environment = WP.env;
     WP.roadGroup.visible = true;
     v.inner.forEach((l) => { l.intensity = 2.2 + 3 * dark * ck; });
+    if (v.van.glow) v.van.glow.forEach((m) => { m.emissiveIntensity = 0.55 * dark * ck; });
     const A = WP.arch; A.winM.emissiveIntensity = 0.05 + 2.4 * dark * ck; A.lampM.emissiveIntensity = 0.4 + 4 * dark * ck;
     if (A.beam) { A.beam.rotation.y = t0 * 0.9; A.beam.userData.m.uniforms.uOp.value = 0.55 * dark * ck; A.beam.visible = dark * ck > 0.05; A.glow.material.opacity = 0.25 + 0.75 * dark * ck; }
     if (v.camp) {
