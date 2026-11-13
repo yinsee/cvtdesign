@@ -316,9 +316,12 @@ const VIEWS = [
   ['driver', "Driver's seat"],
   ['passenger', 'Passenger seat'],
   ['living', 'Living area'],
-  ['bed', 'Lying in bed']
+  ['bed', 'Lying in bed'],
+  ['camp', 'Outside at camp']
 ];
 const SKY = { top: '#4f79ad', horizon: '#f0d7b8', bottom: '#b9ad97', sun: [0.62, 0.32, -0.25] };
+const DUSK = { top: '#262a58', horizon: '#ff9560', bottom: '#3d2f33', fog: '#a8655a', sun: [-0.74, 0.07, -0.56], sunColor: '#ff8a4a', sunI: 1.5, hemiI: 0.26, exposure: 1.0 };
+const DAY = { fog: '#f0d7b8', sunColor: '#ffe2bf', sunI: 3.2, hemiI: 0.6, exposure: 1.12 };
 
 // ---------- small procedural helpers (no images needed)
 function hash2(x, y) { const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return s - Math.floor(s); }
@@ -711,7 +714,7 @@ function buildVan(T, c) {
   res.driver = { pos: [-0.45, floorY + 1.16, seatZ - 0.24], yaw: 0, pitch: -0.06 };
   res.passenger = { pos: [0.45, floorY + 1.16, seatZ - 0.24], yaw: 0.35, pitch: -0.06 };
   res.lights = [[0, topY - 0.25, rearZ + 1.0], [0, topY - 0.25, livingFront - 0.6]];
-  res.group = g; res.doors = doors; res.mats = mats; res.texs = texs; res.wheels = wheels;
+  res.group = g; res.doors = doors; res.mats = mats; res.texs = texs; res.wheels = wheels; res.topY = topY; res.cabDoorRear = cabDoorRear; res.awningY = pop ? H - 0.04 : topY - 0.02;
   return res;
 }
 
@@ -735,7 +738,14 @@ function buildWorld(T, renderer) {
   // environment lighting from the sky
   const pm = new T.PMREMGenerator(renderer);
   const envScene = new T.Scene(); const envSky = new T.Mesh(new T.SphereGeometry(100, 32, 16), skyMat); envScene.add(envSky);
-  const env = pm.fromScene(envScene, 0.035).texture; pm.dispose(); envSky.geometry.dispose();
+  const env = pm.fromScene(envScene, 0.035).texture;
+  const bakeDusk = () => {
+    const u = skyMat.uniforms, keep = [u.top.value.clone(), u.horizon.value.clone(), u.bottom.value.clone(), u.sunDir.value.clone()];
+    u.top.value.set(DUSK.top); u.horizon.value.set(DUSK.horizon); u.bottom.value.set(DUSK.bottom); u.sunDir.value.set(DUSK.sun[0], DUSK.sun[1], DUSK.sun[2]).normalize();
+    const t = pm.fromScene(envScene, 0.035).texture;
+    u.top.value.copy(keep[0]); u.horizon.value.copy(keep[1]); u.bottom.value.copy(keep[2]); u.sunDir.value.copy(keep[3]);
+    return t;
+  };
 
   // terrain height
   const heightAt = (x, z) => {
@@ -801,18 +811,76 @@ function buildWorld(T, renderer) {
   // road
   const asphalt = dataTex(T, 256, (u, v) => { const n = fbm(u * 40, v * 40, 3), sp = hash2(Math.floor(u * 256), Math.floor(v * 256)) > 0.93 ? 18 : 0; const k = 58 + n * 22 + sp; return [k, k, k + 3]; }, 3, 140);
   const roadMat = new T.MeshStandardMaterial({ color: '#ffffff', map: asphalt, roughness: 0.9 });
-  const road = new T.Mesh(new T.PlaneGeometry(6.6, 1000), roadMat); road.rotation.x = -Math.PI / 2; road.position.y = 0.012; road.receiveShadow = true; world.add(road);
+  const roadGroup = new T.Group(); world.add(roadGroup);
+  const road = new T.Mesh(new T.PlaneGeometry(6.6, 1000), roadMat); road.rotation.x = -Math.PI / 2; road.position.y = 0.012; road.receiveShadow = true; roadGroup.add(road);
   const lineMat = new T.MeshStandardMaterial({ color: '#efece2', roughness: 0.6 });
-  [-1, 1].forEach((s) => { const l = new T.Mesh(new T.PlaneGeometry(0.12, 1000), lineMat); l.rotation.x = -Math.PI / 2; l.position.set(s * 3.05, 0.016, 0); l.receiveShadow = true; world.add(l); });
-  const dashes = new T.Group(); world.add(dashes);
+  [-1, 1].forEach((s) => { const l = new T.Mesh(new T.PlaneGeometry(0.12, 1000), lineMat); l.rotation.x = -Math.PI / 2; l.position.set(s * 3.05, 0.016, 0); l.receiveShadow = true; roadGroup.add(l); });
+  const dashes = new T.Group(); roadGroup.add(dashes);
   const dashG = new T.PlaneGeometry(0.12, 3);
   for (let z = -300; z <= 300; z += 9) { const d = new T.Mesh(dashG, lineMat); d.rotation.x = -Math.PI / 2; d.position.set(0, 0.017, z); d.receiveShadow = true; dashes.add(d); }
-  const posts = new T.Group(); world.add(posts);
+  const posts = new T.Group(); roadGroup.add(posts);
   const postG = new T.BoxGeometry(0.1, 1.0, 0.1), postM = new T.MeshStandardMaterial({ color: '#f1efe8', roughness: 0.6 }), refG = new T.BoxGeometry(0.105, 0.12, 0.105), refM = new T.MeshStandardMaterial({ color: '#c41e30', emissive: '#5a0010', emissiveIntensity: 0.6 });
   for (let z = -300; z <= 300; z += 24) [-1, 1].forEach((s) => { const pz = z + (s > 0 ? 12 : 0); const p = new T.Mesh(postG, postM); p.position.set(s * 4.4, 0.5, pz); p.castShadow = true; posts.add(p); const r = new T.Mesh(refG, refM); r.position.set(s * 4.4, 0.85, pz); posts.add(r); });
   disposables.push(asphalt, roadMat, road.geometry, lineMat, dashG, postG, postM, refG, refM);
 
-  return { world, env, dashes, posts, sunDir, disposables, fogColor: SKY.horizon };
+  disposables.push(envSky.geometry, { dispose: () => pm.dispose() });
+  return { world, env, bakeDusk, skyMat, roadGroup, dashes, posts, sunDir, disposables, fogColor: SKY.horizon };
+}
+
+// ---------- evening camp beside the van: awning, string lights, chairs, rug, campfire
+function buildCamp(T, van) {
+  const g = new T.Group(), disp = [];
+  const M = (o, std) => { const m = std ? new T.MeshStandardMaterial(o) : new T.MeshPhysicalMaterial(o); disp.push(m); return m; };
+  const add = (geo, mat, x, y, z, parent) => { const m = new T.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true; (parent || g).add(m); disp.push(geo); return m; };
+  const W = van.W, ax = W / 2 + 0.07, ay = van.awningY, z0 = van.rearZ + 0.6, z1 = van.cabDoorRear - 0.35, reach = 2.3, drop = 0.38;
+  // awning
+  const awn = M({ color: '#ddd5c6', roughness: 0.9, sheen: 0.5, sheenColor: '#fff3e0', side: T.DoubleSide });
+  const ag = new T.PlaneGeometry(reach, z1 - z0); ag.rotateX(-Math.PI / 2);
+  const a = add(ag, awn, ax + reach / 2, ay - drop / 2, (z0 + z1) / 2); a.rotation.z = -Math.atan2(drop, reach);
+  const poleM = M({ color: '#9aa1a8', metalness: 0.8, roughness: 0.3 }, true);
+  [z0 + 0.05, z1 - 0.05].forEach((z) => add(new T.CylinderGeometry(0.018, 0.018, ay - drop, 8), poleM, ax + reach - 0.03, (ay - drop) / 2, z));
+  // string lights hanging under the awning edge
+  const bulbM = M({ color: '#fff1c9', emissive: '#ffcc73', emissiveIntensity: 3 }, true), wireM = M({ color: '#222', roughness: 0.8 }, true);
+  const bulbs = 16, pts = [];
+  for (let i = 0; i <= bulbs; i++) { const t = i / bulbs, z = z0 + (z1 - z0) * t, y = ay - drop - 0.05 - Math.sin(t * Math.PI) * 0.22; pts.push(new T.Vector3(ax + reach - 0.05, y, z)); add(new T.SphereGeometry(0.035, 10, 8), bulbM, ax + reach - 0.05, y - 0.04, z).castShadow = false; }
+  add(new T.TubeGeometry(new T.CatmullRomCurve3(pts), 64, 0.004, 4), wireM, 0, 0, 0);
+  // rug
+  const rugTex = dataTex(T, 128, (u, v) => { const b = Math.floor(u * 9) % 3; const c = b === 0 ? [176, 64, 74] : b === 1 ? [236, 222, 196] : [52, 70, 112]; const n = 0.9 + 0.1 * hash2(Math.floor(u * 128), Math.floor(v * 128)); return [c[0] * n, c[1] * n, c[2] * n]; }, 1, 1); disp.push(rugTex);
+  const rg = new T.PlaneGeometry(1.7, 2.4); rg.rotateX(-Math.PI / 2);
+  add(rg, M({ map: rugTex, roughness: 1 }, true), ax + 1.2, 0.02, (z0 + z1) / 2).castShadow = false;
+  // campfire
+  const fx = ax + 3.4, fz = (z0 + z1) / 2 - 0.2;
+  const stoneM = M({ color: '#6f6b66', roughness: 1, flatShading: true }, true);
+  for (let i = 0; i < 11; i++) { const an = (i / 11) * Math.PI * 2; const st = add(new T.DodecahedronGeometry(0.11 + hash2(i, 9) * 0.05, 0), stoneM, fx + Math.cos(an) * 0.48, 0.07, fz + Math.sin(an) * 0.48); st.rotation.set(hash2(i, 1) * 3, hash2(i, 2) * 3, 0); }
+  const logM = M({ color: '#5a3d28', roughness: 1 }, true), charM = M({ color: '#1e1612', roughness: 1, emissive: '#ff4a10', emissiveIntensity: 0.35 }, true);
+  for (let i = 0; i < 4; i++) { const l = add(new T.CylinderGeometry(0.055, 0.065, 0.7, 10), i % 2 ? logM : charM, fx, 0.12, fz); l.rotation.set(Math.PI / 2 - 0.35, (i / 4) * Math.PI, 0); }
+  const flames = [], fl = [['#ff5a14', 0.26, 0.72, 0.7], ['#ff8c1a', 0.19, 0.6, 0.8], ['#ffd25a', 0.11, 0.42, 0.9]];
+  fl.forEach((f, i) => { const m = new T.MeshBasicMaterial({ color: f[0], transparent: true, opacity: f[3], blending: T.AdditiveBlending, depthWrite: false }); disp.push(m); const c = add(new T.ConeGeometry(f[1], f[2], 14, 1, true), m, fx, 0.16 + f[2] / 2, fz); c.castShadow = false; c.receiveShadow = false; flames.push(c); });
+  const fireLight = new T.PointLight(0xff8a3c, 0, 9, 2); fireLight.position.set(fx, 0.7, fz); g.add(fireLight);
+  const eN = 46, eGeo = new T.BufferGeometry(), ePos = new Float32Array(eN * 3), eSeed = [];
+  for (let i = 0; i < eN; i++) { eSeed.push(Math.random()); ePos[i * 3] = fx; ePos[i * 3 + 1] = Math.random() * 2; ePos[i * 3 + 2] = fz; }
+  eGeo.setAttribute('position', new T.BufferAttribute(ePos, 3));
+  const eMat = new T.PointsMaterial({ color: '#ffb35c', size: 0.045, transparent: true, opacity: 0.9, blending: T.AdditiveBlending, depthWrite: false });
+  const embers = new T.Points(eGeo, eMat); g.add(embers); disp.push(eGeo, eMat);
+  // chairs facing the fire
+  const chairM = M({ color: '#2f4a3a', roughness: 1, sheen: 0.4, sheenColor: '#6f9a80' }), legM = M({ color: '#2a2a2a', metalness: 0.6, roughness: 0.4 }, true);
+  [[-2.4, 1.25], [-0.9, 1.3]].forEach(([an, r]) => {
+    const ch = new T.Group(); ch.position.set(fx + Math.cos(an) * r, 0, fz + Math.sin(an) * r); ch.lookAt(fx, 0, fz); g.add(ch);
+    add(rboxGeo(T, 0.55, 0.06, 0.5, 0.025), chairM, 0, 0.42, 0, ch);
+    const back = add(rboxGeo(T, 0.55, 0.55, 0.05, 0.02), chairM, 0, 0.72, -0.24, ch); back.rotation.x = -0.25;
+    [[-0.25, -0.22], [0.25, -0.22], [-0.25, 0.22], [0.25, 0.22]].forEach(([lx, lz]) => { const lg = add(new T.CylinderGeometry(0.012, 0.012, 0.44, 6), legM, lx, 0.21, lz, ch); lg.rotation.x = lz > 0 ? 0.15 : -0.15; });
+  });
+  // little table and lantern
+  const woodM = M({ color: '#a8835c', roughness: 0.7 }, true);
+  const tx = fx + Math.cos(-1.65) * 1.5, tz = fz + Math.sin(-1.65) * 1.5;
+  add(rboxGeo(T, 0.5, 0.04, 0.4, 0.015), woodM, tx, 0.48, tz);
+  [[-0.2, -0.15], [0.2, -0.15], [-0.2, 0.15], [0.2, 0.15]].forEach(([lx, lz]) => add(new T.CylinderGeometry(0.012, 0.012, 0.46, 6), legM, tx + lx, 0.23, tz + lz));
+  add(new T.CylinderGeometry(0.06, 0.07, 0.16, 12), M({ color: '#ffe0a0', emissive: '#ffb347', emissiveIntensity: 2.5 }, true), tx, 0.58, tz).castShadow = false;
+  add(new T.CylinderGeometry(0.03, 0.06, 0.05, 12), legM, tx, 0.685, tz);
+  // two enamel mugs on the table
+  [[-0.12, 0.05], [0.12, -0.06]].forEach(([mx, mz]) => add(new T.CylinderGeometry(0.04, 0.04, 0.09, 14), M({ color: '#f2f2ef', roughness: 0.35 }, true), tx + mx + 0.0, 0.545, tz + mz));
+  g.visible = false;
+  return { group: g, flames, fireLight, embers, ePos, eSeed, fx, fz, center: new T.Vector3(ax + 1.6, 0.9, fz), disp };
 }
 
 class Component extends DCLogic {
@@ -853,7 +921,7 @@ class Component extends DCLogic {
     scene.environment = W.env;
     scene.fog = new T.Fog(W.fogColor, 120, 900);
     scene.background = new T.Color(W.fogColor);
-    scene.add(new T.HemisphereLight(0xdfe8ff, 0x5d5638, 0.6));
+    const hemi = new T.HemisphereLight(0xdfe8ff, 0x5d5638, 0.6); scene.add(hemi);
     const sun = new T.DirectionalLight(0xffe2bf, 3.2);
     sun.position.copy(W.sunDir).multiplyScalar(30); sun.castShadow = true;
     sun.shadow.mapSize.set(2048, 2048);
@@ -869,7 +937,10 @@ class Component extends DCLogic {
     cs.rotation.x = -Math.PI / 2; cs.position.y = 0.02; cs.renderOrder = 1; scene.add(cs);
 
     this.v = {
-      T, canvas: el, renderer, scene, camera, sun, inner, worldParts: W, contact: cs, van: null, offX: 0, offY: 0,
+      T, canvas: el, renderer, scene, camera, sun, hemi, inner, worldParts: W, contact: cs, van: null, offX: 0, offY: 0, camp: null, campT: 0, envDusk: null,
+      cDayTop: new T.Color(SKY.top), cDayHor: new T.Color(SKY.horizon), cDayBot: new T.Color(SKY.bottom), cDuskTop: new T.Color(DUSK.top), cDuskHor: new T.Color(DUSK.horizon), cDuskBot: new T.Color(DUSK.bottom),
+      cDayFog: new T.Color(DAY.fog), cDuskFog: new T.Color(DUSK.fog), cDaySun: new T.Color(DAY.sunColor), cDuskSun: new T.Color(DUSK.sunColor),
+      dDay: new T.Vector3(SKY.sun[0], SKY.sun[1], SKY.sun[2]).normalize(), dDusk: new T.Vector3(DUSK.sun[0], DUSK.sun[1], DUSK.sun[2]).normalize(), tmpV: new T.Vector3(),
       mode: 'outside', theta: 0.85, phi: 1.22, radius: 11, yaw: 0, pitch: 0, fov: 45,
       look: new T.Vector3(0, 1.2, 0), lastInteract: 0, doorT: 0, running: true, raf: 0, last: performance.now(), pointers: new Map()
     };
@@ -890,12 +961,19 @@ class Component extends DCLogic {
     this.disposeVan();
     v.worldParts.disposables.forEach((d) => d.dispose && d.dispose());
     if (v.worldParts.env) v.worldParts.env.dispose();
+    if (v.envDusk) v.envDusk.dispose();
     v.renderer.dispose();
     this.v = null;
   }
 
+  disposeCamp() {
+    const v = this.v; if (!v || !v.camp) return;
+    v.scene.remove(v.camp.group); v.camp.disp.forEach((d) => d.dispose && d.dispose()); v.camp = null;
+  }
+
   disposeVan() {
     const v = this.v; if (!v || !v.van) return;
+    this.disposeCamp();
     v.scene.remove(v.van.group);
     v.van.group.traverse((o) => { if (o.geometry) o.geometry.dispose(); });
     v.van.mats.forEach((m) => m.dispose());
@@ -908,6 +986,7 @@ class Component extends DCLogic {
     this.disposeVan();
     v.van = buildVan(v.T, VAN_SPECS[id] || VAN_SPECS['man-lwb-auto']);
     v.scene.add(v.van.group);
+    v.camp = buildCamp(v.T, v.van); v.scene.add(v.camp.group);
     v.van.lights.forEach((p, i) => v.inner[i].position.set(p[0], p[1], p[2]));
     v.contact.scale.set(v.van.W + 1.1, v.van.L + 1.6, 1);
     v.doorT = 0;
@@ -918,6 +997,7 @@ class Component extends DCLogic {
     const v = this.v; if (!v || !v.van) return;
     v.mode = mode;
     if (mode === 'outside') { v.radius = v.van.L * 1.25 + 3; v.phi = 1.3; v.fov = 40; }
+    else if (mode === 'camp') { v.radius = v.van.L * 1.2 + 4.5; v.phi = 1.33; v.theta = 0.62; v.fov = 40; if (!v.envDusk) v.envDusk = v.worldParts.bakeDusk(); }
     else if (mode === 'drive') { v.fov = 26; }
     else { const p = v.van[mode]; if (!p) return; v.yaw = p.yaw || 0; v.pitch = p.pitch || 0; v.fov = 72; }
     if (snap) { const t = this.target(); v.camera.position.copy(t.pos); v.look.copy(t.look); v.camera.fov = v.fov; const o = this.offsetTarget(); v.offX = o[0]; v.offY = o[1]; v.camera.updateProjectionMatrix(); }
@@ -925,8 +1005,8 @@ class Component extends DCLogic {
 
   target() {
     const v = this.v, T = v.T;
-    if (v.mode === 'outside') {
-      const c = new T.Vector3(0, v.van.H * 0.45, 0);
+    if (v.mode === 'outside' || v.mode === 'camp') {
+      const c = v.mode === 'camp' && v.camp ? v.camp.center.clone() : new T.Vector3(0, v.van.H * 0.45, 0);
       const pos = new T.Vector3(c.x + v.radius * Math.sin(v.phi) * Math.sin(v.theta), c.y + v.radius * Math.cos(v.phi), c.z + v.radius * Math.sin(v.phi) * Math.cos(v.theta));
       if (pos.y < 0.5) pos.y = 0.5;
       return { pos, look: c };
@@ -959,12 +1039,12 @@ class Component extends DCLogic {
         const before = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
         p.x = e.clientX; p.y = e.clientY;
         const after = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
-        if (v.mode === 'outside') v.radius = Math.min(v.van.L * 3, Math.max(v.van.L * 0.85, v.radius * (before / Math.max(after, 1))));
+        if (v.mode === 'outside' || v.mode === 'camp') v.radius = Math.min(v.van.L * 3, Math.max(v.van.L * 0.85, v.radius * (before / Math.max(after, 1))));
         else v.fov = Math.min(85, Math.max(35, v.fov * (before / Math.max(after, 1))));
         return;
       }
       p.x = e.clientX; p.y = e.clientY;
-      if (v.mode === 'outside') { v.theta -= dx * 0.006; v.phi = Math.min(1.5, Math.max(0.35, v.phi - dy * 0.005)); }
+      if (v.mode === 'outside' || v.mode === 'camp') { v.theta -= dx * 0.006; v.phi = Math.min(1.48, Math.max(0.35, v.phi - dy * 0.005)); }
       else { v.yaw += dx * 0.005; v.pitch = Math.min(1.1, Math.max(-1.1, v.pitch + dy * 0.004)); }
       v.lastInteract = performance.now();
     };
@@ -972,7 +1052,7 @@ class Component extends DCLogic {
     const wheel = (e) => {
       if (v.mode === 'drive') return;
       e.preventDefault(); v.lastInteract = performance.now();
-      if (v.mode === 'outside') v.radius = Math.min(v.van.L * 3, Math.max(v.van.L * 0.85, v.radius * (1 + Math.sign(e.deltaY) * 0.08)));
+      if (v.mode === 'outside' || v.mode === 'camp') v.radius = Math.min(v.van.L * 3, Math.max(v.van.L * 0.85, v.radius * (1 + Math.sign(e.deltaY) * 0.08)));
       else v.fov = Math.min(85, Math.max(35, v.fov + Math.sign(e.deltaY) * 3));
     };
     el.addEventListener('pointerdown', down);
@@ -1017,7 +1097,34 @@ class Component extends DCLogic {
     v.offX += (ot[0] - v.offX) * ease; v.offY += (ot[1] - v.offY) * ease;
     const cw = v.canvas.clientWidth || 800, chh = v.canvas.clientHeight || 450;
     if (Math.abs(v.offX) > 0.001 || Math.abs(v.offY) > 0.001) v.camera.setViewOffset(cw, chh, v.offX * cw, v.offY * chh, cw, chh); else v.camera.clearViewOffset();
-    const want = v.mode === 'bed' ? 1 : 0;
+    // day <-> sunset at camp
+    const campWant = v.mode === 'camp' ? 1 : 0;
+    v.campT += (campWant - v.campT) * (1 - Math.exp(-dt * 1.4));
+    const ck = v.campT, WP = v.worldParts, u = WP.skyMat.uniforms;
+    u.top.value.copy(v.cDayTop).lerp(v.cDuskTop, ck); u.horizon.value.copy(v.cDayHor).lerp(v.cDuskHor, ck); u.bottom.value.copy(v.cDayBot).lerp(v.cDuskBot, ck);
+    v.tmpV.copy(v.dDay).lerp(v.dDusk, ck).normalize(); u.sunDir.value.copy(v.tmpV); v.sun.position.copy(v.tmpV).multiplyScalar(30);
+    v.sun.color.copy(v.cDaySun).lerp(v.cDuskSun, ck); v.sun.intensity = DAY.sunI + (DUSK.sunI - DAY.sunI) * ck;
+    v.hemi.intensity = DAY.hemiI + (DUSK.hemiI - DAY.hemiI) * ck;
+    v.renderer.toneMappingExposure = DAY.exposure + (DUSK.exposure - DAY.exposure) * ck;
+    v.scene.fog.color.copy(v.cDayFog).lerp(v.cDuskFog, ck); v.scene.background.copy(v.scene.fog.color);
+    v.scene.environment = (ck > 0.5 && v.envDusk) ? v.envDusk : WP.env;
+    WP.roadGroup.visible = ck < 0.5;
+    v.inner.forEach((l) => { l.intensity = 2.2 + 2.5 * ck; });
+    if (v.camp) {
+      const c = v.camp; c.group.visible = ck > 0.02;
+      if (c.group.visible) {
+        c.flames.forEach((f, i) => { f.scale.set(1 + 0.08 * Math.sin(t0 * 17 + i), 0.85 + 0.25 * Math.sin(t0 * (11 + i * 3)) + 0.1 * Math.sin(t0 * 29 + i), 1 + 0.08 * Math.cos(t0 * 15 + i)); f.rotation.y = t0 * (0.8 + i * 0.4); f.material.opacity = (0.65 + 0.12 * i) * Math.min(1, ck * 1.5); });
+        c.fireLight.intensity = ck * (3.2 + 0.7 * Math.sin(t0 * 13) + 0.4 * Math.sin(t0 * 31));
+        const ep = c.ePos;
+        for (let i = 0; i < c.eSeed.length; i++) {
+          const s0 = c.eSeed[i]; ep[i * 3 + 1] += dt * (0.5 + s0 * 0.7);
+          ep[i * 3] = c.fx + Math.sin(t0 * (1 + s0) + i) * 0.12 * (ep[i * 3 + 1]); ep[i * 3 + 2] = c.fz + Math.cos(t0 * (1.3 + s0) + i) * 0.12 * (ep[i * 3 + 1]);
+          if (ep[i * 3 + 1] > 1.6 + s0 * 1.4) ep[i * 3 + 1] = 0.25;
+        }
+        c.embers.geometry.attributes.position.needsUpdate = true;
+      }
+    }
+    const want = (v.mode === 'bed' || v.mode === 'camp') ? 1 : 0;
     v.doorT += (want - v.doorT) * (1 - Math.exp(-dt * 3));
     v.van.doors.forEach((d) => { d.pivot.rotation[d.axis] = d.open * v.doorT; });
     v.renderer.render(v.scene, v.camera);
@@ -1030,7 +1137,7 @@ class Component extends DCLogic {
     const viewLabel = (VIEWS.find((x) => x[0] === s.view) || VIEWS[0])[1];
     const spec = VAN_SPECS[s.van] || VAN_SPECS['man-lwb-auto'];
     const hero = this.hero, inside = hero && s.view !== 'drive';
-    const viewIds = hero ? ['driver', 'passenger', 'living', 'bed'] : ['outside', 'driver', 'passenger', 'living', 'bed'];
+    const viewIds = hero ? ['driver', 'passenger', 'living', 'bed', 'camp'] : ['outside', 'driver', 'passenger', 'living', 'bed', 'camp'];
     const hOn = 'min-h-[52px] shrink-0 rounded-full bg-brand px-5 text-[16px] font-bold text-white';
     const hOff = 'min-h-[52px] shrink-0 rounded-full bg-white/90 px-5 text-[16px] font-bold text-plum hover:bg-white';
     return {
@@ -1062,8 +1169,8 @@ class Component extends DCLogic {
       van: s.van,
       vanName: spec.name,
       viewLabel,
-      hint: s.view === 'outside' ? 'Drag to walk around · scroll or pinch to zoom' : 'Drag to look around · scroll or pinch to zoom',
-      ariaLabel: '3D model of the ' + spec.name + ', ' + viewLabel.toLowerCase() + ' view, on a Highland road beside a loch',
+      hint: s.view === 'outside' || s.view === 'camp' ? 'Drag to rotate · scroll or pinch to zoom' : 'Drag to look around · scroll or pinch to zoom',
+      ariaLabel: '3D model of the ' + spec.name + ', ' + viewLabel.toLowerCase() + (s.view === 'camp' ? ', parked at a lochside campsite at sunset with a campfire, chairs and string lights' : ' view, on a Highland road beside a loch'),
       vanOptions: VAN_ORDER.map((id) => ({ id, name: VAN_SPECS[id].name })),
       pickVan: (e) => this.setState({ van: e.target.value }),
       views: VIEWS.filter((x) => viewIds.includes(x[0])).map(([id, label]) => ({ label, pressed: s.view === id ? 'true' : 'false', cls: s.view === id ? (hero ? hOn : on) : (hero ? hOff : off), pick: () => this.setState({ view: id }) }))
