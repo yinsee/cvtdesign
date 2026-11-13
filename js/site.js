@@ -1337,7 +1337,7 @@ class Component extends DCLogic {
     renderer.toneMapping = T.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.12;
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = T.PCFSoftShadowMap;
+    renderer.shadowMap.type = T.VSMShadowMap; // low-res map, blurred: soft, natural shadows
 
     const scene = new T.Scene();
     const camera = new T.PerspectiveCamera(45, 16 / 9, 0.03, 2000);
@@ -1351,9 +1351,9 @@ class Component extends DCLogic {
     const hemi = new T.HemisphereLight(0xdfe8ff, 0x5d5638, 0.6); scene.add(hemi);
     const sun = new T.DirectionalLight(0xffe2bf, 3.2);
     sun.position.copy(W.sunDir).multiplyScalar(30); sun.castShadow = true;
-    sun.shadow.mapSize.set(2048, 2048);
+    sun.shadow.mapSize.set(512, 512);
     Object.assign(sun.shadow.camera, { left: -8, right: 8, top: 8, bottom: -8, near: 5, far: 70 });
-    sun.shadow.bias = -0.0003; sun.shadow.normalBias = 0.02; sun.shadow.radius = 4;
+    sun.shadow.bias = -0.0005; sun.shadow.normalBias = 0.02; sun.shadow.radius = 9; sun.shadow.blurSamples = 16;
     scene.add(sun);
     const inner = [new T.PointLight(0xffd9a8, 2.2, 5, 2), new T.PointLight(0xffd9a8, 2.2, 5, 2)];
     inner.forEach((l) => scene.add(l));
@@ -1661,7 +1661,6 @@ class Component extends DCLogic {
     };
   }
 }
-
 
 return Component;
 })();
