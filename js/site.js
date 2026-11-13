@@ -526,9 +526,9 @@ function buildVan(T, c) {
   const seatZ = wsBaseZ - (pop ? 0.82 : 0.95);
   box(Wi, 0.28, 0.55, trim, 0, bonnetH + 0.06, wsBaseZ - 0.22);
   box(0.42, 0.02, 0.2, M('#0e1626', { emissive: '#22406a', emissiveIntensity: 0.6 }), 0.15, bonnetH + 0.22, wsBaseZ - 0.42).rotation.x = -0.9;
-  const wheel = add(new T.TorusGeometry(0.19, 0.025, 12, 40), trim, -0.42, bonnetH + 0.22, wsBaseZ - 0.6);
+  const wheel = add(new T.TorusGeometry(0.19, 0.025, 12, 40), trim, -0.45, bonnetH + 0.1, wsBaseZ - 0.6);
   wheel.rotation.x = -0.45;
-  const col = box(0.06, 0.06, 0.35, trim, -0.42, bonnetH + 0.14, wsBaseZ - 0.44); col.rotation.x = 0.45;
+  const col = box(0.06, 0.06, 0.35, trim, -0.45, bonnetH + 0.02, wsBaseZ - 0.44); col.rotation.x = 0.45;
   const seat = (x, z, rot) => {
     const s = new T.Group(); s.position.set(x, 0, z); s.rotation.y = rot; g.add(s);
     box(0.36, 0.34, 0.36, trim, 0, floorY + 0.17, 0, s);
@@ -620,8 +620,8 @@ function buildVan(T, c) {
       living: { pos: [-0.05, floorY + 1.6, livingFront - 0.15], yaw: Math.PI, pitch: -0.2 }
     });
   }
-  res.driver = { pos: [-0.45, floorY + 1.08, seatZ + (swivel ? 0.1 : -0.05)], yaw: 0, pitch: -0.1 };
-  res.passenger = { pos: [0.45, floorY + 1.08, seatZ + (swivel ? 0.1 : -0.05)], yaw: 0.35, pitch: -0.08 };
+  res.driver = { pos: [-0.45, floorY + 1.16, seatZ - 0.24], yaw: 0, pitch: -0.06 };
+  res.passenger = { pos: [0.45, floorY + 1.16, seatZ - 0.24], yaw: 0.35, pitch: -0.06 };
   res.lights = [[0, H - 0.25, rearZ + 1.0], [0, H - 0.25, livingFront - 0.6]];
   res.group = g; res.doors = doors; res.mats = mats;
   return res;
