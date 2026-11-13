@@ -323,7 +323,8 @@ const SKY = { top: '#4f79ad', horizon: '#f0d7b8', bottom: '#b9ad97', sun: [0.62,
 const DUSK = { top: '#262a58', horizon: '#ff9560', bottom: '#3d2f33', fog: '#a8655a', sun: [-0.74, 0.07, -0.56], sunColor: '#ff8a4a', sunI: 1.5, hemiI: 0.26, exposure: 1.0 };
 const DAY = { fog: '#f0d7b8', sunColor: '#ffe2bf', sunI: 3.2, hemiI: 0.6, exposure: 1.12 };
 const NIGHT = { top: '#060a1a', horizon: '#1b2342', bottom: '#0a0b12', fog: '#121829', moon: [0.25, 0.85, 0.3], moonColor: '#9fb6ff', moonI: 0.45, hemiI: 0.07, exposure: 1.15 };
-const TIMES = [['morning', 'Morning', 8], ['midday', 'Midday', 13], ['sunset', 'Sunset', 19.6], ['night', 'Night', 22.5]];
+const TIMES = [['morning', 'Morning', 8], ['midday', 'Midday', 13], ['sunset', 'Sunset', 19.3], ['night', 'Night', 22.5]];
+const periodOf = (t) => (t >= 5 && t < 11 ? 'morning' : t >= 11 && t < 17 ? 'midday' : t >= 17 && t < 20.8 ? 'sunset' : 'night');
 
 // ---------- small procedural helpers (no images needed)
 function hash2(x, y) { const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return s - Math.floor(s); }
@@ -380,7 +381,7 @@ function buildVan(T, c) {
   const chrome = S({ color: '#dfe3e8', roughness: 0.15, metalness: 1 });
   const tyreM = S({ color: '#141416', roughness: 0.92 });
   const rimM = S({ color: '#c5c9cf', roughness: 0.25, metalness: 0.95 });
-  const glassSide = P({ color: '#0f151b', metalness: 0.1, roughness: 0.04, transparent: true, opacity: 0.6, side: T.DoubleSide, depthWrite: false, envMapIntensity: 1.6 });
+  const glassSide = P({ color: '#0b0f14', metalness: 0.15, roughness: 0.03, transparent: true, opacity: 0.74, side: T.DoubleSide, depthWrite: false, envMapIntensity: 2.0 });
   const glassFront = P({ color: '#30404c', metalness: 0.05, roughness: 0.03, transparent: true, opacity: 0.22, side: T.DoubleSide, depthWrite: false, envMapIntensity: 1.4 });
   const headM = P({ color: '#e8eef4', roughness: 0.05, metalness: 0.2, clearcoat: 1, emissive: '#d8e8ff', emissiveIntensity: 0.55 });
   const drlM = S({ color: '#ffffff', emissive: '#ffffff', emissiveIntensity: 2.5 });
@@ -460,9 +461,15 @@ function buildVan(T, c) {
     const w = [];
     if (pop) { w.push(rect(rearZ + 0.45, cabDoorRear - 0.12, winY0, winY1)); return w; }
     const mid = (rearZ + cabDoorRear) / 2;
-    if (side > 0) w.push(rect(cabDoorRear - 1.05, cabDoorRear - 0.2, winY0, winY1));
-    w.push(rect(rearZ + 0.35, rearZ + 1.15, winY0 + 0.05, winY1));
-    if (c.stripes && side < 0) w.push(rect(mid - 0.35, mid + 0.35, winY0, winY1));
+    if (c.stripes) {
+      if (side > 0) w.push(rect(cabDoorRear - 1.05, cabDoorRear - 0.2, winY0, winY1));
+      w.push(rect(rearZ + 0.35, rearZ + 1.15, winY0 + 0.05, winY1));
+      if (side < 0) w.push(rect(mid - 0.35, mid + 0.35, winY0, winY1));
+      return w;
+    }
+    const gy0 = bonnetH + 0.16, gy1 = topY - 0.2;
+    w.push(rect(cabDoorRear - 1.22, cabDoorRear - 0.1, gy0, gy1));
+    w.push(rect(rearZ + 0.42, cabDoorRear - 1.36, gy0, gy1));
     return w;
   };
   const toPath = (pts, Ctor) => { const p = new Ctor(); p.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) p.lineTo(pts[i][0], pts[i][1]); p.closePath(); return p; };
@@ -779,7 +786,7 @@ function buildWorld(T, renderer) {
   const ground = new T.Mesh(gGeo, groundMat); ground.receiveShadow = true; world.add(ground); disposables.push(gGeo, groundMat);
 
   // loch
-  const waterMat = new T.MeshPhysicalMaterial({ color: '#27455a', roughness: 0.06, metalness: 0.1, clearcoat: 1, clearcoatRoughness: 0.1, envMapIntensity: 1.3 });
+  const waterMat = new T.MeshStandardMaterial({ color: '#1f3a4c', roughness: 0.28, metalness: 0.0, envMapIntensity: 0.45 });
   const water = new T.Mesh(new T.PlaneGeometry(400, 1000), waterMat); water.rotation.x = -Math.PI / 2; water.position.set(14 + 200, -0.25, 0); world.add(water); disposables.push(water.geometry, waterMat);
 
   // mountain ridges
@@ -906,7 +913,6 @@ class Component extends DCLogic {
     if (!this.v) return;
     if (prevState.van !== this.state.van) this.loadVan(this.state.van);
     if (prevState.view !== this.state.view) this.setView(this.state.view);
-    if (prevState.time !== this.state.time) { const t = TIMES.find((x) => x[0] === this.state.time); if (t) this.v.todTarget = t[2]; }
   }
   componentWillUnmount() { this.destroy(); }
 
@@ -1009,7 +1015,7 @@ class Component extends DCLogic {
     const v = this.v; if (!v || !v.van) return;
     v.mode = mode;
     if (mode === 'outside') { v.radius = v.van.L * 1.25 + 3; v.phi = 1.3; v.fov = 40; }
-    else if (mode === 'camp') { v.radius = v.van.L * 1.2 + 4.5; v.phi = 1.33; v.theta = 0.62; v.fov = 40; }
+    else if (mode === 'camp') { v.radius = v.van.L * 1.2 + 4.5; v.phi = 1.33; v.theta = 0.62; v.fov = 40; if (v.campT < 0.05) { v.tod = 18.6; v.jumpTo = null; } }
     else if (mode === 'drive') { v.fov = 26; }
     else { const p = v.van[mode]; if (!p) return; v.yaw = p.yaw || 0; v.pitch = p.pitch || 0; v.fov = 72; }
     if (snap) { const t = this.target(); v.camera.position.copy(t.pos); v.look.copy(t.look); v.camera.fov = v.fov; const o = this.offsetTarget(); v.offX = o[0]; v.offY = o[1]; v.camera.updateProjectionMatrix(); }
@@ -1112,7 +1118,12 @@ class Component extends DCLogic {
     // camp lighting follows the chosen time of day; the road keeps its own daylight
     const campWant = v.mode === 'camp' ? 1 : 0;
     v.campT += (campWant - v.campT) * (1 - Math.exp(-dt * 1.4));
-    v.tod += (v.todTarget - v.tod) * (1 - Math.exp(-dt * 1.6));
+    // the clock runs by itself at camp (a full day in about 90 seconds); tapping the button fast-forwards to the next part of the day
+    if (v.mode === 'camp') {
+      if (v.jumpTo != null) { const d = (v.jumpTo - v.tod + 24) % 24, step = Math.min(d, dt * 6); v.tod = (v.tod + step) % 24; if (d - step < 0.02) v.jumpTo = null; }
+      else v.tod = (v.tod + dt * 0.26) % 24;
+      const per = periodOf(v.tod); if (per !== this.state.time) this.setState({ time: per });
+    }
     const ck = v.campT, WP = v.worldParts, u = WP.skyMat.uniforms, sst = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
     const f = (v.tod - 6) / 14.5, elev = f >= 0 && f <= 1 ? 0.95 * Math.sin(Math.PI * f) : -0.3;
     const az = Math.atan2(DUSK.sun[2], DUSK.sun[0]) + (1 - Math.min(1, Math.max(0, f))) * 2.6;
@@ -1209,7 +1220,14 @@ class Component extends DCLogic {
       vanOptions: VAN_ORDER.map((id) => ({ id, name: VAN_SPECS[id].name })),
       pickVan: (e) => this.setState({ van: e.target.value }),
       isCamp: s.view === 'camp',
-      times: TIMES.map(([id, label]) => ({ label, pressed: s.time === id ? 'true' : 'false', cls: s.time === id ? 'min-h-[44px] shrink-0 rounded-full bg-plum px-4 text-[15px] font-bold text-white' : 'min-h-[44px] shrink-0 rounded-full bg-white/85 px-4 text-[15px] font-bold text-plum hover:bg-white', pick: () => this.setState({ time: id }) })),
+      timeLabel: (TIMES.find((x) => x[0] === s.time) || TIMES[2])[1],
+      isNight: s.time === 'night',
+      isDay: s.time !== 'night',
+      advanceTime: () => {
+        const v = this.v; if (!v) return;
+        const i = TIMES.findIndex((x) => x[0] === periodOf(v.tod)), next = TIMES[(i + 1) % TIMES.length];
+        v.jumpTo = next[2];
+      },
       views: viewIds.map((id) => VIEWS.find((x) => x[0] === id)).map(([id, label]) => ({ label, pressed: s.view === id ? 'true' : 'false', cls: s.view === id ? (hero ? hOn : on) : (hero ? hOff : off), pick: () => this.setState({ view: id }) }))
     };
   }

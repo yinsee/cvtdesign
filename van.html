@@ -8,9 +8,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&amp;family=Lato:wght@400;700;900&amp;display=swap">
-<link rel="stylesheet" href="assets/site.css?v=13">
+<link rel="stylesheet" href="assets/site.css?v=14">
 <script defer src="js/three.min.js?v=158b"></script>
-<script defer src="js/site.js?v=13"></script>
+<script defer src="js/site.js?v=14"></script>
 <script defer src="js/alpine.min.js"></script>
 <style>body{margin:0}[x-cloak]{display:none}</style>
 </head>
@@ -96,9 +96,13 @@
         <button type="button" @click="(V.exitInside)($event)" aria-label="Close the 3D view" class="pointer-events-auto inline-flex min-h-[48px] items-center gap-2 rounded-full bg-white px-5 text-[16px] font-bold text-plum hover:bg-brand hover:text-white"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg>Close</button>
       </div>
       <template x-if="V.isCamp"><span style="display:contents">
-        <div role="group" aria-label="Time of day" class="no-scrollbar pointer-events-auto -mx-5 mb-3 flex items-center gap-2 overflow-x-auto px-5 md:mx-0 md:px-0">
-          <span class="shrink-0 rounded-full bg-plum-deep/70 px-3 py-1.5 text-[14px] font-bold text-white backdrop-blur">Time of day</span>
-          <template x-for="tm in V.times"><button type="button" @click="(tm.pick)($event)" :aria-pressed="tm.pressed" :class="tm.cls" x-text="tm.label"></button></template>
+        <div class="mb-3 flex">
+          <button type="button" @click="(V.advanceTime)($event)" :aria-label="`Time of day: ${V.timeLabel}. Tap to move on to the next part of the day`" class="pointer-events-auto inline-flex min-h-[48px] shrink-0 items-center gap-2 rounded-full bg-plum px-5 text-[16px] font-bold text-white shadow-lg hover:bg-plum-mid">
+            <template x-if="V.isDay"><span style="display:contents"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF8A9B" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg></span></template>
+            <template x-if="V.isNight"><span style="display:contents"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF8A9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg></span></template>
+            <span x-text="V.timeLabel"></span>
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+          </button>
         </div>
       </span></template>
       <p class="m-0 mb-3 w-fit rounded-full bg-white/85 px-3 py-1.5 text-[14px] font-bold text-plum" x-text="V.hint"></p>
@@ -134,9 +138,13 @@
       </div>
     </span></template>
     <template x-if="V.isCamp"><span style="display:contents">
-      <div role="group" aria-label="Time of day" class="no-scrollbar -mx-1 flex items-center gap-2 overflow-x-auto px-1 pb-1">
-        <span class="shrink-0 text-[15px] font-bold text-ink/70">Time of day</span>
-        <template x-for="tm in V.times"><button type="button" @click="(tm.pick)($event)" :aria-pressed="tm.pressed" :class="tm.cls" x-text="tm.label"></button></template>
+      <div class="flex">
+          <button type="button" @click="(V.advanceTime)($event)" :aria-label="`Time of day: ${V.timeLabel}. Tap to move on to the next part of the day`" class="inline-flex min-h-[48px] shrink-0 items-center gap-2 rounded-full bg-plum px-5 text-[16px] font-bold text-white shadow-lg hover:bg-plum-mid">
+            <template x-if="V.isDay"><span style="display:contents"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF8A9B" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg></span></template>
+            <template x-if="V.isNight"><span style="display:contents"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF8A9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg></span></template>
+            <span x-text="V.timeLabel"></span>
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+          </button>
       </div>
     </span></template>
     <div role="group" aria-label="Choose a viewpoint" class="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
