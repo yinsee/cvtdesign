@@ -1098,7 +1098,7 @@ function buildWorld(T, renderer, E) {
   const scatter = (geoTop, geoTrunk, cTop, cTrunk, N, place, flat) => {
     const mt = new T.MeshStandardMaterial({ color: cTop, roughness: 1, flatShading: flat !== false }), mk = new T.MeshStandardMaterial({ color: cTrunk, roughness: 1 });
     const A = new T.InstancedMesh(geoTop, mt, N), B = geoTrunk ? new T.InstancedMesh(geoTrunk, mk, N) : null;
-    for (let i = 0; i < N; i++) { const r = place(i); r[0] *= MS; pp.set(r[0], heightAt(r[0], r[1]), r[1]); const s = r[2]; sc.set(s, s * (0.9 + hash2(i, 4) * 0.4), s); q.setFromAxisAngle(up, hash2(i, 5) * 6.28); mtx.compose(pp, q, sc); A.setMatrixAt(i, mtx); if (B) B.setMatrixAt(i, mtx); }
+    for (let i = 0; i < N; i++) { const r = place(i); r[0] *= MS; if ((r[0] - 17) * (r[0] - 17) + (r[1] - 12) * (r[1] - 12) < 160 || (r[0] > 7 && r[0] < 30 && r[1] > -2 && r[1] < 26)) r[0] += r[0] > 0 ? 30 : -30; pp.set(r[0], heightAt(r[0], r[1]), r[1]); const s = r[2]; sc.set(s, s * (0.9 + hash2(i, 4) * 0.4), s); q.setFromAxisAngle(up, hash2(i, 5) * 6.28); mtx.compose(pp, q, sc); A.setMatrixAt(i, mtx); if (B) B.setMatrixAt(i, mtx); }
     world.add(A); if (B) world.add(B); disposables.push(geoTop, mt, mk); if (geoTrunk) disposables.push(geoTrunk);
   };
   const pineG = () => { const g = new T.ConeGeometry(1.4, 5.5, 7); g.translate(0, 4, 0); return g; };
