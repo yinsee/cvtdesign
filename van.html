@@ -8,9 +8,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&amp;family=Lato:wght@400;700;900&amp;display=swap">
-<link rel="stylesheet" href="assets/site.css?v=7">
+<link rel="stylesheet" href="assets/site.css?v=8">
 <script defer src="js/three.min.js?v=158b"></script>
-<script defer src="js/site.js?v=7"></script>
+<script defer src="js/site.js?v=8"></script>
 <script defer src="js/alpine.min.js"></script>
 <style>body{margin:0}[x-cloak]{display:none}</style>
 </head>
@@ -141,25 +141,24 @@
 
 <main class="mx-auto max-w-[1400px] px-5 md:px-10">
 
-  <!-- Gallery -->
-  <section aria-labelledby="photos-h" class="pt-14 lg:pt-20">
-    <h2 id="photos-h" class="m-0 mb-5 font-display text-[32px] font-extrabold text-plum lg:text-[44px]">Photos</h2>
-    <div class="relative max-w-[768px] overflow-hidden rounded-[28px] bg-plum-tint">
-      <img :src="V.photo.src" :alt="V.photo.alt" class="aspect-[3/2] w-full object-cover">
-      <span class="absolute bottom-4 right-4 rounded-full bg-plum-deep/80 px-4 py-2 text-[15px] font-bold text-white"><span x-text="V.photoIndex"></span> / <span x-text="V.photoCount"></span></span>
-    </div>
-    <div class="no-scrollbar mt-3 flex max-w-[768px] gap-3 overflow-x-auto pb-1">
-      <template x-for="t in V.thumbs">
-        <button type="button" @click="(t.pick)($event)" :aria-label="t.label" :aria-pressed="t.pressed" :class="t.cls"><img :src="t.src" alt="" class="h-full w-full object-cover"></button>
-      </template>
-    </div>
-    <p class="m-0 mt-2 text-[14px] text-ink/60">[Confirm every gallery photo shows this exact van]</p>
-  </section>
-
-  <div class="mt-10 grid gap-10 lg:grid-cols-12 lg:gap-14">
-    <!-- Details -->
+  <div class="grid gap-10 pt-14 lg:grid-cols-12 lg:gap-14 lg:pt-20">
+    <!-- Gallery + details -->
     <div class="lg:col-span-7">
-      <h2 class="m-0 font-display text-[32px] font-extrabold text-plum">At a glance</h2>
+      <section aria-labelledby="photos-h">
+        <h2 id="photos-h" class="m-0 mb-5 font-display text-[32px] font-extrabold text-plum">Photos</h2>
+        <div class="relative overflow-hidden rounded-[28px] bg-plum-tint">
+          <img :src="V.photo.src" :alt="V.photo.alt" class="aspect-[3/2] w-full object-cover">
+          <span class="absolute bottom-4 right-4 rounded-full bg-plum-deep/80 px-4 py-2 text-[15px] font-bold text-white"><span x-text="V.photoIndex"></span> / <span x-text="V.photoCount"></span></span>
+        </div>
+        <div class="mt-3 grid grid-cols-5 gap-2 sm:gap-3">
+          <template x-for="t in V.thumbs">
+            <button type="button" @click="(t.pick)($event)" :aria-label="t.label" :aria-pressed="t.pressed" :class="t.cls"><img :src="t.src" alt="" class="h-full w-full object-cover"></button>
+          </template>
+        </div>
+        <p class="m-0 mt-2 text-[14px] text-ink/60">[Confirm every gallery photo shows this exact van]</p>
+      </section>
+
+      <h2 class="m-0 mt-12 font-display text-[32px] font-extrabold text-plum">At a glance</h2>
       <dl class="m-0 mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <div class="rounded-2xl bg-plum-tint p-4"><dt class="text-[14px] font-bold uppercase tracking-[0.1em] text-ink/70">Sleeps</dt><dd class="m-0 font-display text-[28px] font-extrabold text-plum">2</dd></div>
         <div class="rounded-2xl bg-plum-tint p-4"><dt class="text-[14px] font-bold uppercase tracking-[0.1em] text-ink/70">Gearbox</dt><dd class="m-0 font-display text-[28px] font-extrabold text-plum">Auto</dd></div>

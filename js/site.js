@@ -121,8 +121,8 @@ class Component extends DCLogic {
       { src: 'assets/man-cab.jpg', alt: 'Dashboard, steering wheel and navigation screen' },
       { src: 'assets/man-rear.jpg', alt: 'Rear view of the campervan on a country lane' }
     ];
-    const on = 'h-20 w-28 shrink-0 overflow-hidden rounded-xl ring-4 ring-brand sm:h-24 sm:w-36';
-    const off = 'h-20 w-28 shrink-0 overflow-hidden rounded-xl opacity-80 ring-1 ring-plum/10 hover:opacity-100 sm:h-24 sm:w-36';
+    const on = 'aspect-[4/3] w-full overflow-hidden rounded-xl ring-4 ring-brand';
+    const off = 'aspect-[4/3] w-full overflow-hidden rounded-xl opacity-80 ring-1 ring-plum/10 hover:opacity-100';
     const i = this.state.i;
     return {
       photo: PHOTOS[i],
