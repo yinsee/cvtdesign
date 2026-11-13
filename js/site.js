@@ -1326,20 +1326,14 @@ async function buildWorld(T, renderer, E) {
 
   const cl01 = (v) => Math.min(1, Math.max(0, v));
   const W0 = E.water, MS = E.mirror ? -1 : 1;
-  // LAKESIDE PROTOTYPE: a gravel track leaves the road, winds inland between trees and ends at a clearing by a lake
+  // LAKESIDE PROTOTYPE: wherever the van stops, it turns off onto a pebble track and pulls up beside a pond; it leaves forwards
   const LS = E.lakeside ? (() => {
-    const D = { x: 22, z: 44 }, LK = { x: 54, z: 50, r: 15 };
-    const bz = (a, b, c, d, t) => { const u = 1 - t; return u * u * u * a + 3 * u * u * t * b + 3 * u * t * t * c + t * t * t * d; };
-    const pts = []; for (let i = 0; i <= 8; i++) pts.push([0, i * 5 / 8]);
-    for (let i = 1; i <= 160; i++) { const t = i / 160; pts.push([bz(0, 0, D.x, D.x, t), bz(5, 22, 24, D.z, t)]); }
-    const route = []; let L = 0;
-    pts.forEach((q, i) => { if (i) L += Math.hypot(q[0] - pts[i - 1][0], q[1] - pts[i - 1][1]); route.push({ x: q[0], z: q[1], s: L }); });
-    route.forEach((r, i) => { const a = route[Math.max(0, i - 1)], b = route[Math.min(route.length - 1, i + 1)]; r.th = Math.atan2(b.x - a.x, b.z - a.z); });
-    route[0].th = 0; route[route.length - 1].th = 0;
-    const segDist = (x, z) => { if (x < -14 || x > D.x + 16 || z < -14 || z > D.z + 16) return 99; let m = 1e9; for (let i = 8; i < route.length - 2; i += 2) { const a = route[i], b = route[i + 2], dx = b.x - a.x, dz = b.z - a.z, t = Math.max(0, Math.min(1, ((x - a.x) * dx + (z - a.z) * dz) / (dx * dx + dz * dz || 1))); m = Math.min(m, Math.hypot(x - a.x - dx * t, z - a.z - dz * t)); } return m; };
-    const shoreR = (x, z) => { const a = Math.atan2(z - LK.z, x - LK.x); return LK.r + 2.6 * Math.sin(a * 3 + 0.7) + 1.4 * Math.sin(a * 7 + 2.1); };
-    const clear = (x, z) => Math.hypot(x - D.x - 4, z - D.z);
-    return { D, LK, route, len: L, segDist, shoreR, clear };
+    const D = { x: 8, z: 16 }, POND = { x: 22, z: 18, r: 6.5 };
+    const bez = (p0, p1, p2, p3, n) => { const out = []; for (let i = 0; i <= n; i++) { const t = i / n, u = 1 - t; out.push([u * u * u * p0[0] + 3 * u * u * t * p1[0] + 3 * u * t * t * p2[0] + t * t * t * p3[0], u * u * u * p0[1] + 3 * u * u * t * p1[1] + 3 * u * t * t * p2[1] + t * t * t * p3[1]]); } return out; };
+    const mk = (pts) => { const r = []; let L = 0; pts.forEach((q, i) => { if (i) L += Math.hypot(q[0] - pts[i - 1][0], q[1] - pts[i - 1][1]); r.push({ x: q[0], z: q[1], s: L }); }); r.forEach((p, i) => { const a = r[Math.max(0, i - 1)], b = r[Math.min(r.length - 1, i + 1)]; p.th = Math.atan2(b.x - a.x, b.z - a.z); }); r[0].th = 0; r[r.length - 1].th = 0; return { route: r, len: L }; };
+    const inR = mk(bez([0, 0], [0, 6], [D.x, D.z - 7], [D.x, D.z], 120));
+    const outR = mk(bez([D.x, D.z], [D.x, D.z + 7], [0, D.z + 9], [0, D.z + 16], 120));
+    return { D, POND, inR, outR, exitZ: D.z + 16 };
   })() : null;
   const shoreOff = (z) => { const o = (fbm(z * 0.022 + 3.1, 1.7, 4) - 0.5) * 22 + Math.sin(z * 0.083 + 1.2) * 2.6 + Math.sin(z * 0.21) * 0.9; const keep = cl01((Math.abs(z) - 7) / 18); return Math.max(-1.2, o * keep + (1 - keep) * Math.max(o, 0.6)); };
   const heightAt = (xw, z) => { const x = xw * MS;
@@ -1363,12 +1357,7 @@ async function buildWorld(T, renderer, E) {
       else { const edge = cl01((x - shoreOff(z) - 9) / 7), far = W0.x1 - 30; h = -0.9 * edge + cl01((x - far) / 30) * (1.2 + (fellsL ? 44 : 34) * fbm(x * 0.011, z * 0.011 + 7, 4) * Math.min(1, (x - far) / 90 + 0.25)); }
     }
     // the camp side stays level well past the pitch and its patch; hills and shorelines start further out
-    if (xw > 0) h *= cl01((xw - 24) / 16);
-    if (LS) {
-      h *= Math.min(cl01((LS.clear(xw, z) - 16) / 10), cl01((LS.segDist(xw, z) - 3.5) / 6));
-      const dl = Math.hypot(xw - LS.LK.x, z - LS.LK.z), sr = LS.shoreR(xw, z);
-      if (dl < sr + 6) { const t = cl01((dl - sr) / 6); h = h * t + (dl < sr ? -0.35 - 1.6 * cl01((sr - dl) / 6) : 0) * (1 - t); }
-    }
+    if (xw > 0) h *= cl01((xw - 32) / 16);
     return h;
   };
   const SEG = PERF.low ? 110 : 150;
@@ -1387,7 +1376,6 @@ async function buildWorld(T, renderer, E) {
     if (Math.abs(x) < 6.5) col.lerp(verge, 0.55);
     { const xs = x - shoreOff(z); if ((W0 || E.sea) && xs > 8.5 && xs < (E.sea ? 40 : 17)) col.lerp(beach, cl01((xs - 8.5) / 2) * 0.85); }
     if (W0 && x > W0.x1 - 30 && x < W0.x1 - 22) col.lerp(beach, 0.7 * (1 - Math.abs(x - (W0.x1 - 26)) / 4));
-    if (LS) { const dl = Math.hypot(xw - LS.LK.x, z - LS.LK.z), sr = LS.shoreR(xw, z); if (dl < sr + 3) col.lerp(beach, 0.85 * cl01((sr + 3 - dl) / 2)); if (LS.segDist(xw, z) < 2.4) col.lerp(new T.Color('#a39880'), 0.8); }
     cols.push(col.r, col.g, col.b);
   }
   gGeo.setAttribute('color', new T.Float32BufferAttribute(cols, 3)); gGeo.computeVertexNormals();
@@ -1444,7 +1432,7 @@ async function buildWorld(T, renderer, E) {
   // buildings for this setting
   const envKey = Object.keys(ENVS).find((k) => ENVS[k] === E) || 'loch';
   const arch = buildArch(T, envKey, heightAt, MS); world.add(arch.group); mergeStatic(T, arch.group, arch.disp); arch.disp.forEach((d) => disposables.push(d));
-  const blocked = (x, z) => arch.sites.some(([sx, sz, r]) => (x - sx) * (x - sx) + (z - sz) * (z - sz) < r * r) || (LS && (LS.segDist(x, z) < 5 || LS.clear(x, z) < 17 || Math.hypot(x - LS.LK.x, z - LS.LK.z) < LS.LK.r + 6));
+  const blocked = (x, z) => arch.sites.some(([sx, sz, r]) => (x - sx) * (x - sx) + (z - sz) * (z - sz) < r * r);
 
   // vegetation
   const mtx = new T.Matrix4(), q = new T.Quaternion(), sc = new T.Vector3(), pp = new T.Vector3(), up = new T.Vector3(0, 1, 0);
@@ -1452,24 +1440,41 @@ async function buildWorld(T, renderer, E) {
     N = Math.round(N * (PERF.low ? 0.6 : 1));
     const mt = new T.MeshStandardMaterial({ color: cTop, roughness: 1, flatShading: flat !== false }), mk = new T.MeshStandardMaterial({ color: cTrunk, roughness: 1 });
     const A = new T.InstancedMesh(geoTop, mt, N), B = geoTrunk ? new T.InstancedMesh(geoTrunk, mk, N) : null;
-    for (let i = 0; i < N; i++) { const r = place(i); r[0] *= MS; if ((r[0] - 17) * (r[0] - 17) + (r[1] - 12) * (r[1] - 12) < 160 || (r[0] > 7 && r[0] < 30 && r[1] > -2 && r[1] < 26)) r[0] += r[0] > 0 ? 30 : -30; if (r[0] > -6 && r[0] < 17) r[0] = r[0] > 4 ? r[0] + 13 : r[0] - 10; pp.set(r[0], heightAt(r[0], r[1]), r[1]); const s = blocked(r[0], r[1]) ? 0.0001 : r[2]; sc.set(s, s * (0.9 + hash2(i, 4) * 0.4), s); q.setFromAxisAngle(up, hash2(i, 5) * 6.28); mtx.compose(pp, q, sc); A.setMatrixAt(i, mtx); if (B) B.setMatrixAt(i, mtx); }
+    for (let i = 0; i < N; i++) { const r = place(i); r[0] *= MS; if ((r[0] - 17) * (r[0] - 17) + (r[1] - 12) * (r[1] - 12) < 160 || (r[0] > 7 && r[0] < 30 && r[1] > -2 && r[1] < 26)) r[0] += r[0] > 0 ? 30 : -30; if (r[0] > -6 && r[0] < 34) r[0] = r[0] > 4 ? r[0] + 30 : r[0] - 10; pp.set(r[0], heightAt(r[0], r[1]), r[1]); const s = blocked(r[0], r[1]) ? 0.0001 : r[2]; sc.set(s, s * (0.9 + hash2(i, 4) * 0.4), s); q.setFromAxisAngle(up, hash2(i, 5) * 6.28); mtx.compose(pp, q, sc); A.setMatrixAt(i, mtx); if (B) B.setMatrixAt(i, mtx); }
     world.add(A); if (B) world.add(B); disposables.push(geoTop, mt, mk); if (geoTrunk) disposables.push(geoTrunk);
   };
   const pineG = () => { const g = new T.ConeGeometry(1.4, 5.5, 7); g.translate(0, 4, 0); return g; };
   const trunkG = () => { const g = new T.CylinderGeometry(0.18, 0.22, 1.4, 6); g.translate(0, 0.7, 0); return g; };
   const roundG = () => { const g = new T.IcosahedronGeometry(2.4, 1); g.translate(0, 3.6, 0); g.scale(1, 0.85, 1); return g; };
   const trunkTall = () => { const g = new T.CylinderGeometry(0.22, 0.3, 2.4, 6); g.translate(0, 1.2, 0); return g; };
+  const site = new T.Group(); site.visible = false; world.add(site);
   if (LS) {
-    scatter(pineG(), trunkG(), '#2c4a2e', '#4a3a2c', 240, (i) => [8 + hash2(i, 41) * 9, 16 + hash2(i, 42) * 110, 0.8 + hash2(i, 43) * 0.6]);
-    scatter(pineG(), trunkG(), '#2f4f33', '#4a3a2c', 160, (i) => { const a = hash2(i, 44) * Math.PI * 2, r = LS.LK.r + 10 + hash2(i, 45) * 26; return [LS.LK.x + Math.cos(a) * r, LS.LK.z + Math.sin(a) * r, 0.8 + hash2(i, 46) * 0.7]; });
-    const lakeN = waveTex.clone(); lakeN.repeat.set(10, 10); lakeN.needsUpdate = true;
-    const lm = new T.MeshStandardMaterial({ color: '#2b5c70', roughness: 0.06, metalness: 0.1, normalMap: lakeN, normalScale: new T.Vector2(0.22, 0.22), transparent: true, opacity: 0.94 });
-    const lake = new T.Mesh(new T.CircleGeometry(LS.LK.r + 9, 72), lm); lake.rotation.x = -Math.PI / 2; lake.position.set(LS.LK.x, -0.25, LS.LK.z); lake.receiveShadow = true; world.add(lake);
-    const tp = [], ti = []; let k0 = 0;
-    LS.route.forEach((r, i) => { if (r.x < 2.6 && i < 40) return; const nx = Math.cos(r.th), nz = -Math.sin(r.th), w = 1.6; tp.push(r.x - nx * w, 0.035, r.z - nz * w, r.x + nx * w, 0.035, r.z + nz * w); if (k0) { const j = (k0 - 1) * 2; ti.push(j, j + 2, j + 1, j + 1, j + 2, j + 3); } k0++; });
-    const tg = new T.BufferGeometry(); tg.setAttribute('position', new T.Float32BufferAttribute(tp, 3)); tg.setIndex(ti); tg.computeVertexNormals();
-    const tm = new T.MeshStandardMaterial({ color: '#a6997e', roughness: 1, side: T.DoubleSide }); const track = new T.Mesh(tg, tm); track.receiveShadow = true; world.add(track);
-    disposables.push(lakeN, lm, lake.geometry, tg, tm);
+    // pebble tracks (in, and back out to the road): many small stones of mixed size and colour
+    const pgeo = new T.DodecahedronGeometry(1, 0), pmat = new T.MeshStandardMaterial({ color: '#ffffff', roughness: 0.9, flatShading: true });
+    const pcols = ['#9a958c', '#b8b2a6', '#7d776d', '#cfc8b8', '#8a7f70', '#a39a8b', '#6e6a64', '#d9d3c7'], c3 = new T.Color(), stones = [];
+    [LS.inR, LS.outR].forEach((R0, ri) => R0.route.forEach((p0, i) => {
+      if (ri === 0 && i < 8) return;
+      const nx = Math.cos(p0.th), nz = -Math.sin(p0.th);
+      for (let k = 0; k < 8; k++) { const j = i * 31 + k * 7 + ri * 997, off = (hash2(j, 1) - 0.5) * 2.6, al = (hash2(j, 2) - 0.5) * 0.3; stones.push([p0.x + nx * off + Math.sin(p0.th) * al, p0.z + nz * off + Math.cos(p0.th) * al, 0.05 + Math.pow(hash2(j, 3), 2.2) * 0.17, j]); }
+    }));
+    const P = LS.POND;
+    for (let i = 0; i < 220; i++) { const a = hash2(i, 61) * Math.PI * 2, rr = P.r + 0.6 + 0.9 * Math.sin(a * 3 + 0.7) + 0.5 * Math.sin(a * 5 + 2.1) + (hash2(i, 62) - 0.3) * 1.3; stones.push([P.x + Math.cos(a) * rr, P.z - Math.sin(a) * rr, 0.06 + Math.pow(hash2(i, 63), 2) * 0.22, i + 5000]); }
+    const pim = new T.InstancedMesh(pgeo, pmat, stones.length);
+    stones.forEach(([x, z, r, j], i) => { pp.set(x, r * 0.22, z); q.setFromEuler(new T.Euler(hash2(j, 4) * 3, hash2(j, 5) * 6, hash2(j, 6) * 3)); sc.set(r * (1 + hash2(j, 7) * 0.5), r * 0.45, r); mtx.compose(pp, q, sc); pim.setMatrixAt(i, mtx); pim.setColorAt(i, c3.set(pcols[Math.floor(hash2(j, 8) * pcols.length)])); });
+    pim.receiveShadow = true; site.add(pim);
+    // the pond: a wavy edge, a sandy beach, rippled water and reeds round the far side
+    const shape = (rr) => { const s0 = new T.Shape(); for (let i = 0; i <= 72; i++) { const a = (i / 72) * Math.PI * 2, r0 = rr + 0.9 * Math.sin(a * 3 + 0.7) + 0.5 * Math.sin(a * 5 + 2.1), px = Math.cos(a) * r0, pz = Math.sin(a) * r0; if (i) s0.lineTo(px, pz); else s0.moveTo(px, pz); } return s0; };
+    const beachG = new T.ShapeGeometry(shape(P.r + 1.9), 1); beachG.rotateX(-Math.PI / 2);
+    const beachM = new T.MeshStandardMaterial({ color: '#c9bb98', roughness: 1 }), beach = new T.Mesh(beachG, beachM); beach.position.set(P.x, 0.012, P.z); beach.receiveShadow = true; site.add(beach);
+    const lakeN = waveTex.clone(); lakeN.repeat.set(3, 3); lakeN.needsUpdate = true;
+    const waterG = new T.ShapeGeometry(shape(P.r), 1); waterG.rotateX(-Math.PI / 2);
+    const waterM = new T.MeshStandardMaterial({ color: '#2b5c70', roughness: 0.05, metalness: 0.1, normalMap: lakeN, normalScale: new T.Vector2(0.25, 0.25) });
+    const water = new T.Mesh(waterG, waterM); water.position.set(P.x, 0.028, P.z); water.receiveShadow = true; site.add(water);
+    const rg = new T.ConeGeometry(0.03, 1.25, 3); rg.translate(0, 0.62, 0);
+    const rmat = new T.MeshStandardMaterial({ color: '#7b7a45', roughness: 1, flatShading: true }), RN = 260, rim = new T.InstancedMesh(rg, rmat, RN);
+    for (let i = 0; i < RN; i++) { let a = hash2(i, 71) * Math.PI * 2; if (Math.cos(a) < -0.35) a += Math.PI; const rr = P.r + 0.9 * Math.sin(a * 3 + 0.7) + 0.5 * Math.sin(a * 5 + 2.1) + (hash2(i, 72) - 0.6) * 1.2; pp.set(P.x + Math.cos(a) * rr + (hash2(i, 73) - 0.5) * 0.4, 0, P.z - Math.sin(a) * rr); q.setFromEuler(new T.Euler((hash2(i, 74) - 0.5) * 0.3, 0, (hash2(i, 75) - 0.5) * 0.3)); const s0 = 0.7 + hash2(i, 76) * 0.7; sc.set(s0, s0, s0); mtx.compose(pp, q, sc); rim.setMatrixAt(i, mtx); }
+    site.add(rim);
+    disposables.push(pgeo, pmat, beachG, beachM, lakeN, waterG, waterM, rg, rmat);
   }
   const sideX = (i, near, span, farSide) => (farSide ? 1 : -1) * (near + Math.pow(hash2(i, 1), 1.3) * span);
   if (E.trees === 'pine' || E.trees === 'mixed') {
@@ -1514,7 +1519,7 @@ async function buildWorld(T, renderer, E) {
     const bCols = E.sea ? ['#5b6b2c', '#6a7a30', '#4e5d2a'] : E.alpine ? ['#4e6a34', '#5d7a3c', '#6b6a3a'] : ['#3f5a2c', '#4c6a32', '#6b6a34', '#7a6232'];
     const sightline = (x, z) => { const d = Math.hypot(x, z), along = (x * 0.78 + z * 0.62); return along > 0 && d < 40 && Math.abs(x * 0.62 - z * 0.78) < along * 0.5 + 3; };
     const wet = (x, z) => heightAt(x, z) < (W0 ? W0.y + 0.12 : E.sea ? -0.55 : -9);
-    const freeStatic = (x, z, tall) => !(x > -4.6 && x < PARK_X + 11) && !(tall && sightline(x, z)) && !blocked(x, z) && !wet(x, z);
+    const freeStatic = (x, z, tall) => !(x > -4.6 && x < 34) && !(tall && sightline(x, z)) && !blocked(x, z) && !wet(x, z);
     // grass clumps: a few crossed blades
     const blade = new T.ConeGeometry(0.05, 0.5, 3); blade.translate(0, 0.25, 0);
     const parts = []; for (let k = 0; k < 5; k++) { const b = blade.clone(); b.rotateZ((hash2(k, 1) - 0.5) * 0.7); b.rotateY(k * 1.3); b.translate((hash2(k, 2) - 0.5) * 0.18, 0, (hash2(k, 3) - 0.5) * 0.18); parts.push(b); }
@@ -1576,7 +1581,7 @@ async function buildWorld(T, renderer, E) {
   mergeStatic(T, dashes, disposables); mergeStatic(T, posts, disposables);
   disposables.push(asphalt, roadMat, road.geometry, lineMat, dashG, postG, postM, refG, refM, envSky.geometry, { dispose: () => pm.dispose() });
 
-  return { world, arch, patch, LS, env, bakeSky, bakeView, stars, skyMat, roadGroup, waveTex, dashes, posts, sunDir, disposables, fogColor: E.sky[1], E };
+  return { world, arch, patch, LS, site, env, bakeSky, bakeView, stars, skyMat, roadGroup, waveTex, dashes, posts, sunDir, disposables, fogColor: E.sky[1], E };
 }
 
 // ---------- evening camp beside the van: awning, string lights, chairs, rug, campfire
@@ -1694,7 +1699,6 @@ class Component extends DCLogic {
     if (this.dead || this.mountEl !== el) { W.disposables.forEach((d) => d.dispose && d.dispose()); renderer.dispose(); return; }
     const worldRoot = new T.Group(); scene.add(worldRoot); worldRoot.add(W.world);
     { const skyM = W.world.children.find((o) => o.material && o.material.uniforms && o.material.uniforms.tSky); if (skyM) scene.add(skyM); if (W.stars) scene.add(W.stars); }
-    if (W.LS) { W.patch.visible = true; W.patch.position.set(W.LS.D.x, 0, W.LS.D.z); }
     scene.environment = W.env;
     scene.fog = new T.Fog(W.fogColor, E.fog[0], E.fog[1]);
     scene.background = new T.Color(W.fogColor);
@@ -1792,7 +1796,7 @@ class Component extends DCLogic {
     v.van = buildVan(v.T, VAN_SPECS[id] || VAN_SPECS['man-lwb-auto']); v.shadowDirty = true;
     v.scene.add(v.van.group);
     v.camp = buildCamp(v.T, v.van);
-    if (v.worldParts.LS) { v.worldRoot.add(v.camp.group); v.camp.group.position.set(v.worldParts.LS.D.x, 0, v.worldParts.LS.D.z); } else v.scene.add(v.camp.group);
+    if (v.worldParts.LS) { v.worldParts.site.add(v.camp.group); v.camp.group.position.set(v.worldParts.LS.D.x, 0, v.worldParts.LS.D.z); } else v.scene.add(v.camp.group);
     v.van.lights.forEach((p, i) => v.inner[i].position.set(p[0], p[1], p[2]));
     v.contact.scale.set(v.van.W + 1.1, v.van.L + 1.6, 1);
     v.doorT = 0;
@@ -1909,32 +1913,28 @@ class Component extends DCLogic {
     let vel = v.speed * VMAX, sp = 0, lat = 0, signed = 1;
     const LS = v.worldParts.LS;
     if (LS) {
-      // LAKESIDE PROTOTYPE: the van leaves the road on a gravel track and drives in to the lake; the world moves around it
-      const dist0 = v.dist || 0;
-      if (v.rs === undefined) { v.rs = atCamp ? LS.len : 0; v.sv = 0; }
-      if (atCamp) {
-        const Rm = Math.max(0, LS.len - v.rs), cap = v.rs < 4 ? VMAX : 6;
-        let sv = v.rs === 0 ? Math.max(vel, v.sv) : Math.max(0, v.sv);
-        sv = sv > cap ? Math.max(cap, sv - BR * dt) : Math.min(cap, sv + ACC * dt);
-        sv = Math.min(sv, Math.sqrt(2 * BR * Rm));
-        v.rs += Math.min(Rm, sv * dt); v.sv = sv;
-        if (LS.len - v.rs < 1e-3) { v.rs = LS.len; v.sv = 0; }
-        v.park = v.rs >= LS.len ? 1 : 0.5; vel = 0;
-      } else if (v.rs > 0) {
-        // packed up first, then it reverses back down the track to the road
-        if (v.setupT < 0.02) { let sv = Math.min(0, v.sv); sv = Math.max(-6, sv - ACC * dt); sv = -Math.min(-sv, Math.sqrt(2 * BR * v.rs) + 0.3); v.rs = Math.max(0, v.rs + sv * dt); v.sv = v.rs <= 1e-3 ? 0 : sv; if (v.rs <= 1e-3) v.rs = 0; } else v.sv = 0;
-        v.park = 0.5; vel = 0;
-      } else {
-        const go = driving && v.setupT < 0.02;
-        vel = go ? Math.min(VMAX, vel + ACC * 0.75 * dt) : Math.max(0, vel - BR * dt);
-        v.dist = dist0 + vel * dt; v.park = 0; v.sv = 0;
-      }
-      const pz = this.routePose(LS, v.rs), c = Math.cos(-pz.th), sn = Math.sin(-pz.th);
-      v.worldRoot.rotation.y = -pz.th; v.worldRoot.position.set(-(pz.x * c + pz.z * sn), 0, -(-pz.x * sn + pz.z * c));
-      v.speed = vel / VMAX; sp = Math.max(v.speed, Math.abs(v.sv) / VMAX); signed = v.sv < 0 ? -1 : 1;
+      // LAKESIDE PROTOTYPE: the scenery stays put and the van moves through it (the world root carries the inverse of the van's pose)
+      if (v.ls === undefined) v.ls = { state: 'road', t: 0, roadZ: 0, A: 0, v0: 0 };
+      const L = v.ls; let pose = { x: 0, z: L.roadZ, th: 0 }, svel = 0;
+      // Hermite easing: starts at the speed it already has, arrives on time, ends at the speed wanted
+      const herm = (u, len, T, v0, v1) => { const u2 = u * u, u3 = u2 * u; return { s: (3 * u2 - 2 * u3) * len + (u3 - 2 * u2 + u) * T * v0 + (u3 - u2) * T * v1, ds: ((6 * u - 6 * u2) * len + (3 * u2 - 4 * u + 1) * T * v0 + (3 * u2 - 2 * u) * T * v1) / T }; };
+      if (atCamp && L.state === 'road') { L.state = 'in'; L.t = 0; L.A = L.roadZ; L.v0 = vel; v.worldParts.site.position.set(0, 0, L.A); v.worldParts.site.visible = true; }
+      if (atCamp && (L.state === 'out' || L.state === 'pack')) L.state = 'camp';
+      if (!atCamp && (L.state === 'camp' || L.state === 'in')) L.state = 'pack';
+      if (L.state === 'in') { L.t += dt; const T = 1.5, u = Math.min(1, L.t / T), h = herm(u, LS.inR.len, T, L.v0, 0), p = this.routePose(LS.inR, h.s); pose = { x: p.x, z: L.A + p.z, th: p.th }; svel = h.ds; if (u >= 1) L.state = 'camp'; }
+      if (L.state === 'camp' || L.state === 'pack') { pose = { x: LS.D.x, z: L.A + LS.D.z, th: 0 }; if (L.state === 'pack' && v.setupT < 0.02) { L.state = 'out'; L.t = 0; } }
+      if (L.state === 'out') { L.t += dt; const T = 1.0, u = Math.min(1, L.t / T), h = herm(u, LS.outR.len, T, 0, VMAX), p = this.routePose(LS.outR, h.s); pose = { x: p.x, z: L.A + p.z, th: p.th }; svel = h.ds; if (u >= 1) { L.state = 'road'; L.roadZ = L.A + LS.exitZ; vel = VMAX; v.worldParts.site.visible = false; pose = { x: 0, z: L.roadZ, th: 0 }; } }
+      if (L.state === 'road') { const go = driving && v.setupT < 0.02; vel = go ? Math.min(VMAX, vel + ACC * 0.75 * dt) : Math.max(0, vel - BR * dt); v.dist = (v.dist || 0) + vel * dt; v.park = 0; }
+      else { v.park = L.state === 'camp' || L.state === 'pack' ? 1 : 0.5; vel = 0; }
+      // once parked up, the road is out of sight and is not drawn
+      const showRoad = !(L.state === 'camp' || L.state === 'pack');
+      v.worldParts.roadGroup.visible = showRoad; v.worldParts.dashes.visible = showRoad; v.worldParts.posts.visible = showRoad;
+      const c = Math.cos(-pose.th), sn = Math.sin(-pose.th);
+      v.worldRoot.rotation.y = -pose.th; v.worldRoot.position.set(-(pose.x * c + pose.z * sn), 0, -(-pose.x * sn + pose.z * c));
+      v.speed = vel / VMAX; sp = Math.max(v.speed, Math.abs(svel) / VMAX); signed = 1;
       v.yawV = 0; g.rotation.y = 0; g.position.x = 0; v.vx = 0; v.contact.position.x = 0; if (v.camp) v.camp.group.visible = true;
       v.van.lights.forEach((p, i) => v.inner[i].position.set(p[0], p[1], p[2]));
-      vel = Math.abs(v.sv) + vel;
+      v.sv = svel; vel = Math.abs(svel) + vel;
     } else {
     const dist0 = v.dist || 0, lat0 = PARK * smp(v.park);
       if (atCamp) {
@@ -1964,7 +1964,7 @@ class Component extends DCLogic {
     }
     // the camp is set out once the van has stopped, and packed away before it leaves
     const setWant = atCamp && v.park >= 1 && vel < 0.05;
-    v.setupT = setWant ? Math.min(1, v.setupT + dt * 0.42) : Math.max(0, v.setupT - dt * 1.3);
+    v.setupT = setWant ? Math.min(1, v.setupT + dt * 0.42) : Math.max(0, v.setupT - dt * (LS ? 5 : 1.3));
     const pv = v.pOff > -999;
     if (!LS) { v.worldParts.patch.visible = pv; v.worldParts.patch.position.set(PARK, 0, pv ? v.pOff : 0); if (v.camp) { v.camp.group.position.set(PARK, 0, pv ? v.pOff : 0); v.camp.group.visible = pv; } }
     g.position.y = sp * (0.012 * Math.sin(t0 * 8.3) + 0.006 * Math.sin(t0 * 13.7 + 1.3));
@@ -2019,7 +2019,7 @@ class Component extends DCLogic {
       if (key === 'day') v.scene.environment = WP.env;
       else { if (!v.envs[key]) v.envs[key] = WP.bakeSky(key === 'night' ? Object.assign({}, NIGHT, { sun: NIGHT.moon }) : DUSK); v.scene.environment = v.envs[key]; }
     } else v.scene.environment = WP.env;
-    WP.roadGroup.visible = true;
+    if (!WP.LS) WP.roadGroup.visible = true;
     v.inner.forEach((l) => { l.intensity = 2.2 + 3 * dark * ck; });
     if (v.van.glow) v.van.glow.forEach((m) => { m.emissiveIntensity = 0.55 * dark * ck; });
     const A = WP.arch; A.winM.emissiveIntensity = 0.05 + 2.4 * dark * ck; A.lampM.emissiveIntensity = 0.4 + 4 * dark * ck;
