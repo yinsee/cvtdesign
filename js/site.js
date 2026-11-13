@@ -1890,7 +1890,7 @@ class Component extends DCLogic {
       heroCls: inside ? 'fixed inset-0 z-[100] isolate overflow-hidden bg-plum-deep' : 'relative isolate overflow-hidden bg-plum-deep',
       innerCls: inside
         ? 'pointer-events-none mx-auto flex h-full max-w-[1400px] flex-col justify-end px-5 pb-6 pt-24 md:px-10 md:pb-10'
-        : 'pointer-events-none mx-auto flex min-h-[580px] max-w-[1400px] flex-col justify-end px-5 pb-12 pt-32 md:px-10 lg:min-h-[720px] lg:pb-20',
+        : 'pointer-events-none mx-auto flex min-h-[620px] max-w-[1400px] flex-col justify-start px-5 pb-10 pt-8 md:px-10 lg:min-h-[760px] lg:pb-16 lg:pt-12',
       enterInside: () => {
         this.setState({ view: 'camp' });
         const el = this.sectionEl;

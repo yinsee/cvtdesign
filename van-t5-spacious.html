@@ -8,9 +8,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&amp;family=Lato:wght@400;700;900&amp;family=Lora:ital,wght@0,400;0,600;1,400&amp;display=swap">
-<link rel="stylesheet" href="assets/site.css?v=3">
+<link rel="stylesheet" href="assets/site.css?v=4">
 <script defer src="js/three.min.js?v=158b"></script>
-<script defer src="js/site.js?v=12"></script>
+<script defer src="js/site.js?v=13"></script>
 <script defer src="js/alpine.min.js"></script>
 <style>body{margin:0}[x-cloak]{display:none}</style>
 </head>
@@ -77,6 +77,7 @@
   <template x-if="V.noGL"><span style="display:contents"><img src="assets/hero-man.jpg" alt="" class="absolute inset-0 -z-20 h-full w-full object-cover"></span></template>
   <template x-if="V.outsideMode"><span style="display:contents">
     <div class="pointer-events-none absolute inset-0 -z-10 scrim-b"></div>
+    <div class="pointer-events-none absolute inset-0 -z-10 scrim-t"></div>
     <div class="pointer-events-none absolute inset-0 -z-10 hidden scrim-l lg:block"></div>
   </span></template>
   <div :class="V.innerCls">
@@ -85,7 +86,8 @@
       <p class="m-0 inline-flex w-fit items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-[15px] font-bold text-white backdrop-blur"><span class="h-2 w-2 rounded-full bg-brand"></span><span x-text="V.eyebrow"></span></p>
       <h1 id="page-h" class="m-0 mt-4 max-w-[13ch] font-display text-[52px] font-extrabold leading-[0.92] tracking-[-0.035em] text-white sm:text-[76px] lg:text-[104px]" x-text="V.title"></h1>
       <p class="m-0 mt-5 max-w-[38rem] text-[20px] leading-relaxed text-white/90 lg:text-[22px]" x-text="V.intro"></p>
-      <div class="pointer-events-auto mt-8 flex flex-col gap-3 sm:flex-row">
+      <div aria-hidden="true" class="min-h-[48px] flex-1"></div>
+      <div class="pointer-events-auto flex flex-col gap-3 sm:flex-row">
         <a href="#book" class="inline-flex min-h-[58px] items-center justify-center rounded-full bg-brand px-8 text-[18px] font-bold text-white hover:bg-brand-dark">Check availability</a>
         <button type="button" @click="(V.enterInside)($event)" class="inline-flex min-h-[58px] items-center justify-center gap-2 rounded-full border-2 border-white px-8 text-[18px] font-bold text-white hover:bg-white hover:text-plum"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 3 8l9 5 9-5-9-5Z"></path><path d="m3 16 9 5 9-5"></path><path d="m3 12 9 5 9-5"></path></svg>Look inside in 3D</button>
       </div>
