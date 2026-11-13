@@ -1699,7 +1699,29 @@ class Component extends DCLogic {
     this.tick();
   }
 
+  // freeze the page behind the window-filling 3D view: nothing scrolls, on phones included (iOS needs the body pinned)
+  lockScroll() {
+    if (this.locked || typeof document === 'undefined') return;
+    const b = document.body, h = document.documentElement, y = window.scrollY || window.pageYOffset || 0;
+    this.locked = { y, b: b.getAttribute('style'), h: h.getAttribute('style') };
+    h.style.overflow = 'hidden'; h.style.overscrollBehavior = 'none';
+    Object.assign(b.style, { overflow: 'hidden', position: 'fixed', top: -y + 'px', left: '0', right: '0', width: '100%', overscrollBehavior: 'none' });
+    if (this.v) this.v.canvas.style.touchAction = 'none';
+    this.onKey = (e) => { if (e.key === 'Escape') { this.unlockScroll(); this.setState({ view: 'drive' }); } };
+    window.addEventListener('keydown', this.onKey);
+  }
+  unlockScroll() {
+    const L = this.locked; if (!L) return; this.locked = null;
+    const b = document.body, h = document.documentElement;
+    if (L.b == null) b.removeAttribute('style'); else b.setAttribute('style', L.b);
+    if (L.h == null) h.removeAttribute('style'); else h.setAttribute('style', L.h);
+    window.scrollTo(0, L.y);
+    if (this.v) this.v.canvas.style.touchAction = '';
+    if (this.onKey) window.removeEventListener('keydown', this.onKey);
+  }
+
   destroy() {
+    this.unlockScroll();
     this.dead = true;
     const v = this.v; if (!v) return;
     cancelAnimationFrame(v.raf); v.running = false;
@@ -1753,7 +1775,8 @@ class Component extends DCLogic {
     const v = this.v, T = v.T;
     if (v.mode === 'outside' || v.mode === 'camp') {
       const c = v.mode === 'camp' && v.camp ? v.camp.center.clone().add(new T.Vector3(PARK_X, 0, 0)) : new T.Vector3(v.vx || 0, v.van.H * 0.45, 0);
-      const pos = new T.Vector3(c.x + v.radius * Math.sin(v.phi) * Math.sin(v.theta), c.y + v.radius * Math.cos(v.phi), c.z + v.radius * Math.sin(v.phi) * Math.cos(v.theta));
+      const asp = v.camera.aspect || 1.6, rr = v.radius * (asp < 1.2 ? Math.min(2.2, Math.pow(1.2 / asp, 0.85)) : 1);
+      const pos = new T.Vector3(c.x + rr * Math.sin(v.phi) * Math.sin(v.theta), c.y + rr * Math.cos(v.phi), c.z + rr * Math.sin(v.phi) * Math.cos(v.theta));
       if (pos.y < 0.5) pos.y = 0.5;
       return { pos, look: c };
     }
@@ -2007,19 +2030,13 @@ class Component extends DCLogic {
       eyebrow: this.props.eyebrow || '',
       intro: this.props.intro || '',
       sectionRef: this.sectionRef,
-      heroCls: inside ? 'fixed inset-0 z-[100] isolate overflow-hidden bg-plum-deep' : 'relative isolate overflow-hidden bg-plum-deep',
+      heroCls: inside ? 'fixed inset-0 z-[100] isolate h-full w-full overflow-hidden bg-plum-deep' : 'relative isolate overflow-hidden bg-plum-deep',
       innerCls: inside
         ? 'pointer-events-none mx-auto flex h-full max-w-[1400px] flex-col justify-end px-5 pb-6 pt-24 md:px-10 md:pb-10'
         : 'pointer-events-none mx-auto flex min-h-[620px] max-w-[1400px] flex-col justify-start px-5 pb-10 pt-8 md:px-10 lg:min-h-[760px] lg:pb-16 lg:pt-12',
-      enterInside: () => {
-        this.setState({ view: 'camp' });
-        const el = this.sectionEl;
-        try { if (el && el.requestFullscreen && !document.fullscreenElement) { const p = el.requestFullscreen(); if (p && p.catch) p.catch(() => {}); } } catch (e) {}
-      },
-      exitInside: () => {
-        try { if (document.fullscreenElement && document.exitFullscreen) { const p = document.exitFullscreen(); if (p && p.catch) p.catch(() => {}); } } catch (e) {}
-        this.setState({ view: 'drive' });
-      },
+      // look inside fills the browser window (no browser full-screen) and freezes the page behind it
+      enterInside: () => { this.lockScroll(); this.setState({ view: 'camp' }); },
+      exitInside: () => { this.unlockScroll(); this.setState({ view: 'drive' }); },
       canvasRef: this.canvasRef,
       noGL: s.noGL,
       showPicker: this.props.picker !== 'false',
