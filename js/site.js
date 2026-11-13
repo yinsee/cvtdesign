@@ -1101,7 +1101,7 @@ function buildArch(T, key, heightAt, MS) {
   };
   // hero and camp views look from the +x/+z side towards -x/-z: place things by distance and angle from that line of sight
   const base = Math.atan2(-0.62, -0.78);
-  const at = (dist, deg) => [Math.cos(base + deg * Math.PI / 180) * dist, Math.sin(base + deg * Math.PI / 180) * dist];
+  const at = (dist, deg) => { dist *= 1.6; deg *= 1.15; return [Math.cos(base + deg * Math.PI / 180) * dist, Math.sin(base + deg * Math.PI / 180) * dist]; };
   const cottage = (x, z, rot, wallM, roofM, w, d, storeys, plinth) => {
     w = w || 5.5; d = d || 9; storeys = storeys || 1; const h = 2.6 * storeys + 0.4, p = site(x, z, w, d, rot, plinth);
     box(w, h, d, wallM, 0, 0, 0, p); roof(w + 0.5, w * 0.55, d + 0.5, roofM, 0, h, 0, p);
@@ -1363,8 +1363,8 @@ function buildWorld(T, renderer, E) {
   // undergrowth around the camp: grass clumps, wildflowers, bushes and reeds at the water's edge
   {
     const dry = E.alpine ? '#7a9a4a' : E.sea ? '#a7a35e' : E.fields ? '#7c9a44' : '#5f7a3a';
-    const sightline = (x, z) => { const d = Math.hypot(x, z), along = (x * 0.78 + z * 0.62); return along > 0 && d < 34 && Math.abs(x * 0.62 - z * 0.78) < along * 0.42 + 2.5; };
-    const free = (x, z, tall) => { const xl = x * MS; if (x > -9 && x < 3.4) return false; if (x > 0.6 && x < 7.5 && z > -6.5 && z < 6.5) return false; if (tall && sightline(x, z)) return false; if (blocked(x, z)) return false; const h = heightAt(x, z); return h > (W0 ? W0.y + 0.12 : E.sea ? -0.55 : -9); };
+    const sightline = (x, z) => { const d = Math.hypot(x, z), along = (x * 0.78 + z * 0.62); return along > 0 && d < 40 && Math.abs(x * 0.62 - z * 0.78) < along * 0.5 + 3; };
+    const free = (x, z, tall) => { const xl = x * MS; if (x > -9 && x < 3.4) return false; if (x > 0.6 && x < 7.5 && z > -6.5 && z < 6.5) return false; if (sightline(x, z)) return false; if (Math.hypot(x - 13, z - 10.5) < 9) return false; if (blocked(x, z)) return false; const h = heightAt(x, z); return h > (W0 ? W0.y + 0.12 : E.sea ? -0.55 : -9); };
     const pick = (i, near, far, tall) => { for (let t = 0; t < 12; t++) { const a = hash2(i, 31 + t) * Math.PI * 2, r = near + Math.pow(hash2(i, 47 + t), 1.6) * far, x = Math.cos(a) * r, z = Math.sin(a) * r; if (free(x, z, tall)) return [x, z]; } return null; };
     const inst = (geo, matO, N, near, far, tall, scl, colors) => {
       const m = new T.MeshStandardMaterial(Object.assign({ roughness: 1 }, matO)), im = new T.InstancedMesh(geo, m, N), c = new T.Color();
