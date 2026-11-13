@@ -1057,6 +1057,124 @@ const ENVS = {
   alps:   { label: 'Alpine pass', sky: ['#2268cf', '#d3e5f5', '#c9d2d6'], fog: [160, 1300], grass: ['#5c8a3a', '#86a04e'], accent: '#9aa07a', alpine: true, trees: 'larch', ridges: [['#56606e', '#e9edf2', 2], ['#6a7486', '#f2f5f8', 2], ['#8e98ad', '#f7f9fb', 2]] }
 };
 
+// ---------- architecture: a few buildings that belong to each setting (glowing windows after dark)
+function buildArch(T, key, heightAt, MS) {
+  const g = new T.Group(), disp = [], sites = [];
+  const mat = (o) => { const m = new T.MeshStandardMaterial(Object.assign({ roughness: 0.95 }, o)); disp.push(m); return m; };
+  const winM = mat({ color: '#2b2f36', emissive: '#ffc977', emissiveIntensity: 0.05, roughness: 0.3 });
+  const lampM = mat({ color: '#fff6d8', emissive: '#ffe4a0', emissiveIntensity: 0.4, roughness: 0.2 });
+  const C = {
+    white: mat({ color: '#ebe6dc' }), harl: mat({ color: '#d9d3c6' }), stone: mat({ color: '#8d877c' }), dark: mat({ color: '#6c665d' }),
+    slate: mat({ color: '#3b4048', roughness: 0.8 }), sand: mat({ color: '#b9a682' }), grit: mat({ color: '#9b8f78' }),
+    wood: mat({ color: '#6b4a2e' }), wood2: mat({ color: '#7d5130' }), red: mat({ color: '#a8262f' }), roofR: mat({ color: '#5a3a2c', roughness: 0.85 }),
+    green: mat({ color: '#3f4a35' }), black: mat({ color: '#25262a' })
+  };
+  const box = (w, h, d, m, x, y, z, parent, ry) => { const geo = new T.BoxGeometry(w, h, d); disp.push(geo); const o = new T.Mesh(geo, m); o.position.set(x, y + h / 2, z); if (ry) o.rotation.y = ry; o.receiveShadow = true; (parent || g).add(o); return o; };
+  const cyl = (rt, rb, h, m, x, y, z, parent, seg) => { const geo = new T.CylinderGeometry(rt, rb, h, seg || 20); disp.push(geo); const o = new T.Mesh(geo, m); o.position.set(x, y + h / 2, z); o.receiveShadow = true; (parent || g).add(o); return o; };
+  const cone = (r, h, m, x, y, z, parent, seg, rot) => { const geo = new T.ConeGeometry(r, h, seg || 16); disp.push(geo); const o = new T.Mesh(geo, m); o.position.set(x, y + h / 2, z); if (rot) o.rotation.y = rot; (parent || g).add(o); return o; };
+  const roof = (w, h, d, m, x, y, z, parent) => { // gable roof along z
+    const s = new T.Shape(); s.moveTo(-w / 2, 0); s.lineTo(w / 2, 0); s.lineTo(0, h); s.lineTo(-w / 2, 0);
+    const geo = new T.ExtrudeGeometry(s, { depth: d, bevelEnabled: false }); geo.translate(0, 0, -d / 2); disp.push(geo);
+    const o = new T.Mesh(geo, m); o.position.set(x, y, z); o.receiveShadow = true; (parent || g).add(o); return o;
+  };
+  const windows = (w, d, rows, y0, parent, every) => { // windows on both long faces (±x) and gable ends
+    const n = Math.max(1, Math.floor(d / (every || 2.6)));
+    for (let r = 0; r < rows; r++) for (let i = 0; i < n; i++) { const z = -d / 2 + (i + 0.5) * d / n; [-1, 1].forEach((s) => box(0.08, 0.9, 0.7, winM, s * (w / 2 + 0.02), y0 + r * 2.6, z, parent)); }
+    [-1, 1].forEach((s) => box(0.7, 0.9, 0.08, winM, 0, y0, s * (d / 2 + 0.02), parent));
+  };
+  // set a building on the slope: floor at the uphill level, a stone plinth down to the lowest corner
+  const site = (x, z, w, d, rot, plinthM) => {
+    const grp = new T.Group(), c = Math.cos(rot), s = Math.sin(rot); let lo = Infinity, hi = -Infinity;
+    [[-1, -1], [1, -1], [-1, 1], [1, 1], [0, 0]].forEach(([a, b]) => { const px = x + (a * w / 2) * c + (b * d / 2) * s, pz = z - (a * w / 2) * s + (b * d / 2) * c, h = heightAt(px, pz); lo = Math.min(lo, h); hi = Math.max(hi, h); });
+    hi = Math.max(hi, 0.4);
+    grp.position.set(x, hi, z); grp.rotation.y = rot; g.add(grp);
+    if (hi - lo > 0.05) box(w + 0.4, hi - lo + 0.6, d + 0.4, plinthM || C.stone, 0, -(hi - lo) - 0.6, 0, grp);
+    sites.push([x, z, Math.max(w, d) * 0.9 + 3]);
+    return grp;
+  };
+  // hero and camp views look from the +x/+z side towards -x/-z: place things by distance and angle from that line of sight
+  const base = Math.atan2(-0.62, -0.78);
+  const at = (dist, deg) => [Math.cos(base + deg * Math.PI / 180) * dist, Math.sin(base + deg * Math.PI / 180) * dist];
+  const cottage = (x, z, rot, wallM, roofM, w, d, storeys, plinth) => {
+    w = w || 5.5; d = d || 9; storeys = storeys || 1; const h = 2.6 * storeys + 0.4, p = site(x, z, w, d, rot, plinth);
+    box(w, h, d, wallM, 0, 0, 0, p); roof(w + 0.5, w * 0.55, d + 0.5, roofM, 0, h, 0, p);
+    [-1, 1].forEach((s) => box(0.7, w * 0.55 + 1.2, 0.7, wallM, 0, h - 0.4, s * (d / 2 - 0.2), p));
+    windows(w, d, storeys, 0.9, p); box(0.08, 1.9, 0.9, C.black, w / 2 + 0.03, 0, 0, p);
+    return p;
+  };
+  const church = (x, z, rot, wallM, roofM, spire) => {
+    const p = site(x, z, 7, 18, rot, C.stone);
+    box(7, 6, 14, wallM, 0, 0, 2, p); roof(7.6, 4.2, 14.4, roofM, 0, 6, 2, p);
+    for (let i = 0; i < 4; i++) [-1, 1].forEach((s) => box(0.08, 2.2, 0.9, winM, s * 3.52, 1.8, -3 + i * 3, p));
+    box(5, 13, 5, wallM, 0, 0, -6.5, p);
+    for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2; box(0.9, 1.4, 0.08, winM, Math.sin(a) * 2.52, 9.5, -6.5 + Math.cos(a) * 2.52, p, a); }
+    if (spire) cone(3.4, 11, roofM, 0, 13, -6.5, p, 4, Math.PI / 4);
+    else [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([a, b]) => box(0.7, 1.4, 0.7, wallM, a * 2.15, 13, -6.5 + b * 2.15, p));
+    return p;
+  };
+  const walls = (pts, m) => { // dry-stone walls following the ground
+    for (let i = 0; i < pts.length - 1; i++) { const [x0, z0] = pts[i], [x1, z1] = pts[i + 1], L = Math.hypot(x1 - x0, z1 - z0), n = Math.ceil(L / 3);
+      for (let k = 0; k < n; k++) { const t = (k + 0.5) / n, x = x0 + (x1 - x0) * t, z = z0 + (z1 - z0) * t; box(L / n + 0.05, 1.1, 0.6, m, x, heightAt(x, z) - 0.15, z, g, -Math.atan2(z1 - z0, x1 - x0)); } }
+  };
+  let beam = null;
+
+  if (key === 'loch') {
+    // a Highland tower house on a knoll, and a whitewashed croft
+    const [cx, cz] = at(105, -9), p = site(cx, cz, 12, 12, 0.5, C.dark);
+    box(9, 15, 8, C.harl, 0, 0, 0, p); roof(9.6, 4.5, 8.6, C.slate, 0, 15, 0, p);
+    [[-1, -1], [1, 1]].forEach(([a, b]) => { cyl(1.1, 1.1, 3.4, C.harl, a * 4.6, 12, b * 4.1, p); cone(1.35, 3, C.slate, a * 4.6, 15.4, b * 4.1, p); });
+    for (let r = 0; r < 4; r++) for (let i = 0; i < 3; i++) [-1, 1].forEach((s) => box(0.08, 1.0, 0.6, winM, s * 4.52, 2 + r * 3.2, -2.5 + i * 2.5, p));
+    box(5, 6, 6, C.dark, -6.5, 0, 1, p); box(14, 3.2, 0.9, C.dark, -2, 0, 6.5, p);
+    const [hx, hz] = at(42, 13); cottage(hx, hz, 0.3, C.white, C.slate, 5, 10);
+    const [bx, bz] = at(52, 19); cottage(bx, bz, 0.35, C.stone, C.roofR, 4, 6);
+  } else if (key === 'lakes') {
+    // a Lakeland farmstead in grey stone with dry-stone walls, and a chapel below the fells
+    const [fx, fz] = at(46, 11); cottage(fx, fz, 0.2, C.dark, C.slate, 6, 12, 2, C.dark);
+    const [bx, bz] = at(54, 20); cottage(bx, bz, 0.9, C.stone, C.slate, 6, 14, 1, C.dark);
+    walls([at(30, 2), at(40, 4), at(75, 3), at(95, 8)], C.dark); walls([at(34, 26), at(48, 4)], C.dark); walls([at(62, 30), at(78, 12)], C.dark);
+    const [kx, kz] = at(118, -10); church(kx, kz, 0.6, C.stone, C.slate, false);
+  } else if (key === 'coast') {
+    // a lighthouse on a rock out at sea, coastguard cottages on the cliff behind
+    const [lx, lz] = at(78, -12);
+    const rk = new T.Mesh(new T.DodecahedronGeometry(1, 1), C.dark); disp.push(rk.geometry); rk.scale.set(11, 3.2, 9); rk.position.set(lx, -0.6, lz); g.add(rk);
+    const p = new T.Group(); p.position.set(lx, 1.6, lz); g.add(p);
+    cyl(1.5, 2.3, 17, C.white, 0, 0, 0, p, 28); cyl(1.56, 1.6, 2, C.red, 0, 11, 0, p, 28);
+    cyl(2.3, 2.3, 0.35, C.black, 0, 17, 0, p, 28); cyl(1.25, 1.25, 1.8, lampM, 0, 17.35, 0, p, 20);
+    const dome = new T.Mesh(new T.SphereGeometry(1.4, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2), C.red); disp.push(dome.geometry); dome.position.set(0, 19.15, 0); p.add(dome);
+    for (let i = 0; i < 3; i++) box(0.5, 0.8, 0.08, winM, 0, 4 + i * 4, 2.0 - i * 0.12, p);
+    box(4, 3, 6, C.white, 4.5, -0.6, 1.5, p); roof(4.4, 1.6, 6.4, C.slate, 4.5, 2.4, 1.5, p);
+    const bm = new T.MeshBasicMaterial({ color: '#fff1c2', transparent: true, opacity: 0, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide, fog: false }); disp.push(bm);
+    const bg = new T.ConeGeometry(4, 70, 24, 1, true); bg.translate(0, -35, 0); bg.rotateZ(Math.PI / 2); disp.push(bg);
+    beam = new T.Group(); beam.position.set(0, 18.2, 0); p.add(beam); [0, Math.PI].forEach((a) => { const b = new T.Mesh(bg, bm); b.rotation.y = a; beam.add(b); }); beam.userData.m = bm;
+    for (let i = 0; i < 4; i++) { const [cx, cz] = at(52 + i * 7, 168 - i * 3); cottage(cx, cz, 0.3, C.white, C.slate, 5, 7); }
+  } else if (key === 'dales') {
+    // a village church with a spire across the fields, a stone barn and a farmhouse
+    const [kx, kz] = at(150, -6); church(kx, kz, 0.4, C.sand, C.slate, true);
+    const [bx, bz] = at(52, 15); { const p = site(bx, bz, 8, 16, 0.25, C.grit); box(8, 5, 16, C.grit, 0, 0, 0, p); roof(8.6, 3.6, 16.6, C.slate, 0, 5, 0, p); box(0.08, 3.2, 3.4, C.wood, 4.03, 0, 0, p); }
+    const [fx, fz] = at(78, -17); cottage(fx, fz, 0.5, C.sand, C.slate, 6, 11, 2, C.grit);
+    for (let i = 0; i < 4; i++) { const [vx, vz] = at(160 + (i % 2) * 14, -14 + i * 4); cottage(vx, vz, 0.4 + i * 0.3, i % 2 ? C.sand : C.white, i % 2 ? C.roofR : C.slate, 5, 8); }
+  } else if (key === 'forest') {
+    // a log cabin in a clearing, with a lit porch
+    const [cx, cz] = at(30, 15), p = site(cx, cz, 7, 9, 0.4, C.stone);
+    box(6.4, 3.2, 8, C.wood, 0, 0, 0, p); for (let i = 0; i < 6; i++) [-1, 1].forEach((s) => cyl(0.18, 0.18, 8.2, C.wood2, s * 3.25, 0.25 + i * 0.5, 0, p, 8).rotation.set(Math.PI / 2, 0, 0));
+    roof(7.8, 2.8, 9.4, C.green, 0, 3.2, 0, p); box(0.9, 5.2, 0.9, C.stone, -1.6, 0, -3.6, p);
+    windows(6.4, 8, 1, 1.0, p, 3.4); box(0.08, 2.0, 1.0, C.black, 3.23, 0, 1.6, p);
+    box(1.6, 0.25, 4, C.wood2, 4, 0, 1.6, p); const pl = cyl(0.12, 0.12, 0.25, lampM, 3.6, 2.3, 1.6, p, 10); pl.userData.lamp = true;
+  } else if (key === 'alps') {
+    // chalets with deep eaves on stone bases, and a white chapel with a slender spire
+    [[48, 12, 0.3, 1], [66, 24, 0.9, 0], [120, -4, 0.5, 1]].forEach(([d0, a0, r, big]) => {
+      const [x, z] = at(d0, a0), w = big ? 8 : 6.5, dd = big ? 10 : 8, p = site(x, z, w, dd, r, C.stone);
+      box(w, 2.8, dd, C.white, 0, 0, 0, p); box(w, 2.8, dd, C.wood2, 0, 2.8, 0, p);
+      roof(w + 2.4, 2.4, dd + 2.4, C.slate, 0, 5.6, 0, p); box(w + 1.2, 0.18, 1.4, C.wood, 0, 3.0, dd / 2 + 0.7, p);
+      windows(w, dd, 2, 1.0, p, 2.4);
+    });
+    const [kx, kz] = at(92, -12), p = site(kx, kz, 6, 12, 0.7, C.stone);
+    box(5.5, 5, 10, C.white, 0, 0, 1.5, p); roof(6, 3, 10.4, C.slate, 0, 5, 1.5, p); box(3.4, 10, 3.4, C.white, 0, 0, -4.5, p); cone(2.2, 8, C.slate, 0, 10, -4.5, p, 8);
+    [-1, 1].forEach((s) => box(0.08, 1.8, 0.8, winM, s * 2.77, 1.6, 2, p));
+  }
+  return { group: g, disp, sites, winM, lampM, beam };
+}
+
 // ---------- the world: sky, terrain, water, trees, road
 function buildWorld(T, renderer, E) {
   const world = new T.Group(), disposables = [];
@@ -1192,12 +1310,17 @@ function buildWorld(T, renderer, E) {
     world.add(new T.Mesh(geo, mat)); disposables.push(geo, mat);
   });
 
+  // buildings for this setting
+  const envKey = Object.keys(ENVS).find((k) => ENVS[k] === E) || 'loch';
+  const arch = buildArch(T, envKey, heightAt, MS); world.add(arch.group); arch.disp.forEach((d) => disposables.push(d));
+  const blocked = (x, z) => arch.sites.some(([sx, sz, r]) => (x - sx) * (x - sx) + (z - sz) * (z - sz) < r * r);
+
   // vegetation
   const mtx = new T.Matrix4(), q = new T.Quaternion(), sc = new T.Vector3(), pp = new T.Vector3(), up = new T.Vector3(0, 1, 0);
   const scatter = (geoTop, geoTrunk, cTop, cTrunk, N, place, flat) => {
     const mt = new T.MeshStandardMaterial({ color: cTop, roughness: 1, flatShading: flat !== false }), mk = new T.MeshStandardMaterial({ color: cTrunk, roughness: 1 });
     const A = new T.InstancedMesh(geoTop, mt, N), B = geoTrunk ? new T.InstancedMesh(geoTrunk, mk, N) : null;
-    for (let i = 0; i < N; i++) { const r = place(i); r[0] *= MS; if ((r[0] - 17) * (r[0] - 17) + (r[1] - 12) * (r[1] - 12) < 160 || (r[0] > 7 && r[0] < 30 && r[1] > -2 && r[1] < 26)) r[0] += r[0] > 0 ? 30 : -30; pp.set(r[0], heightAt(r[0], r[1]), r[1]); const s = r[2]; sc.set(s, s * (0.9 + hash2(i, 4) * 0.4), s); q.setFromAxisAngle(up, hash2(i, 5) * 6.28); mtx.compose(pp, q, sc); A.setMatrixAt(i, mtx); if (B) B.setMatrixAt(i, mtx); }
+    for (let i = 0; i < N; i++) { const r = place(i); r[0] *= MS; if ((r[0] - 17) * (r[0] - 17) + (r[1] - 12) * (r[1] - 12) < 160 || (r[0] > 7 && r[0] < 30 && r[1] > -2 && r[1] < 26)) r[0] += r[0] > 0 ? 30 : -30; pp.set(r[0], heightAt(r[0], r[1]), r[1]); const s = blocked(r[0], r[1]) ? 0.0001 : r[2]; sc.set(s, s * (0.9 + hash2(i, 4) * 0.4), s); q.setFromAxisAngle(up, hash2(i, 5) * 6.28); mtx.compose(pp, q, sc); A.setMatrixAt(i, mtx); if (B) B.setMatrixAt(i, mtx); }
     world.add(A); if (B) world.add(B); disposables.push(geoTop, mt, mk); if (geoTrunk) disposables.push(geoTrunk);
   };
   const pineG = () => { const g = new T.ConeGeometry(1.4, 5.5, 7); g.translate(0, 4, 0); return g; };
@@ -1217,7 +1340,7 @@ function buildWorld(T, renderer, E) {
     const segs = []; for (let k = -4; k <= 4; k++) { const x = k * 45; if (Math.abs(x) < 12) continue; for (let zz = -350; zz < 350; zz += 6) segs.push([x, zz, 0]); }
     for (let m = -10; m <= 10; m++) { const z = m * 35; for (let xx = -180; xx < 180; xx += 6) { if (Math.abs(xx) < 12) continue; segs.push([xx, z, 1]); } }
     const hedges = new T.InstancedMesh(hedgeG, hedgeM, segs.length);
-    segs.forEach((sgm, i) => { pp.set(sgm[0], heightAt(sgm[0], sgm[1]) + 0.5, sgm[1]); q.setFromAxisAngle(up, sgm[2] ? Math.PI / 2 : 0); sc.set(1, 0.8 + hash2(i, 3) * 0.5, 6.2); mtx.compose(pp, q, sc); hedges.setMatrixAt(i, mtx); });
+    segs.forEach((sgm, i) => { pp.set(sgm[0], heightAt(sgm[0], sgm[1]) + 0.5, sgm[1]); q.setFromAxisAngle(up, sgm[2] ? Math.PI / 2 : 0); sc.set(blocked(sgm[0], sgm[1]) ? 0.0001 : 1, 0.8 + hash2(i, 3) * 0.5, 6.2); mtx.compose(pp, q, sc); hedges.setMatrixAt(i, mtx); });
     hedges.receiveShadow = true; world.add(hedges); disposables.push(hedgeG, hedgeM);
   } else if (E.trees === 'larch') {
     scatter(pineG(), trunkG(), '#45633a', '#4a3a2c', 520, (i) => [sideX(i, 26, 200, i % 4 === 0), (hash2(i, 2) - 0.5) * 700, 0.6 + hash2(i, 3) * 0.8]);
@@ -1243,7 +1366,7 @@ function buildWorld(T, renderer, E) {
   for (let z = -300; z <= 300; z += 24) [-1, 1].forEach((s) => { const pz = z + (s > 0 ? 12 : 0); const p = new T.Mesh(postG, postM); p.position.set(s * 4.4, 0.5, pz); p.castShadow = true; posts.add(p); const r = new T.Mesh(refG, refM); r.position.set(s * 4.4, 0.85, pz); posts.add(r); });
   disposables.push(asphalt, roadMat, road.geometry, lineMat, dashG, postG, postM, refG, refM, envSky.geometry, { dispose: () => pm.dispose() });
 
-  return { world, env, bakeSky, stars, skyMat, roadGroup, waveTex, dashes, posts, sunDir, disposables, fogColor: E.sky[1], E };
+  return { world, arch, env, bakeSky, stars, skyMat, roadGroup, waveTex, dashes, posts, sunDir, disposables, fogColor: E.sky[1], E };
 }
 
 // ---------- evening camp beside the van: awning, string lights, chairs, rug, campfire
@@ -1528,10 +1651,12 @@ class Component extends DCLogic {
     const cw = v.canvas.clientWidth || 800, chh = v.canvas.clientHeight || 450;
     if (Math.abs(v.offX) > 0.001 || Math.abs(v.offY) > 0.001) v.camera.setViewOffset(cw, chh, v.offX * cw, v.offY * chh, cw, chh); else v.camera.clearViewOffset();
     // camp lighting follows the chosen time of day; the road keeps its own daylight
-    const campWant = v.mode === 'camp' ? 1 : 0;
+    // every look-inside view is parked up at camp: only the hero's driving shot is on the road
+    const atCamp = v.mode !== 'drive' && v.mode !== 'outside';
+    const campWant = atCamp ? 1 : 0;
     v.campT += (campWant - v.campT) * (1 - Math.exp(-dt * 1.4));
     // the clock runs by itself at camp (a full day in about 90 seconds); tapping the button fast-forwards to the next part of the day
-    if (v.mode === 'camp') {
+    if (atCamp) {
       if (v.jumpTo != null) { const d = (v.jumpTo - v.tod + 24) % 24, step = Math.min(d, dt * 6); v.tod = (v.tod + step) % 24; if (d - step < 0.02) v.jumpTo = null; }
       else v.tod = (v.tod + dt * 0.26) % 24;
       const per = periodOf(v.tod); if (per !== this.state.time) this.setState({ time: per });
@@ -1564,10 +1689,12 @@ class Component extends DCLogic {
       if (key === 'day') v.scene.environment = WP.env;
       else { if (!v.envs[key]) v.envs[key] = WP.bakeSky(key === 'night' ? Object.assign({}, NIGHT, { sun: NIGHT.moon }) : DUSK); v.scene.environment = v.envs[key]; }
     } else v.scene.environment = WP.env;
-    WP.roadGroup.visible = v.mode !== 'camp' || ck < 0.5;
+    WP.roadGroup.visible = !atCamp || ck < 0.5;
     v.inner.forEach((l) => { l.intensity = 2.2 + 3 * dark * ck; });
+    const A = WP.arch; A.winM.emissiveIntensity = 0.05 + 2.4 * dark * ck; A.lampM.emissiveIntensity = 0.4 + 4 * dark * ck;
+    if (A.beam) { A.beam.rotation.y = t0 * 0.9; A.beam.userData.m.opacity = 0.16 * dark * ck; A.beam.visible = dark * ck > 0.05; }
     if (v.camp) {
-      const c = v.camp; c.group.visible = v.mode === 'camp' && ck > 0.02;
+      const c = v.camp; c.group.visible = atCamp && ck > 0.02;
       if (c.group.visible) {
         c.bulbM.emissiveIntensity = 0.15 + 3.2 * dark; c.lanternM.emissiveIntensity = 0.3 + 2.6 * dark;
         // the fire burns from late afternoon through the night; by morning it is out and only smoking
@@ -1645,10 +1772,10 @@ class Component extends DCLogic {
       vanName: spec.name,
       viewLabel,
       hint: s.view === 'outside' || s.view === 'camp' ? 'Drag to rotate · scroll or pinch to zoom' : 'Drag to look around · scroll or pinch to zoom',
-      ariaLabel: '3D model of the ' + spec.name + ', ' + viewLabel.toLowerCase() + ' view, ' + (s.view === 'camp' ? 'parked up for the night with a campfire, chairs and string lights' : 'on the road') + ', setting: ' + ((ENVS[this.props.env] || ENVS[spec.env] || ENVS.loch).label),
+      ariaLabel: '3D model of the ' + spec.name + ', ' + viewLabel.toLowerCase() + ' view, ' + (s.view !== 'drive' && s.view !== 'outside' ? 'parked up for the night with a campfire, chairs and string lights' : 'on the road') + ', setting: ' + ((ENVS[this.props.env] || ENVS[spec.env] || ENVS.loch).label),
       vanOptions: VAN_ORDER.map((id) => ({ id, name: VAN_SPECS[id].name })),
       pickVan: (e) => this.setState({ van: e.target.value }),
-      isCamp: s.view === 'camp',
+      isCamp: s.view !== 'drive' && s.view !== 'outside',
       timeLabel: (TIMES.find((x) => x[0] === s.time) || TIMES[2])[1],
       isNight: s.time === 'night',
       isDay: s.time !== 'night',
@@ -1868,6 +1995,30 @@ function buildRouteMap(T, R) {
     else { const t = n === 1 ? 0.5 : i / (n - 1); x = -68 + 136 * t; z = -34 + 68 * t + Math.sin(t * Math.PI * 2 + seed) * 22; }
     for (let g = 0; g < 30 && height(x, z) < 1.4; g++) { x *= 0.9; z *= 0.9; }
     stops.push(new T.Vector3(x, Math.max(height(x, z), 0.6), z));
+  }
+  // a little village at every stop: whitewashed or stone houses with dark roofs, and a church tower
+  { const wallG = new T.BoxGeometry(1.5, 1.2, 2.2); wallG.translate(0, 0.6, 0);
+    const rs = new T.Shape(); rs.moveTo(-0.9, 0); rs.lineTo(0.9, 0); rs.lineTo(0, 0.9); rs.lineTo(-0.9, 0);
+    const roofG = new T.ExtrudeGeometry(rs, { depth: 2.5, bevelEnabled: false }); roofG.translate(0, 1.2, -1.25);
+    const towerG = new T.BoxGeometry(1.2, 3.6, 1.2); towerG.translate(0, 1.8, 0); const spireG = new T.ConeGeometry(0.95, 2.2, 4); spireG.rotateY(Math.PI / 4); spireG.translate(0, 4.7, 0);
+    const wallM = new T.MeshStandardMaterial({ color: '#ffffff', roughness: 0.9 }), roofM = new T.MeshStandardMaterial({ color: '#3d434b', roughness: 0.85 });
+    const per = 7, n = stops.length * per, walls = new T.InstancedMesh(wallG, wallM, n), roofs = new T.InstancedMesh(roofG, roofM, n);
+    const towers = new T.InstancedMesh(towerG, wallM, stops.length), spires = new T.InstancedMesh(spireG, roofM, stops.length);
+    const mx = new T.Matrix4(), q = new T.Quaternion(), sc = new T.Vector3(1, 1, 1), pv = new T.Vector3(), up = new T.Vector3(0, 1, 0), tint = new T.Color();
+    const tints = ['#ece7dc', '#e2dccf', '#b9ab90', '#a59a86', '#f2efe8'];
+    stops.forEach((st, si) => {
+      for (let k = 0; k < per; k++) {
+        const a = rh(si, k) * Math.PI * 2, r = 3.2 + rh(k, si + 7) * 4.5, x = st.x + Math.cos(a) * r, z = st.z + Math.sin(a) * r;
+        pv.set(x, Math.max(height(x, z), 0.5) - 0.1, z); q.setFromAxisAngle(up, a + (rh(si + 3, k) > 0.5 ? Math.PI / 2 : 0)); const s0 = 0.8 + rh(k + 9, si) * 0.5; sc.set(s0, s0, s0);
+        mx.compose(pv, q, sc); walls.setMatrixAt(si * per + k, mx); roofs.setMatrixAt(si * per + k, mx);
+        walls.setColorAt(si * per + k, tint.set(tints[Math.floor(rh(si + 5, k + 2) * tints.length)]));
+      }
+      const a = rh(si, 99) * Math.PI * 2, x = st.x + Math.cos(a) * 5.5, z = st.z + Math.sin(a) * 5.5;
+      pv.set(x, Math.max(height(x, z), 0.5) - 0.1, z); q.identity(); sc.set(1, 1, 1); mx.compose(pv, q, sc); towers.setMatrixAt(si, mx); spires.setMatrixAt(si, mx);
+      towers.setColorAt(si, tint.set('#cfc4ad'));
+    });
+    [walls, roofs, towers, spires].forEach((m) => { m.castShadow = true; m.receiveShadow = true; group.add(m); });
+    disp.push(wallG, roofG, towerG, spireG, wallM, roofM);
   }
   const base = new T.CatmullRomCurve3(stops, R.loop, 'centripetal');
   const samples = base.getSpacedPoints(600).map((p) => new T.Vector3(p.x, Math.max(height(p.x, p.z), 0.4) + 0.45, p.z));
