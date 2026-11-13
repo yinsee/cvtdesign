@@ -2029,15 +2029,15 @@ class Component extends DCLogic {
       insideMode: inside,
       canvasCls: 'absolute inset-0 h-full w-full select-none touch-pan-y ' + (inside ? 'cursor-grab active:cursor-grabbing' : ''),
       // the hero is never taller than 4:3: in portrait the 3D view is a 4:3 box with the words below it
-      mediaCls: inside ? 'absolute inset-0 -z-20' : 'relative -z-20 aspect-[4/3] w-full overflow-hidden landscape:absolute landscape:inset-0 landscape:aspect-auto',
+      mediaCls: inside ? 'absolute inset-0 -z-20' : 'relative -z-20 aspect-[4/3] w-full overflow-hidden landscape:absolute landscape:inset-0 landscape:aspect-auto portrait:order-2',
       title: this.props.title || spec.name,
       eyebrow: this.props.eyebrow || '',
       intro: this.props.intro || '',
       sectionRef: this.sectionRef,
-      heroCls: inside ? 'fixed inset-0 z-[100] isolate h-full w-full overflow-hidden bg-plum-deep' : 'relative isolate overflow-hidden bg-plum-deep',
+      heroCls: inside ? 'fixed inset-0 z-[100] isolate h-full w-full overflow-hidden bg-plum-deep' : 'relative isolate overflow-hidden bg-plum-deep portrait:flex portrait:flex-col',
       innerCls: inside
         ? 'pointer-events-none mx-auto flex h-full max-w-[1400px] flex-col justify-end px-5 pb-6 pt-24 md:px-10 md:pb-10'
-        : 'pointer-events-none mx-auto flex max-w-[1400px] flex-col justify-start px-5 pb-10 pt-6 md:px-10 landscape:min-h-[min(620px,75vw)] landscape:pt-8 lg:landscape:min-h-[min(760px,75vw)] lg:landscape:pb-16 lg:landscape:pt-12',
+        : 'pointer-events-none mx-auto flex max-w-[1400px] flex-col justify-start px-5 pb-10 pt-6 md:px-10 landscape:min-h-[min(620px,75vw)] landscape:pt-8 lg:landscape:min-h-[min(760px,75vw)] lg:landscape:pb-16 lg:landscape:pt-12 portrait:contents',
       // look inside fills the browser window (no browser full-screen) and freezes the page behind it
       enterInside: () => { this.lockScroll(); this.setState({ view: 'camp' }); },
       exitInside: () => { this.unlockScroll(); this.setState({ view: 'drive' }); },

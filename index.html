@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&amp;family=Lato:wght@400;700;900&amp;family=Lora:ital,wght@0,400;0,600;1,400&amp;display=swap">
-<link rel="stylesheet" href="assets/site.css?v=6">
-<script defer src="js/site.js?v=17"></script>
+<link rel="stylesheet" href="assets/site.css?v=8">
+<script defer src="js/site.js?v=19"></script>
 <script defer src="js/alpine.min.js"></script>
 <style>body{margin:0}[x-cloak]{display:none}</style>
 </head>
@@ -68,22 +68,25 @@
 
 <main>
 <!-- HERO -->
-<section aria-labelledby="page-h" class="relative isolate overflow-hidden bg-plum-deep">
-  <div class="relative -z-20 aspect-[4/3] w-full overflow-hidden landscape:absolute landscape:inset-0 landscape:aspect-auto">
+<section aria-labelledby="page-h" class="relative isolate overflow-hidden bg-plum-deep portrait:flex portrait:flex-col">
+  <div class="relative -z-20 aspect-[4/3] w-full overflow-hidden landscape:absolute landscape:inset-0 landscape:aspect-auto portrait:order-2">
     <video x-init="(V.heroRef)($el)" class="absolute inset-0 h-full w-full object-cover" src="assets/hero-loop.mp4" poster="assets/hero-poster.jpg" autoplay="" muted="" loop="" playsinline="" aria-hidden="true"></video>
     <div class="scrim-b absolute inset-0 hidden landscape:block"></div>
+    <div class="pointer-events-none absolute inset-x-0 top-0 h-1/4 bg-gradient-to-b from-plum-deep to-transparent landscape:hidden"></div>
+    <button type="button" @click="(V.toggleVideo)($event)" :aria-label="V.videoLabel" class="pointer-events-auto absolute right-4 top-4 z-10 inline-flex h-12 w-12 items-center justify-center rounded-full bg-plum-deep/55 text-white backdrop-blur hover:bg-plum-deep/80 md:right-6 md:top-6">
+      <template x-if="V.playing"><span style="display:contents"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"></rect><rect x="14" y="5" width="4" height="14" rx="1"></rect></svg></span></template>
+      <template x-if="V.paused"><span style="display:contents"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"></path></svg></span></template>
+    </button>
     <div class="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-plum-deep to-transparent landscape:hidden"></div>
   </div>
-  <div class="scrim-l absolute inset-0 -z-10 hidden lg:landscape:block"></div>
-  <div class="mx-auto flex max-w-[1400px] flex-col justify-end px-5 pb-10 pt-6 md:px-10 landscape:min-h-[min(580px,75vw)] landscape:pb-12 landscape:pt-32 lg:landscape:min-h-[min(720px,75vw)] lg:landscape:pb-20">
+  <div class="scrim-l pointer-events-none absolute inset-0 -z-10 hidden landscape:block"></div>
+  <div class="mx-auto flex max-w-[1400px] flex-col justify-end px-5 pb-10 pt-6 md:px-10 landscape:min-h-[min(580px,75vw)] landscape:pb-12 landscape:pt-32 lg:landscape:min-h-[min(720px,75vw)] lg:landscape:pb-20 portrait:contents pointer-events-none">
+    <div class="pointer-events-auto flex flex-col portrait:order-1 portrait:px-5 portrait:pb-5 portrait:pt-6">
     <p class="m-0 inline-flex w-fit items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-[15px] font-bold text-white backdrop-blur"><span class="h-2 w-2 rounded-full bg-brand"></span>Scotland · Wales · England · Ireland · Europe</p>
     <h1 id="page-h" class="m-0 mt-4 max-w-[13ch] font-display text-[52px] font-extrabold leading-[0.92] tracking-[-0.035em] text-white sm:text-[76px] lg:text-[104px]">Take the long way round.</h1>
     <p class="m-0 mt-5 max-w-[38rem] text-[20px] leading-relaxed text-white/90 lg:text-[22px]">Fully self-contained campervans from Cambridge, with free pick-up from Heathrow or Stansted on long hires. Fly in, and the open roads of Britain and Europe are yours.</p>
-    <div class="mt-8 flex flex-col gap-3 sm:flex-row"><a href="campervans.html" class="inline-flex min-h-[58px] items-center justify-center rounded-full bg-brand px-8 text-[18px] font-bold text-white hover:bg-brand-dark">Find your campervan</a><a href="tel:08006889668" class="inline-flex min-h-[58px] items-center justify-center rounded-full border-2 border-white px-8 text-[18px] font-bold text-white hover:bg-white hover:text-plum">Call 0800 688 9668</a></div>
-    <button type="button" @click="(V.toggleVideo)($event)" :aria-label="V.videoLabel" class="mt-6 inline-flex min-h-[44px] w-fit items-center gap-2 rounded-full bg-white/15 px-4 text-[15px] font-bold text-white backdrop-blur hover:bg-white/25">
-      <template x-if="V.playing"><span style="display:contents"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"></rect><rect x="14" y="5" width="4" height="14" rx="1"></rect></svg>Pause film</span></template>
-      <template x-if="V.paused"><span style="display:contents"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"></path></svg>Play film</span></template>
-    </button>
+    </div>
+    <div class="pointer-events-auto portrait:order-3 portrait:px-5 portrait:pb-10"><div class="mt-8 flex flex-col gap-3 sm:flex-row"><a href="campervans.html" class="inline-flex min-h-[58px] items-center justify-center rounded-full bg-brand px-8 text-[18px] font-bold text-white hover:bg-brand-dark">Find your campervan</a><a href="tel:08006889668" class="inline-flex min-h-[58px] items-center justify-center rounded-full border-2 border-white px-8 text-[18px] font-bold text-white hover:bg-white hover:text-plum">Call 0800 688 9668</a></div></div>
   </div>
 </section>
 <!-- /HERO -->
