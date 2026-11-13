@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CampervanTours</title>
+<meta name="description" content="Self-contained campervan hire from Cambridge for touring the UK and Europe.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&amp;family=Lato:wght@400;700;900&amp;display=swap">
+<link rel="stylesheet" href="assets/site.css">
+<script defer src="js/site.js"></script>
+<script defer src="js/alpine.min.js"></script>
+<style>body{margin:0}[x-cloak]{display:none}</style>
+</head>
+<body>
+<div x-data="dc('Main', {})">
+
+<div class="min-h-screen bg-white font-sans text-[18px] leading-relaxed text-ink antialiased" style="font-family: Lato, system-ui, sans-serif; color: #1C1424">
+<div x-data="dc('Header', {'active': 'home'})" style="display:contents">
+
+<header class="sticky top-0 z-50 w-full font-sans" style="font-family: Lato, system-ui, sans-serif; color: #1C1424">
+  <div class="bg-plum-deep text-white/80">
+    <div class="mx-auto flex max-w-[1400px] items-center justify-between gap-4 px-5 py-2 text-[15px] md:px-10">
+      <p class="m-0 hidden sm:block">Campervan hire from Cambridge · Touring the UK &amp; Europe</p>
+      <p class="m-0 sm:hidden">Open Mon–Sat</p>
+      <a href="tel:08006889668" class="flex min-h-[32px] items-center gap-2 font-bold text-white hover:text-brand-rose">
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"></path></svg>
+        Free call 0800 688 9668
+      </a>
+    </div>
+  </div>
+  <div class="border-b border-plum/10 bg-white/95 backdrop-blur">
+    <div class="mx-auto flex max-w-[1400px] items-center justify-between gap-4 px-5 py-3 md:px-10">
+      <a href="index.html" aria-label="CampervanTours home" class="flex min-h-[48px] items-center font-sans text-[22px] font-black tracking-tight md:text-[26px]">
+        <span class="text-plum">CAMPERVAN</span><span class="text-brand">TOURS</span>
+      </a>
+      <nav aria-label="Main" class="hidden items-center gap-1 lg:flex">
+        <template x-for="l in V.links">
+          <a :href="l.href" :aria-current="l.current" :class="l.cls" x-text="l.label"></a>
+        </template>
+      </nav>
+      <div class="flex items-center gap-2">
+        <a href="campervans.html" class="hidden min-h-[48px] items-center rounded-full bg-brand px-6 text-[17px] font-bold text-white hover:bg-brand-dark sm:inline-flex">Book a campervan</a>
+        <button type="button" aria-label="Menu" :aria-expanded="V.expanded" @click="(V.toggle)($event)" class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-plum text-white lg:hidden">
+          <template x-if="V.open"><span style="display:contents">
+            <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+          </span></template>
+          <template x-if="V.closed"><span style="display:contents">
+            <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
+          </span></template>
+        </button>
+      </div>
+    </div>
+    <template x-if="V.open"><span style="display:contents">
+      <nav aria-label="Mobile" class="border-t border-plum/10 bg-white px-5 pb-6 lg:hidden">
+        <ul class="m-0 list-none divide-y divide-plum/10 p-0">
+          <template x-for="l in V.links">
+            <li><a :href="l.href" class="flex min-h-[60px] items-center justify-between font-display text-[24px] font-bold text-plum"><span x-text="l.label"></span><span aria-hidden="true" class="text-brand">→</span></a></li>
+          </template>
+        </ul>
+        <a href="campervans.html" class="mt-4 flex min-h-[56px] items-center justify-center rounded-full bg-brand text-[18px] font-bold text-white">Book a campervan</a>
+      </nav>
+    </span></template>
+  </div>
+</header>
+</div>
+
+<main>
+<!-- HERO -->
+<section aria-labelledby="page-h" class="relative isolate overflow-hidden bg-plum-deep">
+  <video x-init="(V.heroRef)($el)" class="absolute inset-0 -z-20 h-full w-full object-cover" src="assets/hero-loop.mp4" poster="assets/hero-poster.jpg" autoplay="" muted="" loop="" playsinline="" aria-hidden="true"></video>
+  <div class="scrim-b absolute inset-0 -z-10"></div>
+  <div class="scrim-l absolute inset-0 -z-10 hidden lg:block"></div>
+  <div class="mx-auto flex min-h-[580px] max-w-[1400px] flex-col justify-end px-5 pb-12 pt-32 md:px-10 lg:min-h-[720px] lg:pb-20">
+    <p class="m-0 inline-flex w-fit items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-[15px] font-bold text-white backdrop-blur"><span class="h-2 w-2 rounded-full bg-brand"></span>Scotland · Wales · England · Ireland · Europe</p>
+    <h1 id="page-h" class="m-0 mt-4 max-w-[13ch] font-display text-[52px] font-extrabold leading-[0.92] tracking-[-0.035em] text-white sm:text-[76px] lg:text-[104px]">Take the long way round.</h1>
+    <p class="m-0 mt-5 max-w-[38rem] text-[20px] leading-relaxed text-white/90 lg:text-[22px]">Fully self-contained campervans from Cambridge, with free pick-up from Heathrow or Stansted on long hires. Fly in, and the open roads of Britain and Europe are yours.</p>
+    <div class="mt-8 flex flex-col gap-3 sm:flex-row"><a href="campervans.html" class="inline-flex min-h-[58px] items-center justify-center rounded-full bg-brand px-8 text-[18px] font-bold text-white hover:bg-brand-dark">Find your campervan</a><a href="tel:08006889668" class="inline-flex min-h-[58px] items-center justify-center rounded-full border-2 border-white px-8 text-[18px] font-bold text-white hover:bg-white hover:text-plum">Call 0800 688 9668</a></div>
+    <button type="button" @click="(V.toggleVideo)($event)" :aria-label="V.videoLabel" class="mt-6 inline-flex min-h-[44px] w-fit items-center gap-2 rounded-full bg-white/15 px-4 text-[15px] font-bold text-white backdrop-blur hover:bg-white/25">
+      <template x-if="V.playing"><span style="display:contents"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"></rect><rect x="14" y="5" width="4" height="14" rx="1"></rect></svg>Pause film</span></template>
+      <template x-if="V.paused"><span style="display:contents"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"></path></svg>Play film</span></template>
+    </button>
+  </div>
+</section>
+<!-- /HERO -->
+
+<!-- Booking bar, overlapping the hero -->
+<section aria-label="Check availability" class="relative z-10 mx-auto -mt-8 max-w-[1400px] px-5 md:px-10 lg:-mt-12">
+    <form aria-label="Check availability" class="grid gap-3 rounded-[28px] bg-white p-4 shadow-2xl ring-1 ring-plum/10 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto] lg:items-end lg:p-5">
+      <div class="flex flex-col gap-1.5"><label for="h-from" class="px-1 text-[15px] font-bold text-plum">Pick-up date</label><input id="h-from" type="date" class="min-h-[56px] rounded-2xl border-2 border-plum/15 bg-plum-tint px-4 text-[18px] text-ink focus:border-brand focus:outline-none"></div>
+      <div class="flex flex-col gap-1.5"><label for="h-to" class="px-1 text-[15px] font-bold text-plum">Return date</label><input id="h-to" type="date" class="min-h-[56px] rounded-2xl border-2 border-plum/15 bg-plum-tint px-4 text-[18px] text-ink focus:border-brand focus:outline-none"></div>
+      <div class="flex flex-col gap-1.5 sm:col-span-2 lg:col-span-1"><label for="h-type" class="px-1 text-[15px] font-bold text-plum">Campervan</label><select id="h-type" class="min-h-[56px] rounded-2xl border-2 border-plum/15 bg-plum-tint px-4 text-[18px] text-ink focus:border-brand focus:outline-none"><option>Any campervan</option><option>2 berth</option><option>4 berth</option><option>Automatic only</option><option>With bathroom</option></select></div>
+      <a href="campervans.html" class="inline-flex min-h-[56px] items-center justify-center rounded-2xl bg-brand px-8 text-[18px] font-bold text-white hover:bg-brand-dark sm:col-span-2 lg:col-span-1">Check availability</a>
+    </form>
+</section>
+
+<!-- Destination mosaic -->
+<section aria-labelledby="wake-h" class="mx-auto max-w-[1400px] px-5 py-20 md:px-10 lg:py-28">
+  <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+    <h2 id="wake-h" class="m-0 max-w-[14ch] font-display text-[44px] font-extrabold leading-[0.95] tracking-[-0.03em] text-plum lg:text-[80px]">Where will you wake up tomorrow?</h2>
+    <a href="routes.html" class="inline-flex min-h-[48px] w-fit items-center gap-2 text-[18px] font-bold text-brand underline decoration-2 underline-offset-4 hover:text-brand-dark">All routes →</a>
+  </div>
+  <div class="mt-10 grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4 lg:grid-rows-[300px_300px]">
+    <a href="routes.html" class="group relative col-span-2 row-span-2 block aspect-[4/3] overflow-hidden rounded-[28px] lg:aspect-auto">
+      <img src="assets/hebrides.jpg" alt="White sand and marram grass on a Hebridean beach" class="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105">
+      <div class="scrim-b absolute inset-0"></div>
+      <div class="absolute bottom-0 left-0 p-6 lg:p-8"><p class="m-0 text-[15px] font-bold uppercase tracking-[0.14em] text-white/85">Scotland</p><p class="m-0 font-display text-[32px] font-extrabold leading-tight text-white lg:text-[44px]">Hebridean island hopping</p></div>
+    </a>
+    <a href="routes.html" class="group relative block aspect-square overflow-hidden rounded-[24px] lg:aspect-auto">
+      <img src="assets/lakes.jpg" alt="A wooden jetty on Windermere at sunset" class="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105">
+      <div class="scrim-b absolute inset-0"></div>
+      <p class="absolute bottom-0 left-0 m-0 p-4 font-display text-[20px] font-bold leading-tight text-white lg:p-5 lg:text-[24px]">Lake District</p>
+    </a>
+    <a href="routes.html" class="group relative block aspect-square overflow-hidden rounded-[24px] lg:aspect-auto">
+      <img src="assets/cotswolds.jpg" alt="Honey-stone cottages beside a stream in the Cotswolds" class="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105">
+      <div class="scrim-b absolute inset-0"></div>
+      <p class="absolute bottom-0 left-0 m-0 p-4 font-display text-[20px] font-bold leading-tight text-white lg:p-5 lg:text-[24px]">The Cotswolds</p>
+    </a>
+    <a href="routes.html" class="group relative block aspect-square overflow-hidden rounded-[24px] lg:aspect-auto">
+      <img src="assets/durdle.jpg" alt="Durdle Door rock arch on the Jurassic Coast" class="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105">
+      <div class="scrim-b absolute inset-0"></div>
+      <p class="absolute bottom-0 left-0 m-0 p-4 font-display text-[20px] font-bold leading-tight text-white lg:p-5 lg:text-[24px]">Jurassic Coast</p>
+    </a>
+    <a href="europe.html" class="group relative block aspect-square overflow-hidden rounded-[24px] lg:aspect-auto">
+      <img src="assets/bruges.jpg" alt="Lit gabled houses on Bruges market square at dusk" class="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105">
+      <div class="scrim-b absolute inset-0"></div>
+      <p class="absolute bottom-0 left-0 m-0 p-4 font-display text-[20px] font-bold leading-tight text-white lg:p-5 lg:text-[24px]">Bruges, Belgium</p>
+    </a>
+  </div>
+</section>
+
+<!-- Featured campervans -->
+<section aria-labelledby="vans-h" class="bg-plum-tint py-20 lg:py-28">
+  <div class="mx-auto grid max-w-[1400px] gap-10 px-5 md:px-10 lg:grid-cols-12 lg:items-center">
+    <div class="lg:col-span-5">
+      <p class="m-0 text-[15px] font-bold uppercase tracking-[0.16em] text-brand">The campervans</p>
+      <h2 id="vans-h" class="m-0 mt-3 font-display text-[44px] font-extrabold leading-[0.95] tracking-[-0.03em] text-plum lg:text-[72px]">Your home, wherever you park it.</h2>
+      <p class="m-0 mt-5 max-w-[34rem] text-[19px] text-ink/75">Fully self-contained vans, from nimble pop-tops to spacious MAN conversions with a proper bathroom. Manual or automatic. All are deep-cleaned before every hire.</p>
+      <a href="campervans.html" class="mt-8 inline-flex min-h-[56px] items-center rounded-full bg-plum px-8 text-[18px] font-bold text-white hover:bg-plum-mid">See all campervans</a>
+    </div>
+    <div class="relative lg:col-span-7">
+      <img src="assets/man-cab-golden.jpg" alt="The cab of a MAN campervan looking out over fields at golden hour" class="aspect-[4/3] w-full rounded-[32px] object-cover lg:aspect-[16/11]">
+      <a href="van.html" class="absolute -bottom-8 left-4 right-4 flex items-center gap-4 rounded-[24px] bg-white p-4 shadow-xl sm:left-auto sm:right-6 sm:w-[380px]">
+        <img src="assets/v-man-lwb-auto.jpg" alt="" class="h-20 w-28 shrink-0 rounded-xl object-cover">
+        <span class="flex flex-col"><span class="text-[14px] font-bold uppercase tracking-[0.12em] text-brand">Most requested</span><span class="font-display text-[20px] font-bold leading-tight text-plum">MAN TGE Luxury, 2 berth</span><span class="text-[15px] text-ink/70">Automatic · Bathroom · North–south bed</span></span>
+      </a>
+    </div>
+  </div>
+  <div class="no-scrollbar mx-auto mt-20 flex max-w-[1400px] snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 md:px-10 lg:grid lg:grid-cols-4 lg:overflow-visible">
+    <template x-for="v in V.featured">
+      <a href="van.html" class="group flex w-[78%] shrink-0 snap-start flex-col overflow-hidden rounded-[24px] bg-white shadow-sm ring-1 ring-plum/10 hover:ring-2 hover:ring-brand sm:w-[46%] lg:w-auto">
+        <div class="aspect-[3/2] overflow-hidden"><img :src="v.img" :alt="v.alt" class="h-full w-full object-cover transition duration-700 group-hover:scale-105"></div>
+        <div class="flex flex-1 flex-col gap-1 p-5">
+          <p class="m-0 text-[14px] font-bold uppercase tracking-[0.12em] text-brand" x-text="v.tag"></p>
+          <h3 class="m-0 font-display text-[22px] font-bold leading-tight text-plum" x-text="v.name"></h3>
+          <p class="m-0 text-[16px] text-ink/70" x-text="v.spec"></p>
+        </div>
+      </a>
+    </template>
+  </div>
+</section>
+
+<!-- Inside the vans: video band -->
+<section aria-labelledby="inside-h" class="relative isolate overflow-hidden bg-plum-deep">
+  <video x-init="(V.insideRef)($el)" class="absolute inset-0 -z-20 h-full w-full object-cover" src="assets/inside-loop.mp4" poster="assets/inside-poster.jpg" autoplay="" muted="" loop="" playsinline="" aria-hidden="true"></video>
+  <div class="scrim-l absolute inset-0 -z-10"></div>
+  <div class="absolute inset-0 -z-10 bg-plum-deep/30 lg:hidden"></div>
+  <div class="mx-auto flex min-h-[560px] max-w-[1400px] flex-col justify-center px-5 py-20 md:px-10 lg:min-h-[680px]">
+    <p class="m-0 text-[15px] font-bold uppercase tracking-[0.16em] text-brand-rose">Step inside</p>
+    <h2 id="inside-h" class="m-0 mt-3 max-w-[14ch] font-display text-[44px] font-extrabold leading-[0.95] tracking-[-0.03em] text-white lg:text-[80px]">Proper bed. Proper kitchen. Proper bathroom.</h2>
+    <ul class="m-0 mt-8 grid max-w-[40rem] list-none gap-3 p-0 text-[18px] text-white/90 sm:grid-cols-2">
+      <li class="flex gap-3"><span class="text-brand-rose">●</span>Fully self-contained</li>
+      <li class="flex gap-3"><span class="text-brand-rose">●</span>Deep-cleaned every hire</li>
+      <li class="flex gap-3"><span class="text-brand-rose">●</span>Bedding &amp; towels on long hires</li>
+      <li class="flex gap-3"><span class="text-brand-rose">●</span>Manual or automatic</li>
+    </ul>
+  </div>
+</section>
+
+<!-- Flying in -->
+<section aria-labelledby="fly-h" class="mx-auto grid max-w-[1400px] gap-10 px-5 py-20 md:px-10 lg:grid-cols-2 lg:items-center lg:gap-16 lg:py-28">
+  <div class="relative">
+    <img src="assets/beach-trip.jpg" alt="A smiling traveller looking out of a campervan window at a beach" class="aspect-[4/5] w-full rounded-[32px] object-cover sm:aspect-[4/3] lg:aspect-[4/5]">
+    <div class="absolute -right-2 top-6 rotate-3 rounded-2xl bg-brand px-5 py-4 text-white shadow-xl sm:right-6"><p class="m-0 font-display text-[30px] font-extrabold leading-none">30+ days</p><p class="m-0 text-[15px] font-bold">Overseas Visitors Package</p></div>
+  </div>
+  <div>
+    <p class="m-0 text-[15px] font-bold uppercase tracking-[0.16em] text-brand">From Australia, New Zealand &amp; Europe</p>
+    <h2 id="fly-h" class="m-0 mt-3 font-display text-[44px] font-extrabold leading-[0.95] tracking-[-0.03em] text-plum lg:text-[72px]">Fly in. We'll take it from here.</h2>
+    <ol class="m-0 mt-8 flex list-none flex-col gap-5 p-0">
+      <li class="flex gap-4"><span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-plum font-display text-[18px] font-bold text-white">1</span><span><b class="block text-[19px] text-plum">Free airport transfer</b><span class="text-[17px] text-ink/75">From Heathrow or Stansted to our Cambridge depot.</span></span></li>
+      <li class="flex gap-4"><span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-plum font-display text-[18px] font-bold text-white">2</span><span><b class="block text-[19px] text-plum">Bed made, towels out</b><span class="text-[17px] text-ink/75">Bedding and towels for two are included.</span></span></li>
+      <li class="flex gap-4"><span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-plum font-display text-[18px] font-bold text-white">3</span><span><b class="block text-[19px] text-plum">Luggage kept safe</b><span class="text-[17px] text-ink/75">Leave the big suitcases with us and travel light.</span></span></li>
+    </ol>
+    <a href="overseas-visitors.html" class="mt-9 inline-flex min-h-[56px] items-center rounded-full bg-brand px-8 text-[18px] font-bold text-white hover:bg-brand-dark">Plan a trip from overseas</a>
+  </div>
+</section>
+
+<!-- Europe: full-bleed -->
+<section aria-labelledby="eu-h" class="relative isolate overflow-hidden">
+  <img src="assets/bruges.jpg" alt="Bruges market square at dusk" class="absolute inset-0 -z-20 h-full w-full object-cover">
+  <div class="scrim-l absolute inset-0 -z-10"></div>
+  <div class="absolute inset-0 -z-10 bg-plum-deep/40 lg:bg-transparent"></div>
+  <div class="mx-auto flex min-h-[600px] max-w-[1400px] flex-col justify-center px-5 py-20 md:px-10 lg:min-h-[720px]">
+    <p class="m-0 text-[15px] font-bold uppercase tracking-[0.16em] text-brand-rose">Into Europe</p>
+    <h2 id="eu-h" class="m-0 mt-3 max-w-[13ch] font-display text-[44px] font-extrabold leading-[0.95] tracking-[-0.03em] text-white lg:text-[84px]">Bruges is closer to Cambridge than Edinburgh is.</h2>
+    <p class="m-0 mt-6 max-w-[34rem] text-[19px] text-white/90">Cross by ferry or tunnel and the Continent opens up: medieval Flanders, canal towns, the Great War battlefields, and further if you've time.</p>
+    <a href="europe.html" class="mt-8 inline-flex min-h-[56px] w-fit items-center rounded-full bg-white px-8 text-[18px] font-bold text-plum hover:bg-brand hover:text-white">Plan a European trip</a>
+  </div>
+</section>
+
+<!-- Routes carousel -->
+<section aria-labelledby="routes-h" class="py-20 lg:py-28">
+  <div class="mx-auto flex max-w-[1400px] flex-col gap-4 px-5 md:flex-row md:items-end md:justify-between md:px-10">
+    <div>
+      <p class="m-0 text-[15px] font-bold uppercase tracking-[0.16em] text-brand">Free with every hire</p>
+      <h2 id="routes-h" class="m-0 mt-3 max-w-[16ch] font-display text-[44px] font-extrabold leading-[0.95] tracking-[-0.03em] text-plum lg:text-[72px]">Routes written by people who've driven them.</h2>
+    </div>
+    <a href="routes.html" class="inline-flex min-h-[48px] w-fit items-center text-[18px] font-bold text-brand underline decoration-2 underline-offset-4 hover:text-brand-dark">Browse every route →</a>
+  </div>
+  <div class="no-scrollbar mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 md:px-10 lg:gap-5">
+    <template x-for="r in V.routes">
+      <a href="routes.html" class="group relative block aspect-[3/4] w-[72%] shrink-0 snap-start overflow-hidden rounded-[28px] sm:w-[40%] lg:w-[23%]">
+        <img :src="r.img" :alt="r.alt" class="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105">
+        <div class="scrim-b absolute inset-0"></div>
+        <span class="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-[14px] font-bold text-plum" x-text="r.region"></span>
+        <div class="absolute bottom-0 left-0 right-0 p-5"><p class="m-0 font-display text-[26px] font-extrabold leading-tight text-white" x-text="r.name"></p><p class="m-0 mt-1 text-[16px] text-white/85" x-text="r.line"></p></div>
+      </a>
+    </template>
+  </div>
+</section>
+
+<!-- Guest words: placeholders for real reviews -->
+<section aria-labelledby="guests-h" class="mx-auto max-w-[1400px] px-5 pb-20 md:px-10 lg:pb-28">
+  <h2 id="guests-h" class="sr-only">What our guests say</h2>
+  <figure class="m-0 grid gap-8 rounded-[32px] bg-plum p-8 text-white md:p-14 lg:grid-cols-12 lg:items-center">
+    <blockquote class="m-0 font-display text-[28px] font-bold leading-snug lg:col-span-9 lg:text-[40px]">“[A real guest review goes here — ideally a couple from Australia or New Zealand describing their month on the road.]”</blockquote>
+    <figcaption class="text-[17px] text-white/80 lg:col-span-3">[Guest name]<br>[Home town] · [Route, month]<br><span class="text-brand-rose">[Review source, e.g. Google]</span></figcaption>
+  </figure>
+</section>
+</main>
+
+<div x-data="dc('Footer', {})" style="display:contents">
+
+<div class="font-sans" style="font-family: Lato, system-ui, sans-serif; color: #1C1424">
+
+<!-- Closing call to action over a full-bleed photo -->
+<section aria-labelledby="cta-h" class="relative isolate overflow-hidden">
+  <img src="assets/lakes.jpg" alt="" class="absolute inset-0 -z-10 h-full w-full object-cover">
+  <div class="absolute inset-0 -z-10 bg-plum-deep/60"></div>
+  <div class="mx-auto flex max-w-[1400px] flex-col items-start gap-6 px-5 py-24 md:px-10 lg:py-36">
+    <p class="m-0 rounded-full bg-white/15 px-4 py-1.5 text-[15px] font-bold uppercase tracking-[0.14em] text-white backdrop-blur">Your dates, held for £200</p>
+    <h2 id="cta-h" class="m-0 max-w-[16ch] font-display text-[48px] font-extrabold leading-[0.95] tracking-[-0.03em] text-white sm:text-[64px] lg:text-[96px]">Somewhere, a sunset has your name on it.</h2>
+    <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+      <a href="campervans.html" class="inline-flex min-h-[60px] items-center justify-center rounded-full bg-brand px-9 text-[19px] font-bold text-white hover:bg-brand-dark">Choose your campervan</a>
+      <a href="tel:08006889668" class="inline-flex min-h-[60px] items-center justify-center rounded-full border-2 border-white px-9 text-[19px] font-bold text-white hover:bg-white hover:text-plum">Call 0800 688 9668</a>
+    </div>
+  </div>
+</section>
+
+<footer class="bg-plum-deep pb-24 text-white/75 md:pb-0">
+  <div class="mx-auto grid max-w-[1400px] gap-10 px-5 py-16 sm:grid-cols-2 md:px-10 lg:grid-cols-12">
+    <div class="lg:col-span-4">
+      <p class="m-0 text-[26px] font-black tracking-tight"><span class="text-white">CAMPERVAN</span><span class="text-brand-rose">TOURS</span></p>
+      <p class="m-0 mt-4 max-w-[32ch] text-[17px] leading-relaxed">Self-contained campervan hire from Cambridge, for unhurried journeys across the UK and Europe.</p>
+      <p class="m-0 mt-6 text-[17px] leading-relaxed"><b class="text-white">Head office &amp; depot</b><br>Unit C, Ronald Rolph Court<br>Cambridge CB5 8PX</p>
+    </div>
+    <nav aria-label="Footer: hire" class="lg:col-span-2">
+      <p class="m-0 text-[14px] font-bold uppercase tracking-[0.16em] text-brand-rose">Hire</p>
+      <ul class="m-0 mt-4 flex list-none flex-col gap-1 p-0 text-[17px]">
+        <li><a href="campervans.html" class="inline-flex min-h-[40px] items-center hover:text-white">Campervans</a></li>
+        <li><a href="prices.html" class="inline-flex min-h-[40px] items-center hover:text-white">Prices</a></li>
+        <li><a href="prices.html" class="inline-flex min-h-[40px] items-center hover:text-white">Special offers</a></li>
+        <li><a href="prices.html" class="inline-flex min-h-[40px] items-center hover:text-white">Inclusions &amp; extras</a></li>
+      </ul>
+    </nav>
+    <nav aria-label="Footer: travel" class="lg:col-span-2">
+      <p class="m-0 text-[14px] font-bold uppercase tracking-[0.16em] text-brand-rose">Travel</p>
+      <ul class="m-0 mt-4 flex list-none flex-col gap-1 p-0 text-[17px]">
+        <li><a href="routes.html" class="inline-flex min-h-[40px] items-center hover:text-white">Self-drive routes</a></li>
+        <li><a href="europe.html" class="inline-flex min-h-[40px] items-center hover:text-white">Into Europe</a></li>
+        <li><a href="overseas-visitors.html" class="inline-flex min-h-[40px] items-center hover:text-white">Flying in</a></li>
+        <li><a href="routes.html" class="inline-flex min-h-[40px] items-center hover:text-white">Where to stay</a></li>
+      </ul>
+    </nav>
+    <div class="sm:col-span-2 lg:col-span-4">
+      <p class="m-0 text-[14px] font-bold uppercase tracking-[0.16em] text-brand-rose">Talk to us</p>
+      <a href="tel:08006889668" class="mt-3 block font-display text-[34px] font-extrabold text-white hover:text-brand-rose">0800 688 9668</a>
+      <p class="m-0 mt-1 text-[16px]">Monday to Saturday · Closed Sundays</p>
+      <ul class="m-0 mt-6 flex list-none flex-wrap gap-2 p-0 text-[14px] font-bold text-white">
+        <li class="rounded-lg border border-white/25 px-3 py-2">BVRLA</li>
+        <li class="rounded-lg border border-white/25 px-3 py-2">FSB member</li>
+        <li class="rounded-lg border border-white/25 px-3 py-2">Camping &amp; Caravanning Club</li>
+      </ul>
+    </div>
+  </div>
+  <div class="border-t border-white/10">
+    <div class="mx-auto flex max-w-[1400px] flex-col gap-2 px-5 py-6 text-[14px] md:flex-row md:justify-between md:px-10">
+      <p class="m-0">© 2014–2026 CampervanTours · Company reg. [number] · VAT [number]</p>
+      <p class="m-0"><a href="contact.html" class="underline hover:text-white">Terms</a> · <a href="contact.html" class="underline hover:text-white">Privacy</a></p>
+    </div>
+  </div>
+</footer>
+
+<!-- Phone-only action bar, always reachable -->
+<div class="fixed inset-x-0 bottom-0 z-50 grid grid-cols-2 gap-2 border-t border-plum/10 bg-white/95 p-3 backdrop-blur md:hidden">
+  <a href="tel:08006889668" class="inline-flex min-h-[54px] items-center justify-center gap-2 rounded-full border-2 border-plum text-[17px] font-bold text-plum">
+    <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"></path></svg>Call us
+  </a>
+  <a href="campervans.html" class="inline-flex min-h-[54px] items-center justify-center rounded-full bg-brand text-[17px] font-bold text-white">Book now</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>
