@@ -317,7 +317,7 @@ const VIEWS = [
   ['passenger', 'Passenger seat'],
   ['living', 'Living area'],
   ['bed', 'Lying in bed'],
-  ['camp', 'Outside at camp']
+  ['camp', 'Camping']
 ];
 const SKY = { top: '#4f79ad', horizon: '#f0d7b8', bottom: '#b9ad97', sun: [0.62, 0.32, -0.25] };
 const DUSK = { top: '#262a58', horizon: '#ff9560', bottom: '#3d2f33', fog: '#a8655a', sun: [-0.74, 0.07, -0.56], sunColor: '#ff8a4a', sunI: 1.5, hemiI: 0.26, exposure: 1.0 };
@@ -888,7 +888,7 @@ class Component extends DCLogic {
     super(props);
     const hero = props.hero === 'true' || props.hero === true;
     this.hero = hero;
-    this.state = { van: props.van || 'man-lwb-auto', view: hero ? 'drive' : 'outside', noGL: false };
+    this.state = { van: props.van || 'man-lwb-auto', view: hero ? 'drive' : 'camp', noGL: false };
     this.canvasRef = (el) => this.mount(el);
     this.sectionRef = (el) => { if (el) this.sectionEl = el; };
     this.v = null;
@@ -1108,10 +1108,10 @@ class Component extends DCLogic {
     v.renderer.toneMappingExposure = DAY.exposure + (DUSK.exposure - DAY.exposure) * ck;
     v.scene.fog.color.copy(v.cDayFog).lerp(v.cDuskFog, ck); v.scene.background.copy(v.scene.fog.color);
     v.scene.environment = (ck > 0.5 && v.envDusk) ? v.envDusk : WP.env;
-    WP.roadGroup.visible = ck < 0.5;
+    WP.roadGroup.visible = v.mode !== 'camp' || ck < 0.5;
     v.inner.forEach((l) => { l.intensity = 2.2 + 2.5 * ck; });
     if (v.camp) {
-      const c = v.camp; c.group.visible = ck > 0.02;
+      const c = v.camp; c.group.visible = v.mode === 'camp' && ck > 0.02;
       if (c.group.visible) {
         c.flames.forEach((f, i) => { f.scale.set(1 + 0.08 * Math.sin(t0 * 17 + i), 0.85 + 0.25 * Math.sin(t0 * (11 + i * 3)) + 0.1 * Math.sin(t0 * 29 + i), 1 + 0.08 * Math.cos(t0 * 15 + i)); f.rotation.y = t0 * (0.8 + i * 0.4); f.material.opacity = (0.65 + 0.12 * i) * Math.min(1, ck * 1.5); });
         c.fireLight.intensity = ck * (3.2 + 0.7 * Math.sin(t0 * 13) + 0.4 * Math.sin(t0 * 31));
@@ -1137,7 +1137,7 @@ class Component extends DCLogic {
     const viewLabel = (VIEWS.find((x) => x[0] === s.view) || VIEWS[0])[1];
     const spec = VAN_SPECS[s.van] || VAN_SPECS['man-lwb-auto'];
     const hero = this.hero, inside = hero && s.view !== 'drive';
-    const viewIds = hero ? ['driver', 'passenger', 'living', 'bed', 'camp'] : ['outside', 'driver', 'passenger', 'living', 'bed', 'camp'];
+    const viewIds = hero ? ['camp', 'driver', 'passenger', 'living', 'bed'] : ['camp', 'outside', 'driver', 'passenger', 'living', 'bed'];
     const hOn = 'min-h-[52px] shrink-0 rounded-full bg-brand px-5 text-[16px] font-bold text-white';
     const hOff = 'min-h-[52px] shrink-0 rounded-full bg-white/90 px-5 text-[16px] font-bold text-plum hover:bg-white';
     return {
@@ -1155,7 +1155,7 @@ class Component extends DCLogic {
         ? 'pointer-events-none mx-auto flex h-full max-w-[1400px] flex-col justify-end px-5 pb-6 pt-24 md:px-10 md:pb-10'
         : 'pointer-events-none mx-auto flex min-h-[580px] max-w-[1400px] flex-col justify-end px-5 pb-12 pt-32 md:px-10 lg:min-h-[720px] lg:pb-20',
       enterInside: () => {
-        this.setState({ view: 'driver' });
+        this.setState({ view: 'camp' });
         const el = this.sectionEl;
         try { if (el && el.requestFullscreen && !document.fullscreenElement) { const p = el.requestFullscreen(); if (p && p.catch) p.catch(() => {}); } } catch (e) {}
       },
@@ -1173,7 +1173,7 @@ class Component extends DCLogic {
       ariaLabel: '3D model of the ' + spec.name + ', ' + viewLabel.toLowerCase() + (s.view === 'camp' ? ', parked at a lochside campsite at sunset with a campfire, chairs and string lights' : ' view, on a Highland road beside a loch'),
       vanOptions: VAN_ORDER.map((id) => ({ id, name: VAN_SPECS[id].name })),
       pickVan: (e) => this.setState({ van: e.target.value }),
-      views: VIEWS.filter((x) => viewIds.includes(x[0])).map(([id, label]) => ({ label, pressed: s.view === id ? 'true' : 'false', cls: s.view === id ? (hero ? hOn : on) : (hero ? hOff : off), pick: () => this.setState({ view: id }) }))
+      views: viewIds.map((id) => VIEWS.find((x) => x[0] === id)).map(([id, label]) => ({ label, pressed: s.view === id ? 'true' : 'false', cls: s.view === id ? (hero ? hOn : on) : (hero ? hOff : off), pick: () => this.setState({ view: id }) }))
     };
   }
 }
