@@ -1244,7 +1244,7 @@ function buildArch(T, key, heightAt, MS) {
   } else if (key === 'forest') {
     // a log cabin in a clearing, with a lit porch
     const [cx, cz] = at(30, 15), p = site(cx, cz, 7, 9, 0.4, C.stone);
-    box(6.4, 3.2, 8, C.wood, 0, 0, 0, p); for (let i = 0; i < 6; i++) [-1, 1].forEach((s) => cyl(0.18, 0.18, 8.2, C.wood2, s * 3.25, 0.25 + i * 0.5, 0, p, 8).rotation.set(Math.PI / 2, 0, 0));
+    box(6.4, 3.2, 8, C.wood, 0, 0, 0, p); for (let i = 0; i < 6; i++) [-1, 1].forEach((s) => cyl(0.18, 0.18, 8.2, C.wood2, s * 3.25, 0.25 + i * 0.5 - 4.1, 0, p, 8).rotation.set(Math.PI / 2, 0, 0));
     roof(7.8, 2.8, 9.4, C.green, 0, 3.2, 0, p); box(0.9, 5.2, 0.9, C.stone, -1.6, 0, -3.6, p);
     windows(6.4, 8, 1, 1.0, p, 3.4); box(0.08, 2.0, 1.0, C.black, 3.23, 0, 1.6, p);
     box(1.6, 0.25, 4, C.wood2, 4, 0, 1.6, p); const pl = cyl(0.12, 0.12, 0.25, lampM, 3.6, 2.3, 1.6, p, 10); pl.userData.lamp = true;
@@ -1347,7 +1347,8 @@ async function buildWorld(T, renderer, E) {
       if (x < 0) h = fellsL ? cl01((ax - 16) / 25) * (4 + 28 * fbm(x * 0.008, z * 0.008, 4)) : Math.max(0, (ax - 28) / 60) * 7 * fbm(x * 0.012 + 3, z * 0.012, 4) * cl01((ax - 28) / 40);
       else { const edge = cl01((x - shoreOff(z) - 9) / 7), far = W0.x1 - 30; h = -0.9 * edge + cl01((x - far) / 30) * (1.2 + (fellsL ? 44 : 34) * fbm(x * 0.011, z * 0.011 + 7, 4) * Math.min(1, (x - far) / 90 + 0.25)); }
     }
-    if (xw > 0) h *= cl01((xw - 13) / 7);
+    // the camp side stays level well past the pitch and its patch; hills and shorelines start further out
+    if (xw > 0) h *= cl01((xw - 24) / 16);
     return h;
   };
   const SEG = PERF.low ? 110 : 150;
@@ -1448,7 +1449,7 @@ async function buildWorld(T, renderer, E) {
     // hedgerows along the field edges
     const hedgeG = new T.BoxGeometry(1.1, 1.1, 1); const hedgeM = new T.MeshStandardMaterial({ color: '#3d5a2a', roughness: 1 });
     const segs = []; for (let k = -4; k <= 4; k++) { const x = k * 45; if (Math.abs(x) < 12) continue; for (let zz = -350; zz < 350; zz += 6) segs.push([x, zz, 0]); }
-    for (let m = -10; m <= 10; m++) { const z = m * 35; for (let xx = -180; xx < 180; xx += 6) { if (Math.abs(xx) < 12) continue; segs.push([xx, z, 1]); } }
+    for (let m = -10; m <= 10; m++) { const z = m * 35; for (let xx = -180; xx < 180; xx += 6) { if (xx > -12 && xx < 28) continue; segs.push([xx, z, 1]); /* camp side kept open for the pitch */ } }
     const hedges = new T.InstancedMesh(hedgeG, hedgeM, segs.length);
     segs.forEach((sgm, i) => { pp.set(sgm[0], heightAt(sgm[0], sgm[1]) + 0.5, sgm[1]); q.setFromAxisAngle(up, sgm[2] ? Math.PI / 2 : 0); sc.set(blocked(sgm[0], sgm[1]) ? 0.0001 : 1, 0.8 + hash2(i, 3) * 0.5, 6.2); mtx.compose(pp, q, sc); hedges.setMatrixAt(i, mtx); });
     hedges.receiveShadow = true; world.add(hedges); disposables.push(hedgeG, hedgeM);
@@ -1794,6 +1795,7 @@ class Component extends DCLogic {
     const v = this.v;
     if (!v || v.mode !== 'drive' || !this.hero) return [0, 0];
     const w = v.canvas.clientWidth || 800, h = v.canvas.clientHeight || 450;
+    if (typeof window !== 'undefined' && window.innerHeight > window.innerWidth) return [0, 0.03]; // stacked: words are below, so centre the van
     return w / h > 1.15 ? [-0.2, 0.05] : [0, 0.2];
   }
 
@@ -2025,7 +2027,9 @@ class Component extends DCLogic {
       isTour: !hero,
       outsideMode: hero && !inside,
       insideMode: inside,
-      canvasCls: 'absolute inset-0 -z-20 h-full w-full select-none touch-pan-y ' + (inside ? 'cursor-grab active:cursor-grabbing' : ''),
+      canvasCls: 'absolute inset-0 h-full w-full select-none touch-pan-y ' + (inside ? 'cursor-grab active:cursor-grabbing' : ''),
+      // the hero is never taller than 4:3: in portrait the 3D view is a 4:3 box with the words below it
+      mediaCls: inside ? 'absolute inset-0 -z-20' : 'relative -z-20 aspect-[4/3] w-full overflow-hidden landscape:absolute landscape:inset-0 landscape:aspect-auto',
       title: this.props.title || spec.name,
       eyebrow: this.props.eyebrow || '',
       intro: this.props.intro || '',
@@ -2033,7 +2037,7 @@ class Component extends DCLogic {
       heroCls: inside ? 'fixed inset-0 z-[100] isolate h-full w-full overflow-hidden bg-plum-deep' : 'relative isolate overflow-hidden bg-plum-deep',
       innerCls: inside
         ? 'pointer-events-none mx-auto flex h-full max-w-[1400px] flex-col justify-end px-5 pb-6 pt-24 md:px-10 md:pb-10'
-        : 'pointer-events-none mx-auto flex min-h-[620px] max-w-[1400px] flex-col justify-start px-5 pb-10 pt-8 md:px-10 lg:min-h-[760px] lg:pb-16 lg:pt-12',
+        : 'pointer-events-none mx-auto flex max-w-[1400px] flex-col justify-start px-5 pb-10 pt-6 md:px-10 landscape:min-h-[min(620px,75vw)] landscape:pt-8 lg:landscape:min-h-[min(760px,75vw)] lg:landscape:pb-16 lg:landscape:pt-12',
       // look inside fills the browser window (no browser full-screen) and freezes the page behind it
       enterInside: () => { this.lockScroll(); this.setState({ view: 'camp' }); },
       exitInside: () => { this.unlockScroll(); this.setState({ view: 'drive' }); },
