@@ -996,16 +996,18 @@ class Component extends DCLogic {
     const now = performance.now(), dt = Math.min(0.05, (now - v.last) / 1000); v.last = now;
     if (!v.van) return;
     const t0 = now / 1000, driving = v.mode === 'drive', ease = 1 - Math.exp(-dt * 4), g = v.van.group;
-    if (driving) {
-      g.position.y = 0.012 * Math.sin(t0 * 8.3) + 0.006 * Math.sin(t0 * 13.7 + 1.3);
-      g.rotation.x = 0.004 * Math.sin(t0 * 6.1);
-      g.rotation.z = 0.0028 * Math.sin(t0 * 4.7 + 0.5);
-      v.van.wheels.forEach((w) => { w.rotation.x += dt * 24; });
-      v.worldParts.dashes.position.z = -((t0 * 9) % 9);
-      v.worldParts.posts.position.z = -((t0 * 9) % 24);
-    } else {
-      g.position.y += (0 - g.position.y) * ease; g.rotation.x += (0 - g.rotation.x) * ease; g.rotation.z += (0 - g.rotation.z) * ease;
-    }
+    // the van pulls up smoothly when you look inside, and pulls away again when you step back out
+    if (v.speed === undefined) v.speed = driving ? 1 : 0;
+    const target = driving ? 1 : 0, rate = driving ? 0.6 : 0.9;
+    v.speed += Math.sign(target - v.speed) * Math.min(Math.abs(target - v.speed), dt * rate);
+    const sp = v.speed * v.speed * (3 - 2 * v.speed);
+    v.dist = (v.dist || 0) + dt * 9 * sp;
+    g.position.y = sp * (0.012 * Math.sin(t0 * 8.3) + 0.006 * Math.sin(t0 * 13.7 + 1.3));
+    g.rotation.x = sp * 0.004 * Math.sin(t0 * 6.1) + (driving ? 0 : 0.006 * (sp * (1 - sp)) * 4);
+    g.rotation.z = sp * 0.0028 * Math.sin(t0 * 4.7 + 0.5);
+    v.van.wheels.forEach((w) => { w.rotation.x += dt * 24 * sp; });
+    v.worldParts.dashes.position.z = -(v.dist % 9);
+    v.worldParts.posts.position.z = -(v.dist % 24);
     const tg = this.target(), k = 1 - Math.exp(-dt * 4.5);
     v.camera.position.lerp(tg.pos, k);
     v.look.lerp(tg.look, k);
