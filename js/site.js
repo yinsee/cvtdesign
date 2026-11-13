@@ -319,6 +319,7 @@ const SCENERY = {
 };
 const VIEWS = [
   ['outside', 'Walk around'],
+  ['drive', 'On the road'],
   ['driver', "Driver's seat"],
   ['passenger', 'Passenger seat'],
   ['living', 'Living area'],
@@ -489,9 +490,13 @@ function buildVan(T, c) {
   box(W - 0.06, 0.04, L - bonnetLen - 0.04, vinyl, 0, floorY - 0.02, rearZ + (L - bonnetLen) / 2);
   box(W - 0.6, floorY - sillY + 0.1, L - 0.4, trim, 0, (floorY + sillY) / 2 - 0.05, 0);
   // wheels
+  const wheels = [];
   [fAx, rAx].forEach((z) => [-1, 1].forEach((side) => {
-    const t = add(new T.CylinderGeometry(wheelR, wheelR, 0.25, 32), tyre, side * (W / 2 - 0.15), wheelR, z); t.rotation.z = Math.PI / 2;
-    const h = add(new T.CylinderGeometry(wheelR * 0.58, wheelR * 0.58, 0.27, 24), hubM, side * (W / 2 - 0.15), wheelR, z); h.rotation.z = Math.PI / 2;
+    const wg = new T.Group(); wg.position.set(side * (W / 2 - 0.15), wheelR, z); g.add(wg); wheels.push(wg);
+    const t = add(new T.CylinderGeometry(wheelR, wheelR, 0.25, 32), tyre, 0, 0, 0, wg); t.rotation.z = Math.PI / 2;
+    const h = add(new T.CylinderGeometry(wheelR * 0.58, wheelR * 0.58, 0.27, 24), hubM, 0, 0, 0, wg); h.rotation.z = Math.PI / 2;
+    for (let k = 0; k < 5; k++) { const sp = box(0.03, wheelR * 1.0, 0.07, trim, side * 0.14, 0, 0, wg); sp.rotation.x = (k / 5) * Math.PI * 2; sp.geometry.translate(0, wheelR * 0.25, 0); }
+    add(new T.CylinderGeometry(0.06, 0.06, 0.29, 12), trim, 0, 0, 0, wg).rotation.z = Math.PI / 2;
   }));
 
   // ---- rear doors
@@ -623,14 +628,16 @@ function buildVan(T, c) {
   res.driver = { pos: [-0.45, floorY + 1.16, seatZ - 0.24], yaw: 0, pitch: -0.06 };
   res.passenger = { pos: [0.45, floorY + 1.16, seatZ - 0.24], yaw: 0.35, pitch: -0.06 };
   res.lights = [[0, H - 0.25, rearZ + 1.0], [0, H - 0.25, livingFront - 0.6]];
-  res.group = g; res.doors = doors; res.mats = mats;
+  res.group = g; res.doors = doors; res.mats = mats; res.wheels = wheels;
   return res;
 }
 
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { van: props.van || 'man-lwb-auto', view: 'outside', scenery: 'highlands', noGL: false };
+    const hero = props.hero === 'true' || props.hero === true;
+    this.hero = hero;
+    this.state = { van: props.van || 'man-lwb-auto', view: hero ? 'drive' : 'outside', scenery: 'highlands', noGL: false };
     this.canvasRef = (el) => this.mount(el);
     this.v = null;
   }
@@ -681,11 +688,12 @@ class Component extends DCLogic {
     const roadMat = new T.MeshStandardMaterial({ color: '#3a3b3f', roughness: 0.95 });
     const r = new T.Mesh(new T.PlaneGeometry(4.2, 2 * R), roadMat); r.rotation.x = -Math.PI / 2; r.position.y = 0.004; r.receiveShadow = true; road.add(r);
     const dashMat = new T.MeshStandardMaterial({ color: '#e9e6dc', roughness: 0.8 });
-    for (let z = -R + 2; z < R; z += 5) { const d = new T.Mesh(new T.PlaneGeometry(0.12, 2), dashMat); d.rotation.x = -Math.PI / 2; d.position.set(0, 0.006, z); road.add(d); }
+    const dashes = new T.Group(); road.add(dashes);
+    for (let z = -R + 2; z < R; z += 5) { const d = new T.Mesh(new T.PlaneGeometry(0.12, 2), dashMat); d.rotation.x = -Math.PI / 2; d.position.set(0, 0.006, z); dashes.add(d); }
     scene.add(road);
 
     this.v = {
-      T, canvas: el, renderer, scene, camera, sun, inner, panoMat, groundMat, road, van: null, textures: {},
+      T, canvas: el, renderer, scene, camera, sun, inner, panoMat, groundMat, road, dashes, van: null, textures: {}, offX: 0, offY: 0,
       mode: 'outside', theta: 0.85, phi: 1.22, radius: 11, yaw: 0, pitch: 0, fov: 45,
       look: new T.Vector3(0, 1.2, 0), lastInteract: 0, doorT: 0, running: true, raf: 0, last: performance.now(), pointers: new Map()
     };
@@ -750,11 +758,13 @@ class Component extends DCLogic {
     v.mode = mode;
     if (mode === 'outside') {
       v.radius = v.van.L * 1.25 + 3; v.phi = 1.25; v.fov = 42;
+    } else if (mode === 'drive') {
+      v.fov = 30;
     } else {
       const p = v.van[mode]; if (!p) return;
       v.yaw = p.yaw || 0; v.pitch = p.pitch || 0; v.fov = 72;
     }
-    if (snap) { const t = this.target(); v.camera.position.copy(t.pos); v.look.copy(t.look); v.camera.fov = v.fov; v.camera.updateProjectionMatrix(); }
+    if (snap) { const t = this.target(); v.camera.position.copy(t.pos); v.look.copy(t.look); v.camera.fov = v.fov; const o = this.offsetTarget(); v.offX = o[0]; v.offY = o[1]; v.camera.updateProjectionMatrix(); }
   }
 
   target() {
@@ -765,15 +775,26 @@ class Component extends DCLogic {
       if (pos.y < 0.4) pos.y = 0.4;
       return { pos, look: c };
     }
+    if (v.mode === 'drive') {
+      const c = new T.Vector3(0, v.van.H * 0.42, 0.2), th = 0.92, el = 0.1, d = v.van.L * 1.55 + 4.5;
+      return { pos: new T.Vector3(c.x + d * Math.sin(th) * Math.cos(el), c.y + d * Math.sin(el), c.z + d * Math.cos(th) * Math.cos(el)), look: c };
+    }
     const p = v.van[v.mode].pos;
     const pos = new T.Vector3(p[0], p[1], p[2]);
     const dir = new T.Vector3(Math.sin(v.yaw) * Math.cos(v.pitch), Math.sin(v.pitch), Math.cos(v.yaw) * Math.cos(v.pitch));
     return { pos, look: pos.clone().add(dir) };
   }
 
+  offsetTarget() {
+    const v = this.v;
+    if (!v || v.mode !== 'drive' || !this.hero) return [0, 0];
+    const w = v.canvas.clientWidth || 800, h = v.canvas.clientHeight || 450;
+    return w / h > 1.15 ? [-0.2, 0.04] : [0, 0.2];
+  }
+
   bindInput(el) {
     const v = this.v;
-    const down = (e) => { v.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY }); v.lastInteract = performance.now(); try { el.setPointerCapture(e.pointerId); } catch (x) {} };
+    const down = (e) => { if (v.mode === 'drive') return; v.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY }); v.lastInteract = performance.now(); try { el.setPointerCapture(e.pointerId); } catch (x) {} };
     const move = (e) => {
       if (!v.pointers.has(e.pointerId)) return;
       const p = v.pointers.get(e.pointerId), dx = e.clientX - p.x, dy = e.clientY - p.y;
@@ -793,6 +814,7 @@ class Component extends DCLogic {
     };
     const up = (e) => { v.pointers.delete(e.pointerId); };
     const wheel = (e) => {
+      if (v.mode === 'drive') return;
       e.preventDefault(); v.lastInteract = performance.now();
       if (v.mode === 'outside') v.radius = Math.min(v.van.L * 3, Math.max(v.van.L * 0.85, v.radius * (1 + Math.sign(e.deltaY) * 0.08)));
       else v.fov = Math.min(85, Math.max(35, v.fov + Math.sign(e.deltaY) * 3));
@@ -817,7 +839,22 @@ class Component extends DCLogic {
     v.raf = requestAnimationFrame(() => this.tick());
     const now = performance.now(), dt = Math.min(0.05, (now - v.last) / 1000); v.last = now;
     if (!v.van) return;
-    if (v.mode === 'outside' && now - v.lastInteract > 3500 && v.pointers.size === 0) v.theta += dt * 0.12;
+    const t0 = now / 1000, driving = v.mode === 'drive';
+    const ease = 1 - Math.exp(-dt * 4);
+    const g = v.van.group;
+    if (driving) {
+      g.position.y = 0.014 * Math.sin(t0 * 8.3) + 0.007 * Math.sin(t0 * 13.7 + 1.3);
+      g.rotation.x = 0.0045 * Math.sin(t0 * 6.1);
+      g.rotation.z = 0.003 * Math.sin(t0 * 4.7 + 0.5);
+      v.van.wheels.forEach((w) => { w.rotation.x += dt * 9; });
+      v.dashes.position.z = -((t0 * 8) % 5);
+    } else {
+      g.position.y += (0 - g.position.y) * ease; g.rotation.x += (0 - g.rotation.x) * ease; g.rotation.z += (0 - g.rotation.z) * ease;
+    }
+    const ot = this.offsetTarget();
+    v.offX += (ot[0] - v.offX) * ease; v.offY += (ot[1] - v.offY) * ease;
+    const cw = v.canvas.clientWidth || 800, chh = v.canvas.clientHeight || 450;
+    if (Math.abs(v.offX) > 0.001 || Math.abs(v.offY) > 0.001) v.camera.setViewOffset(cw, chh, v.offX * cw, v.offY * chh, cw, chh); else v.camera.clearViewOffset();
     const t = this.target(), k = 1 - Math.exp(-dt * 5);
     v.camera.position.lerp(t.pos, k);
     v.look.lerp(t.look, k);
@@ -833,23 +870,34 @@ class Component extends DCLogic {
     const s = this.state;
     const on = 'min-h-[52px] shrink-0 rounded-full border-2 border-plum bg-plum px-5 text-[16px] font-bold text-white';
     const off = 'min-h-[52px] shrink-0 rounded-full border-2 border-plum/20 bg-white px-5 text-[16px] font-bold text-plum hover:border-plum';
-    const sOn = 'min-h-[44px] shrink-0 rounded-full bg-brand px-4 text-[15px] font-bold text-white';
-    const sOff = 'min-h-[44px] shrink-0 rounded-full bg-plum-tint px-4 text-[15px] font-bold text-plum hover:bg-plum-light';
     const viewLabel = (VIEWS.find((x) => x[0] === s.view) || VIEWS[0])[1];
     const spec = VAN_SPECS[s.van] || VAN_SPECS['man-lwb-auto'];
+    const hero = this.hero, inside = hero && s.view !== 'drive';
+    const viewIds = hero ? ['driver', 'passenger', 'living', 'bed'] : ['outside', 'driver', 'passenger', 'living', 'bed'];
+    const hOn = 'min-h-[52px] shrink-0 rounded-full bg-brand px-5 text-[16px] font-bold text-white';
+    const hOff = 'min-h-[52px] shrink-0 rounded-full bg-white/90 px-5 text-[16px] font-bold text-plum hover:bg-white';
     return {
+      isHero: hero,
+      isTour: !hero,
+      outsideMode: hero && !inside,
+      insideMode: inside,
+      canvasCls: 'absolute inset-0 -z-20 h-full w-full select-none touch-pan-y ' + (inside ? 'cursor-grab active:cursor-grabbing' : ''),
+      title: this.props.title || spec.name,
+      eyebrow: this.props.eyebrow || '',
+      intro: this.props.intro || '',
+      enterInside: () => this.setState({ view: 'driver' }),
+      exitInside: () => this.setState({ view: 'drive' }),
       canvasRef: this.canvasRef,
       noGL: s.noGL,
       showPicker: this.props.picker !== 'false',
       van: s.van,
       vanName: spec.name,
       viewLabel,
-      hint: s.view === 'outside' ? 'Drag to walk around · scroll or pinch to zoom' : 'Drag to look around',
-      ariaLabel: '3D model of the ' + spec.name + ', ' + viewLabel.toLowerCase() + ' view, with ' + SCENERY[s.scenery].label + ' scenery',
+      hint: s.view === 'outside' ? 'Drag to walk around · scroll or pinch to zoom' : 'Drag to look around · scroll or pinch to zoom',
+      ariaLabel: '3D model of the ' + spec.name + ', ' + viewLabel.toLowerCase() + ' view, in the Scottish Highlands',
       vanOptions: VAN_ORDER.map((id) => ({ id, name: VAN_SPECS[id].name })),
       pickVan: (e) => this.setState({ van: e.target.value }),
-      views: VIEWS.map(([id, label]) => ({ label, pressed: s.view === id ? 'true' : 'false', cls: s.view === id ? on : off, pick: () => this.setState({ view: id }) })),
-      sceneries: Object.keys(SCENERY).map((k) => ({ label: SCENERY[k].label, pressed: s.scenery === k ? 'true' : 'false', cls: s.scenery === k ? sOn : sOff, pick: () => this.setState({ scenery: k }) }))
+      views: VIEWS.filter((x) => viewIds.includes(x[0])).map(([id, label]) => ({ label, pressed: s.view === id ? 'true' : 'false', cls: s.view === id ? (hero ? hOn : on) : (hero ? hOff : off), pick: () => this.setState({ view: id }) }))
     };
   }
 }
