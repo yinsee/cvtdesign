@@ -1677,10 +1677,10 @@ class Component extends DCLogic {
     // every look-inside view is parked up at camp: only the hero's driving shot is on the road
     const atCamp = v.mode !== 'drive' && v.mode !== 'outside';
     if (v.park === undefined) v.park = atCamp ? 1 : 0;
-    const PARK = 4.6, PD = 18, smp = (p) => p * p * (3 - 2 * p);
+    const PARK = 5.3, PD = 15, smp = (p) => p * p * (3 - 2 * p);
     // the van pulls up smoothly when you look inside, and pulls away again when you step back out
     if (v.speed === undefined) v.speed = driving ? 1 : 0;
-    const target = atCamp ? (v.park >= 1 ? 0 : 0.14 + 0.86 * (1 - smp(Math.min(1, Math.max(0, (v.park - 0.1) / 0.9))))) : (driving ? 1 : 0), rate = atCamp ? 0.8 : 0.6;
+    const target = atCamp ? (v.park >= 1 ? 0 : 0.3 + 0.7 * (1 - smp(Math.min(1, Math.max(0, (v.park - 0.1) / 0.9))))) : (driving ? 1 : 0), rate = atCamp ? 1.1 : 0.6;
     const dist0 = v.dist || 0;
     v.speed += Math.sign(target - v.speed) * Math.min(Math.abs(target - v.speed), dt * rate);
     const sp = v.speed * v.speed * (3 - 2 * v.speed);
@@ -1712,7 +1712,7 @@ class Component extends DCLogic {
     const campWant = atCamp && v.park >= 1 && v.speed < 0.04 ? 1 : 0;
     v.campT += (campWant - v.campT) * (1 - Math.exp(-dt * 1.4));
     // the clock runs by itself at camp (a full day in about 90 seconds); tapping the button fast-forwards to the next part of the day
-    if (atCamp) {
+    if (atCamp && v.campT > 0.5) {
       if (v.jumpTo != null) { const d = (v.jumpTo - v.tod + 24) % 24, step = Math.min(d, dt * 6); v.tod = (v.tod + step) % 24; if (d - step < 0.02) v.jumpTo = null; }
       else v.tod = (v.tod + dt * 0.26) % 24;
       const per = periodOf(v.tod); if (per !== this.state.time) this.setState({ time: per });
