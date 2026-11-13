@@ -322,6 +322,8 @@ const VIEWS = [
 const SKY = { top: '#4f79ad', horizon: '#f0d7b8', bottom: '#b9ad97', sun: [0.62, 0.32, -0.25] };
 const DUSK = { top: '#262a58', horizon: '#ff9560', bottom: '#3d2f33', fog: '#a8655a', sun: [-0.74, 0.07, -0.56], sunColor: '#ff8a4a', sunI: 1.5, hemiI: 0.26, exposure: 1.0 };
 const DAY = { fog: '#f0d7b8', sunColor: '#ffe2bf', sunI: 3.2, hemiI: 0.6, exposure: 1.12 };
+const NIGHT = { top: '#060a1a', horizon: '#1b2342', bottom: '#0a0b12', fog: '#121829', moon: [0.25, 0.85, 0.3], moonColor: '#9fb6ff', moonI: 0.45, hemiI: 0.07, exposure: 1.15 };
+const TIMES = [['morning', 'Morning', 8], ['midday', 'Midday', 13], ['sunset', 'Sunset', 19.6], ['night', 'Night', 22.5]];
 
 // ---------- small procedural helpers (no images needed)
 function hash2(x, y) { const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return s - Math.floor(s); }
@@ -739,13 +741,19 @@ function buildWorld(T, renderer) {
   const pm = new T.PMREMGenerator(renderer);
   const envScene = new T.Scene(); const envSky = new T.Mesh(new T.SphereGeometry(100, 32, 16), skyMat); envScene.add(envSky);
   const env = pm.fromScene(envScene, 0.035).texture;
-  const bakeDusk = () => {
+  const bakeSky = (pal) => {
     const u = skyMat.uniforms, keep = [u.top.value.clone(), u.horizon.value.clone(), u.bottom.value.clone(), u.sunDir.value.clone()];
-    u.top.value.set(DUSK.top); u.horizon.value.set(DUSK.horizon); u.bottom.value.set(DUSK.bottom); u.sunDir.value.set(DUSK.sun[0], DUSK.sun[1], DUSK.sun[2]).normalize();
+    u.top.value.set(pal.top); u.horizon.value.set(pal.horizon); u.bottom.value.set(pal.bottom); u.sunDir.value.set(pal.sun[0], pal.sun[1], pal.sun[2]).normalize();
     const t = pm.fromScene(envScene, 0.035).texture;
     u.top.value.copy(keep[0]); u.horizon.value.copy(keep[1]); u.bottom.value.copy(keep[2]); u.sunDir.value.copy(keep[3]);
     return t;
   };
+  // stars, faded in at night
+  const sN = 1600, sp = new Float32Array(sN * 3);
+  for (let i = 0; i < sN; i++) { const th = hash2(i, 11) * Math.PI * 2, y = 0.08 + hash2(i, 12) * 0.92, r = Math.sqrt(1 - y * y); sp[i * 3] = Math.cos(th) * r * 850; sp[i * 3 + 1] = y * 850; sp[i * 3 + 2] = Math.sin(th) * r * 850; }
+  const sGeo = new T.BufferGeometry(); sGeo.setAttribute('position', new T.BufferAttribute(sp, 3));
+  const sMat = new T.PointsMaterial({ color: '#ffffff', size: 1.6, sizeAttenuation: false, transparent: true, opacity: 0, depthWrite: false, fog: false });
+  const stars = new T.Points(sGeo, sMat); stars.visible = false; world.add(stars); disposables.push(sGeo, sMat);
 
   // terrain height
   const heightAt = (x, z) => {
@@ -824,7 +832,7 @@ function buildWorld(T, renderer) {
   disposables.push(asphalt, roadMat, road.geometry, lineMat, dashG, postG, postM, refG, refM);
 
   disposables.push(envSky.geometry, { dispose: () => pm.dispose() });
-  return { world, env, bakeDusk, skyMat, roadGroup, dashes, posts, sunDir, disposables, fogColor: SKY.horizon };
+  return { world, env, bakeSky, stars, skyMat, roadGroup, dashes, posts, sunDir, disposables, fogColor: SKY.horizon };
 }
 
 // ---------- evening camp beside the van: awning, string lights, chairs, rug, campfire
@@ -840,7 +848,7 @@ function buildCamp(T, van) {
   const poleM = M({ color: '#9aa1a8', metalness: 0.8, roughness: 0.3 }, true);
   [z0 + 0.05, z1 - 0.05].forEach((z) => add(new T.CylinderGeometry(0.018, 0.018, ay - drop, 8), poleM, ax + reach - 0.03, (ay - drop) / 2, z));
   // string lights hanging under the awning edge
-  const bulbM = M({ color: '#fff1c9', emissive: '#ffcc73', emissiveIntensity: 3 }, true), wireM = M({ color: '#222', roughness: 0.8 }, true);
+  const bulbM = M({ color: '#fff1c9', emissive: '#ffcc73', emissiveIntensity: 3 }, true), lanternM = M({ color: '#ffe0a0', emissive: '#ffb347', emissiveIntensity: 2.5 }, true), wireM = M({ color: '#222', roughness: 0.8 }, true);
   const bulbs = 16, pts = [];
   for (let i = 0; i <= bulbs; i++) { const t = i / bulbs, z = z0 + (z1 - z0) * t, y = ay - drop - 0.05 - Math.sin(t * Math.PI) * 0.22; pts.push(new T.Vector3(ax + reach - 0.05, y, z)); add(new T.SphereGeometry(0.035, 10, 8), bulbM, ax + reach - 0.05, y - 0.04, z).castShadow = false; }
   add(new T.TubeGeometry(new T.CatmullRomCurve3(pts), 64, 0.004, 4), wireM, 0, 0, 0);
@@ -875,12 +883,12 @@ function buildCamp(T, van) {
   const tx = fx + Math.cos(-1.65) * 1.5, tz = fz + Math.sin(-1.65) * 1.5;
   add(rboxGeo(T, 0.5, 0.04, 0.4, 0.015), woodM, tx, 0.48, tz);
   [[-0.2, -0.15], [0.2, -0.15], [-0.2, 0.15], [0.2, 0.15]].forEach(([lx, lz]) => add(new T.CylinderGeometry(0.012, 0.012, 0.46, 6), legM, tx + lx, 0.23, tz + lz));
-  add(new T.CylinderGeometry(0.06, 0.07, 0.16, 12), M({ color: '#ffe0a0', emissive: '#ffb347', emissiveIntensity: 2.5 }, true), tx, 0.58, tz).castShadow = false;
+  add(new T.CylinderGeometry(0.06, 0.07, 0.16, 12), lanternM, tx, 0.58, tz).castShadow = false;
   add(new T.CylinderGeometry(0.03, 0.06, 0.05, 12), legM, tx, 0.685, tz);
   // two enamel mugs on the table
   [[-0.12, 0.05], [0.12, -0.06]].forEach(([mx, mz]) => add(new T.CylinderGeometry(0.04, 0.04, 0.09, 14), M({ color: '#f2f2ef', roughness: 0.35 }, true), tx + mx + 0.0, 0.545, tz + mz));
   g.visible = false;
-  return { group: g, flames, fireLight, embers, ePos, eSeed, fx, fz, center: new T.Vector3(ax + 1.6, 0.9, fz), disp };
+  return { group: g, bulbM, lanternM, flames, fireLight, embers, ePos, eSeed, fx, fz, center: new T.Vector3(ax + 1.6, 0.9, fz), disp };
 }
 
 class Component extends DCLogic {
@@ -888,7 +896,7 @@ class Component extends DCLogic {
     super(props);
     const hero = props.hero === 'true' || props.hero === true;
     this.hero = hero;
-    this.state = { van: props.van || 'man-lwb-auto', view: hero ? 'drive' : 'camp', noGL: false };
+    this.state = { van: props.van || 'man-lwb-auto', view: hero ? 'drive' : 'camp', time: 'sunset', noGL: false };
     this.canvasRef = (el) => this.mount(el);
     this.sectionRef = (el) => { if (el) this.sectionEl = el; };
     this.v = null;
@@ -898,6 +906,7 @@ class Component extends DCLogic {
     if (!this.v) return;
     if (prevState.van !== this.state.van) this.loadVan(this.state.van);
     if (prevState.view !== this.state.view) this.setView(this.state.view);
+    if (prevState.time !== this.state.time) { const t = TIMES.find((x) => x[0] === this.state.time); if (t) this.v.todTarget = t[2]; }
   }
   componentWillUnmount() { this.destroy(); }
 
@@ -941,6 +950,9 @@ class Component extends DCLogic {
       cDayTop: new T.Color(SKY.top), cDayHor: new T.Color(SKY.horizon), cDayBot: new T.Color(SKY.bottom), cDuskTop: new T.Color(DUSK.top), cDuskHor: new T.Color(DUSK.horizon), cDuskBot: new T.Color(DUSK.bottom),
       cDayFog: new T.Color(DAY.fog), cDuskFog: new T.Color(DUSK.fog), cDaySun: new T.Color(DAY.sunColor), cDuskSun: new T.Color(DUSK.sunColor),
       dDay: new T.Vector3(SKY.sun[0], SKY.sun[1], SKY.sun[2]).normalize(), dDusk: new T.Vector3(DUSK.sun[0], DUSK.sun[1], DUSK.sun[2]).normalize(), tmpV: new T.Vector3(),
+      cNightTop: new T.Color(NIGHT.top), cNightHor: new T.Color(NIGHT.horizon), cNightBot: new T.Color(NIGHT.bottom), cNightFog: new T.Color(NIGHT.fog), cMoon: new T.Color(NIGHT.moonColor),
+      dMoon: new T.Vector3(NIGHT.moon[0], NIGHT.moon[1], NIGHT.moon[2]).normalize(), envs: {}, tod: 19.6, todTarget: 19.6,
+      pTop: new T.Color(), pHor: new T.Color(), pBot: new T.Color(), pFog: new T.Color(), pSun: new T.Color(), pDir: new T.Vector3(), tmpC: new T.Color(),
       mode: 'outside', theta: 0.85, phi: 1.22, radius: 11, yaw: 0, pitch: 0, fov: 45,
       look: new T.Vector3(0, 1.2, 0), lastInteract: 0, doorT: 0, running: true, raf: 0, last: performance.now(), pointers: new Map()
     };
@@ -961,7 +973,7 @@ class Component extends DCLogic {
     this.disposeVan();
     v.worldParts.disposables.forEach((d) => d.dispose && d.dispose());
     if (v.worldParts.env) v.worldParts.env.dispose();
-    if (v.envDusk) v.envDusk.dispose();
+    Object.values(v.envs).forEach((e) => e.dispose());
     v.renderer.dispose();
     this.v = null;
   }
@@ -997,7 +1009,7 @@ class Component extends DCLogic {
     const v = this.v; if (!v || !v.van) return;
     v.mode = mode;
     if (mode === 'outside') { v.radius = v.van.L * 1.25 + 3; v.phi = 1.3; v.fov = 40; }
-    else if (mode === 'camp') { v.radius = v.van.L * 1.2 + 4.5; v.phi = 1.33; v.theta = 0.62; v.fov = 40; if (!v.envDusk) v.envDusk = v.worldParts.bakeDusk(); }
+    else if (mode === 'camp') { v.radius = v.van.L * 1.2 + 4.5; v.phi = 1.33; v.theta = 0.62; v.fov = 40; }
     else if (mode === 'drive') { v.fov = 26; }
     else { const p = v.van[mode]; if (!p) return; v.yaw = p.yaw || 0; v.pitch = p.pitch || 0; v.fov = 72; }
     if (snap) { const t = this.target(); v.camera.position.copy(t.pos); v.look.copy(t.look); v.camera.fov = v.fov; const o = this.offsetTarget(); v.offX = o[0]; v.offY = o[1]; v.camera.updateProjectionMatrix(); }
@@ -1097,24 +1109,46 @@ class Component extends DCLogic {
     v.offX += (ot[0] - v.offX) * ease; v.offY += (ot[1] - v.offY) * ease;
     const cw = v.canvas.clientWidth || 800, chh = v.canvas.clientHeight || 450;
     if (Math.abs(v.offX) > 0.001 || Math.abs(v.offY) > 0.001) v.camera.setViewOffset(cw, chh, v.offX * cw, v.offY * chh, cw, chh); else v.camera.clearViewOffset();
-    // day <-> sunset at camp
+    // camp lighting follows the chosen time of day; the road keeps its own daylight
     const campWant = v.mode === 'camp' ? 1 : 0;
     v.campT += (campWant - v.campT) * (1 - Math.exp(-dt * 1.4));
-    const ck = v.campT, WP = v.worldParts, u = WP.skyMat.uniforms;
-    u.top.value.copy(v.cDayTop).lerp(v.cDuskTop, ck); u.horizon.value.copy(v.cDayHor).lerp(v.cDuskHor, ck); u.bottom.value.copy(v.cDayBot).lerp(v.cDuskBot, ck);
-    v.tmpV.copy(v.dDay).lerp(v.dDusk, ck).normalize(); u.sunDir.value.copy(v.tmpV); v.sun.position.copy(v.tmpV).multiplyScalar(30);
-    v.sun.color.copy(v.cDaySun).lerp(v.cDuskSun, ck); v.sun.intensity = DAY.sunI + (DUSK.sunI - DAY.sunI) * ck;
-    v.hemi.intensity = DAY.hemiI + (DUSK.hemiI - DAY.hemiI) * ck;
-    v.renderer.toneMappingExposure = DAY.exposure + (DUSK.exposure - DAY.exposure) * ck;
-    v.scene.fog.color.copy(v.cDayFog).lerp(v.cDuskFog, ck); v.scene.background.copy(v.scene.fog.color);
-    v.scene.environment = (ck > 0.5 && v.envDusk) ? v.envDusk : WP.env;
+    v.tod += (v.todTarget - v.tod) * (1 - Math.exp(-dt * 1.6));
+    const ck = v.campT, WP = v.worldParts, u = WP.skyMat.uniforms, sst = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+    const f = (v.tod - 6) / 14.5, elev = f >= 0 && f <= 1 ? 0.95 * Math.sin(Math.PI * f) : -0.3;
+    const az = Math.atan2(DUSK.sun[2], DUSK.sun[0]) + (1 - Math.min(1, Math.max(0, f))) * 2.6;
+    const wd = sst(0.1, 0.5, elev), wn = sst(0.02, -0.12, elev) * (v.tod > 20 || v.tod < 6 ? 1 : 0), dark = 1 - sst(0.02, 0.32, elev);
+    // palette at this time of day: dusk -> day by sun height, then -> night
+    v.pTop.copy(v.cDuskTop).lerp(v.cDayTop, wd).lerp(v.cNightTop, wn);
+    v.pHor.copy(v.cDuskHor).lerp(v.cDayHor, wd).lerp(v.cNightHor, wn);
+    v.pBot.copy(v.cDuskBot).lerp(v.cDayBot, wd).lerp(v.cNightBot, wn);
+    v.pFog.copy(v.cDuskFog).lerp(v.cDayFog, wd).lerp(v.cNightFog, wn);
+    v.pSun.copy(v.cDuskSun).lerp(v.cDaySun, wd).lerp(v.cMoon, wn);
+    const ce = Math.cos(Math.max(elev, 0.03));
+    v.pDir.set(Math.cos(az) * ce, Math.sin(Math.max(elev, 0.03)), Math.sin(az) * ce).normalize().lerp(v.dMoon, wn).normalize();
+    const pSunI = (DUSK.sunI + (DAY.sunI - DUSK.sunI) * wd) * (1 - wn) + NIGHT.moonI * wn;
+    const pHemi = (DUSK.hemiI + (DAY.hemiI - DUSK.hemiI) * wd) * (1 - wn) + NIGHT.hemiI * wn;
+    const pExp = (DUSK.exposure + (DAY.exposure - DUSK.exposure) * wd) * (1 - wn) + NIGHT.exposure * wn;
+    // blend from the road's daylight into the camp palette
+    u.top.value.copy(v.cDayTop).lerp(v.pTop, ck); u.horizon.value.copy(v.cDayHor).lerp(v.pHor, ck); u.bottom.value.copy(v.cDayBot).lerp(v.pBot, ck);
+    v.tmpV.copy(v.dDay).lerp(v.pDir, ck).normalize(); u.sunDir.value.copy(v.tmpV).multiplyScalar(1 - 0.9 * wn * ck); v.sun.position.copy(v.tmpV).multiplyScalar(30);
+    v.sun.color.copy(v.cDaySun).lerp(v.pSun, ck); v.sun.intensity = DAY.sunI + (pSunI - DAY.sunI) * ck;
+    v.hemi.intensity = DAY.hemiI + (pHemi - DAY.hemiI) * ck;
+    v.renderer.toneMappingExposure = DAY.exposure + (pExp - DAY.exposure) * ck;
+    v.scene.fog.color.copy(v.cDayFog).lerp(v.pFog, ck); v.scene.background.copy(v.scene.fog.color);
+    WP.stars.visible = ck * wn > 0.01; WP.stars.material.opacity = ck * wn;
+    if (ck > 0.5) {
+      const key = wn > 0.5 ? 'night' : (wd > 0.5 ? 'day' : 'dusk');
+      if (key === 'day') v.scene.environment = WP.env;
+      else { if (!v.envs[key]) v.envs[key] = WP.bakeSky(key === 'night' ? Object.assign({}, NIGHT, { sun: NIGHT.moon }) : DUSK); v.scene.environment = v.envs[key]; }
+    } else v.scene.environment = WP.env;
     WP.roadGroup.visible = v.mode !== 'camp' || ck < 0.5;
-    v.inner.forEach((l) => { l.intensity = 2.2 + 2.5 * ck; });
+    v.inner.forEach((l) => { l.intensity = 2.2 + 3 * dark * ck; });
     if (v.camp) {
       const c = v.camp; c.group.visible = v.mode === 'camp' && ck > 0.02;
       if (c.group.visible) {
-        c.flames.forEach((f, i) => { f.scale.set(1 + 0.08 * Math.sin(t0 * 17 + i), 0.85 + 0.25 * Math.sin(t0 * (11 + i * 3)) + 0.1 * Math.sin(t0 * 29 + i), 1 + 0.08 * Math.cos(t0 * 15 + i)); f.rotation.y = t0 * (0.8 + i * 0.4); f.material.opacity = (0.65 + 0.12 * i) * Math.min(1, ck * 1.5); });
-        c.fireLight.intensity = ck * (3.2 + 0.7 * Math.sin(t0 * 13) + 0.4 * Math.sin(t0 * 31));
+        c.bulbM.emissiveIntensity = 0.15 + 3.2 * dark; c.lanternM.emissiveIntensity = 0.3 + 2.6 * dark;
+        c.flames.forEach((fm, i) => { fm.scale.set(1 + 0.08 * Math.sin(t0 * 17 + i), 0.85 + 0.25 * Math.sin(t0 * (11 + i * 3)) + 0.1 * Math.sin(t0 * 29 + i), 1 + 0.08 * Math.cos(t0 * 15 + i)); fm.rotation.y = t0 * (0.8 + i * 0.4); fm.material.opacity = (0.65 + 0.12 * i) * Math.min(1, ck * 1.5) * (0.45 + 0.55 * dark); });
+        c.fireLight.intensity = ck * (0.6 + 3 * dark) * (1 + 0.22 * Math.sin(t0 * 13) + 0.12 * Math.sin(t0 * 31));
         const ep = c.ePos;
         for (let i = 0; i < c.eSeed.length; i++) {
           const s0 = c.eSeed[i]; ep[i * 3 + 1] += dt * (0.5 + s0 * 0.7);
@@ -1122,6 +1156,7 @@ class Component extends DCLogic {
           if (ep[i * 3 + 1] > 1.6 + s0 * 1.4) ep[i * 3 + 1] = 0.25;
         }
         c.embers.geometry.attributes.position.needsUpdate = true;
+        c.embers.material.opacity = 0.3 + 0.6 * dark;
       }
     }
     const want = (v.mode === 'bed' || v.mode === 'camp') ? 1 : 0;
@@ -1173,6 +1208,8 @@ class Component extends DCLogic {
       ariaLabel: '3D model of the ' + spec.name + ', ' + viewLabel.toLowerCase() + (s.view === 'camp' ? ', parked at a lochside campsite at sunset with a campfire, chairs and string lights' : ' view, on a Highland road beside a loch'),
       vanOptions: VAN_ORDER.map((id) => ({ id, name: VAN_SPECS[id].name })),
       pickVan: (e) => this.setState({ van: e.target.value }),
+      isCamp: s.view === 'camp',
+      times: TIMES.map(([id, label]) => ({ label, pressed: s.time === id ? 'true' : 'false', cls: s.time === id ? 'min-h-[44px] shrink-0 rounded-full bg-plum px-4 text-[15px] font-bold text-white' : 'min-h-[44px] shrink-0 rounded-full bg-white/85 px-4 text-[15px] font-bold text-plum hover:bg-white', pick: () => this.setState({ time: id }) })),
       views: viewIds.map((id) => VIEWS.find((x) => x[0] === id)).map(([id, label]) => ({ label, pressed: s.view === id ? 'true' : 'false', cls: s.view === id ? (hero ? hOn : on) : (hero ? hOff : off), pick: () => this.setState({ view: id }) }))
     };
   }
