@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&amp;family=Lato:wght@400;700;900&amp;display=swap">
-<link rel="stylesheet" href="assets/site.css?v=16">
-<script defer src="js/site.js?v=16"></script>
+<link rel="stylesheet" href="assets/site.css?v=17">
+<script defer src="js/site.js?v=17"></script>
 <script defer src="js/alpine.min.js"></script>
 <style>body{margin:0}[x-cloak]{display:none}</style>
 </head>
@@ -141,7 +141,7 @@
     </div>
     <div class="relative lg:col-span-7">
       <img src="assets/man-cab-golden.jpg" alt="The cab of a MAN campervan looking out over fields at golden hour" class="aspect-[4/3] w-full rounded-[32px] object-cover lg:aspect-[16/11]">
-      <a href="van.html" class="absolute -bottom-8 left-4 right-4 flex items-center gap-4 rounded-[24px] bg-white p-4 shadow-xl sm:left-auto sm:right-6 sm:w-[380px]">
+      <a href="van-man-lwb-auto.html" class="absolute -bottom-8 left-4 right-4 flex items-center gap-4 rounded-[24px] bg-white p-4 shadow-xl sm:left-auto sm:right-6 sm:w-[380px]">
         <img src="assets/v-man-lwb-auto.jpg" alt="" class="h-20 w-28 shrink-0 rounded-xl object-cover">
         <span class="flex flex-col"><span class="text-[14px] font-bold uppercase tracking-[0.12em] text-brand">Most requested</span><span class="font-display text-[20px] font-bold leading-tight text-plum">MAN TGE Luxury, 2 berth</span><span class="text-[15px] text-ink/70">Automatic · Bathroom · North–south bed</span></span>
       </a>
@@ -149,7 +149,7 @@
   </div>
   <div class="no-scrollbar mx-auto mt-20 flex max-w-[1400px] snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 md:px-10 lg:grid lg:grid-cols-4 lg:overflow-visible">
     <template x-for="v in V.featured">
-      <a href="van.html" class="group flex w-[78%] shrink-0 snap-start flex-col overflow-hidden rounded-[24px] bg-white shadow-sm ring-1 ring-plum/10 hover:ring-2 hover:ring-brand sm:w-[46%] lg:w-auto">
+      <a :href="v.href" class="group flex w-[78%] shrink-0 snap-start flex-col overflow-hidden rounded-[24px] bg-white shadow-sm ring-1 ring-plum/10 hover:ring-2 hover:ring-brand sm:w-[46%] lg:w-auto">
         <div class="aspect-[3/2] overflow-hidden"><img :src="v.img" :alt="v.alt" class="h-full w-full object-cover transition duration-700 group-hover:scale-105"></div>
         <div class="flex flex-1 flex-col gap-1 p-5">
           <p class="m-0 text-[14px] font-bold uppercase tracking-[0.12em] text-brand" x-text="v.tag"></p>

@@ -36,10 +36,10 @@ class Component extends DCLogic {
       if (this.state.playing) { const p = el.play(); if (p && p.catch) p.catch(() => {}); }
     };
     const featured = [
-      { name: 'VW T5 Spacious', tag: 'Pop-top · 4 berth', spec: 'Automatic · Double bed · Kitchen', img: 'assets/v-t5-spacious.jpg', alt: 'Grey VW T5 campervan with pop-top raised at sunset' },
-      { name: 'Toleno R', tag: 'Two double beds', spec: 'Manual · Bathroom · Dining', img: 'assets/v-toleno.jpg', alt: 'White Toleno R campervan on a woodland road' },
-      { name: 'VW Crafter LWB', tag: 'Room for four', spec: 'Automatic · Bathroom · Kitchen', img: 'assets/v-crafter-auto.jpg', alt: 'White VW Crafter campervan above a beach' },
-      { name: 'MAN TGE MWB', tag: 'Extra-wide bed', spec: 'Automatic · Bathroom · 2 berth', img: 'assets/v-man-mwb.jpg', alt: 'Grey MAN TGE campervan parked in farmland' }
+      { href: 'van-t5-spacious.html', name: 'VW T5 Spacious', tag: 'Pop-top · 4 berth', spec: 'Automatic · Double bed · Kitchen', img: 'assets/v-t5-spacious.jpg', alt: 'Grey VW T5 campervan with pop-top raised at sunset' },
+      { href: 'van-toleno.html', name: 'Toleno R', tag: 'Two double beds', spec: 'Manual · Bathroom · Dining', img: 'assets/v-toleno.jpg', alt: 'White Toleno R campervan on a woodland road' },
+      { href: 'van-crafter-auto.html', name: 'VW Crafter LWB', tag: 'Room for four', spec: 'Automatic · Bathroom · Kitchen', img: 'assets/v-crafter-auto.jpg', alt: 'White VW Crafter campervan above a beach' },
+      { href: 'van-man-mwb.html', name: 'MAN TGE MWB', tag: 'Extra-wide bed', spec: 'Automatic · Bathroom · 2 berth', img: 'assets/v-man-mwb.jpg', alt: 'Grey MAN TGE campervan parked in farmland' }
     ];
     const routes = [
       { name: 'North Coast 500', region: 'Scotland', line: 'Mountain roads and wild coastline', img: 'assets/nc500.jpg', alt: 'Kylesku Bridge over a Highland loch' },
@@ -75,15 +75,15 @@ class Component extends DCLogic {
   constructor(props) { super(props); this.state = { filter: 'all' }; }
   renderVals() {
     const VANS = [
-      { name: 'MAN TGE LWB Luxury', berth: 2, gear: 'Automatic', bathroom: true, roof: 'Fixed roof', badge: 'Luxury', features: 'North–south double bed, kitchen and bathroom.', img: 'assets/v-man-lwb-auto.jpg', alt: 'Grey MAN TGE campervan in front of snowy mountains' },
-      { name: 'MAN TGE LWB Luxury', berth: 2, gear: 'Manual', bathroom: true, roof: 'Fixed roof', badge: 'Luxury', features: 'Extra-plush double bed, bathroom, kitchen and generous living space.', img: 'assets/v-man-lwb-manual.jpg', alt: 'Grey MAN TGE campervan parked by trees' },
-      { name: 'MAN TGE MWB', berth: 2, gear: 'Automatic', bathroom: true, roof: 'Fixed roof', badge: 'Premium', features: 'Extra-wide bed, bathroom and kitchen. Easier to park.', img: 'assets/v-man-mwb.jpg', alt: 'Grey MAN TGE campervan in farmland' },
-      { name: 'VW Crafter LWB', berth: 4, gear: 'Automatic', bathroom: true, roof: 'Fixed roof', badge: 'Premium', features: 'Two beds, bathroom, kitchen and dining area.', img: 'assets/v-crafter-auto.jpg', alt: 'White VW Crafter campervan above a beach' },
-      { name: 'VW Crafter LWB', berth: 4, gear: 'Manual', bathroom: true, roof: 'Fixed roof', badge: '', features: 'Bathroom, kitchen, dining area and TV. Room to spread out.', img: 'assets/v-crafter-manual.jpg', alt: 'Silver VW Crafter campervan among olive trees' },
-      { name: 'Toleno R', berth: 4, gear: 'Manual', bathroom: true, roof: 'Fixed roof', badge: 'Premium', features: 'Two double beds, bathroom, kitchen, dining area and TV.', img: 'assets/v-toleno.jpg', alt: 'White Toleno R campervan on a woodland road' },
-      { name: 'VW T5 Spacious', berth: 4, gear: 'Automatic', bathroom: false, roof: 'Pop-top', badge: '', features: 'Pop-top roof, double bed, kitchen and microwave.', img: 'assets/v-t5-spacious.jpg', alt: 'Grey VW T5 campervan with pop-top raised' },
-      { name: 'VW T5 Wide Bed', berth: 4, gear: 'Automatic', bathroom: false, roof: 'Pop-top', badge: '', features: 'Pop-top roof, side kitchen and a wide double bed.', img: 'assets/v-t5-widebed.jpg', alt: 'Silver VW T5 campervan with pop-top on a country lane' },
-      { name: 'VW T5 Compact', berth: 4, gear: 'Automatic', bathroom: false, roof: 'Pop-top', badge: '', features: 'Pop-top, side kitchen and double bed. Nimble on country lanes.', img: 'assets/v-t5-compact.jpg', alt: 'White VW T5 campervan on a clifftop campsite' }
+      { name: 'MAN TGE LWB Luxury', berth: 2, gear: 'Automatic', bathroom: true, roof: 'Fixed roof', badge: 'Luxury', features: 'North–south double bed, kitchen and bathroom.', href: 'van-man-lwb-auto.html', img: 'assets/v-man-lwb-auto.jpg', alt: 'Grey MAN TGE campervan in front of snowy mountains' },
+      { name: 'MAN TGE LWB Luxury', berth: 2, gear: 'Manual', bathroom: true, roof: 'Fixed roof', badge: 'Luxury', features: 'Extra-plush double bed, bathroom, kitchen and generous living space.', href: 'van-man-lwb-manual.html', img: 'assets/v-man-lwb-manual.jpg', alt: 'Grey MAN TGE campervan parked by trees' },
+      { name: 'MAN TGE MWB', berth: 2, gear: 'Automatic', bathroom: true, roof: 'Fixed roof', badge: 'Premium', features: 'Extra-wide bed, bathroom and kitchen. Easier to park.', href: 'van-man-mwb.html', img: 'assets/v-man-mwb.jpg', alt: 'Grey MAN TGE campervan in farmland' },
+      { name: 'VW Crafter LWB', berth: 4, gear: 'Automatic', bathroom: true, roof: 'Fixed roof', badge: 'Premium', features: 'Two beds, bathroom, kitchen and dining area.', href: 'van-crafter-auto.html', img: 'assets/v-crafter-auto.jpg', alt: 'White VW Crafter campervan above a beach' },
+      { name: 'VW Crafter LWB', berth: 4, gear: 'Manual', bathroom: true, roof: 'Fixed roof', badge: '', features: 'Bathroom, kitchen, dining area and TV. Room to spread out.', href: 'van-crafter-manual.html', img: 'assets/v-crafter-manual.jpg', alt: 'Silver VW Crafter campervan among olive trees' },
+      { name: 'Toleno R', berth: 4, gear: 'Manual', bathroom: true, roof: 'Fixed roof', badge: 'Premium', features: 'Two double beds, bathroom, kitchen, dining area and TV.', href: 'van-toleno.html', img: 'assets/v-toleno.jpg', alt: 'White Toleno R campervan on a woodland road' },
+      { name: 'VW T5 Spacious', berth: 4, gear: 'Automatic', bathroom: false, roof: 'Pop-top', badge: '', features: 'Pop-top roof, double bed, kitchen and microwave.', href: 'van-t5-spacious.html', img: 'assets/v-t5-spacious.jpg', alt: 'Grey VW T5 campervan with pop-top raised' },
+      { name: 'VW T5 Wide Bed', berth: 4, gear: 'Automatic', bathroom: false, roof: 'Pop-top', badge: '', features: 'Pop-top roof, side kitchen and a wide double bed.', href: 'van-t5-widebed.html', img: 'assets/v-t5-widebed.jpg', alt: 'Silver VW T5 campervan with pop-top on a country lane' },
+      { name: 'VW T5 Compact', berth: 4, gear: 'Automatic', bathroom: false, roof: 'Pop-top', badge: '', features: 'Pop-top, side kitchen and double bed. Nimble on country lanes.', href: 'van-t5-compact.html', img: 'assets/v-t5-compact.jpg', alt: 'White VW T5 campervan on a clifftop campsite' }
     ].map((v) => ({ ...v, premium: !!v.badge, gearShort: v.gear === 'Automatic' ? 'Auto' : 'Manual', bathShort: v.bathroom ? 'Yes' : 'No' }));
     const FILTERS = [
       { id: 'all', label: 'All campervans', test: () => true },
@@ -102,37 +102,6 @@ class Component extends DCLogic {
       all: VANS,
       count: vans.length,
       total: VANS.length
-    };
-  }
-}
-
-return Component;
-})();
-
-DC["Van"] = (function () {
-
-class Component extends DCLogic {
-  constructor(props) { super(props); this.state = { i: 0, playing: true }; this.video = null; }
-  renderVals() {
-    const PHOTOS = [
-      { src: 'assets/v-man-lwb-auto.jpg', alt: 'MAN TGE campervan in front of snowy mountains' },
-      { src: 'assets/man-cab-golden.jpg', alt: 'Cab and front seats at golden hour' },
-      { src: 'assets/man-interior.jpg', alt: 'Bed and kitchen inside the campervan' },
-      { src: 'assets/man-cab.jpg', alt: 'Dashboard, steering wheel and navigation screen' },
-      { src: 'assets/man-rear.jpg', alt: 'Rear view of the campervan on a country lane' }
-    ];
-    const on = 'aspect-[4/3] w-full overflow-hidden rounded-xl ring-4 ring-brand';
-    const off = 'aspect-[4/3] w-full overflow-hidden rounded-xl opacity-80 ring-1 ring-plum/10 hover:opacity-100';
-    const i = this.state.i;
-    return {
-      photo: PHOTOS[i],
-      photoIndex: i + 1,
-      photoCount: PHOTOS.length,
-      thumbs: PHOTOS.map((p, k) => ({ src: p.src, label: 'Show photo ' + (k + 1) + ': ' + p.alt, pressed: k === i ? 'true' : 'false', cls: k === i ? on : off, pick: () => this.setState({ i: k }) })),
-      videoRef: (el) => { if (!el) return; this.video = el; el.muted = true; el.loop = true; el.playsInline = true; if (this.state.playing) { const p = el.play(); if (p && p.catch) p.catch(() => {}); } },
-      videoLabel: this.state.playing ? 'Pause film' : 'Play film',
-      videoText: this.state.playing ? 'Pause' : 'Play',
-      toggleVideo: () => { const next = !this.state.playing; try { next ? this.video.play() : this.video.pause(); } catch (e) {} this.setState({ playing: next }); }
     };
   }
 }
@@ -257,6 +226,258 @@ class Component extends DCLogic {
 return Component;
 })();
 
+DC["Van"] = (function () {
+
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { i: 0, playing: true }; this.video = null; }
+  renderVals() {
+    const PHOTOS = [
+      { src: 'assets/v-man-lwb-auto.jpg', alt: "MAN TGE campervan in front of snowy mountains" },
+      { src: 'assets/man-cab-golden.jpg', alt: "Cab and front seats at golden hour" },
+      { src: 'assets/man-interior.jpg', alt: "Bed and kitchen inside the campervan" },
+      { src: 'assets/man-cab.jpg', alt: "Dashboard, steering wheel and navigation screen" },
+      { src: 'assets/man-rear.jpg', alt: "Rear view of the campervan on a country lane" }
+    ];
+    const on = 'aspect-[4/3] w-full overflow-hidden rounded-xl ring-4 ring-brand';
+    const off = 'aspect-[4/3] w-full overflow-hidden rounded-xl opacity-80 ring-1 ring-plum/10 hover:opacity-100';
+    const i = this.state.i;
+    return {
+      photo: PHOTOS[i],
+      photoIndex: i + 1,
+      photoCount: PHOTOS.length,
+      thumbs: PHOTOS.map((p, k) => ({ src: p.src, label: 'Show photo ' + (k + 1) + ': ' + p.alt, pressed: k === i ? 'true' : 'false', cls: k === i ? on : off, pick: () => this.setState({ i: k }) })),
+      videoRef: (el) => { if (!el) return; this.video = el; el.muted = true; el.loop = true; el.playsInline = true; if (this.state.playing) { const p = el.play(); if (p && p.catch) p.catch(() => {}); } },
+      videoLabel: this.state.playing ? 'Pause film' : 'Play film',
+      videoText: this.state.playing ? 'Pause' : 'Play',
+      toggleVideo: () => { const next = !this.state.playing; try { next ? this.video.play() : this.video.pause(); } catch (e) {} this.setState({ playing: next }); }
+    };
+  }
+}
+
+return Component;
+})();
+
+DC["Van-man-lwb-manual"] = (function () {
+
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { i: 0, playing: true }; this.video = null; }
+  renderVals() {
+    const PHOTOS = [
+      { src: 'assets/v-man-lwb-manual.jpg', alt: "Grey MAN TGE campervan parked by trees" },
+      { src: 'assets/man-cab-golden.jpg', alt: "Cab and front seats at golden hour" },
+      { src: 'assets/man-cab.jpg', alt: "Dashboard and steering wheel" }
+    ];
+    const on = 'aspect-[4/3] w-full overflow-hidden rounded-xl ring-4 ring-brand';
+    const off = 'aspect-[4/3] w-full overflow-hidden rounded-xl opacity-80 ring-1 ring-plum/10 hover:opacity-100';
+    const i = this.state.i;
+    return {
+      photo: PHOTOS[i],
+      photoIndex: i + 1,
+      photoCount: PHOTOS.length,
+      thumbs: PHOTOS.map((p, k) => ({ src: p.src, label: 'Show photo ' + (k + 1) + ': ' + p.alt, pressed: k === i ? 'true' : 'false', cls: k === i ? on : off, pick: () => this.setState({ i: k }) })),
+      videoRef: (el) => { if (!el) return; this.video = el; el.muted = true; el.loop = true; el.playsInline = true; if (this.state.playing) { const p = el.play(); if (p && p.catch) p.catch(() => {}); } },
+      videoLabel: this.state.playing ? 'Pause film' : 'Play film',
+      videoText: this.state.playing ? 'Pause' : 'Play',
+      toggleVideo: () => { const next = !this.state.playing; try { next ? this.video.play() : this.video.pause(); } catch (e) {} this.setState({ playing: next }); }
+    };
+  }
+}
+
+return Component;
+})();
+
+DC["Van-man-mwb"] = (function () {
+
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { i: 0, playing: true }; this.video = null; }
+  renderVals() {
+    const PHOTOS = [
+      { src: 'assets/v-man-mwb.jpg', alt: "Grey MAN TGE campervan in farmland" },
+      { src: 'assets/man-cab.jpg', alt: "Dashboard and steering wheel" }
+    ];
+    const on = 'aspect-[4/3] w-full overflow-hidden rounded-xl ring-4 ring-brand';
+    const off = 'aspect-[4/3] w-full overflow-hidden rounded-xl opacity-80 ring-1 ring-plum/10 hover:opacity-100';
+    const i = this.state.i;
+    return {
+      photo: PHOTOS[i],
+      photoIndex: i + 1,
+      photoCount: PHOTOS.length,
+      thumbs: PHOTOS.map((p, k) => ({ src: p.src, label: 'Show photo ' + (k + 1) + ': ' + p.alt, pressed: k === i ? 'true' : 'false', cls: k === i ? on : off, pick: () => this.setState({ i: k }) })),
+      videoRef: (el) => { if (!el) return; this.video = el; el.muted = true; el.loop = true; el.playsInline = true; if (this.state.playing) { const p = el.play(); if (p && p.catch) p.catch(() => {}); } },
+      videoLabel: this.state.playing ? 'Pause film' : 'Play film',
+      videoText: this.state.playing ? 'Pause' : 'Play',
+      toggleVideo: () => { const next = !this.state.playing; try { next ? this.video.play() : this.video.pause(); } catch (e) {} this.setState({ playing: next }); }
+    };
+  }
+}
+
+return Component;
+})();
+
+DC["Van-crafter-auto"] = (function () {
+
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { i: 0, playing: true }; this.video = null; }
+  renderVals() {
+    const PHOTOS = [
+      { src: 'assets/v-crafter-auto.jpg', alt: "White VW Crafter campervan above a beach" }
+    ];
+    const on = 'aspect-[4/3] w-full overflow-hidden rounded-xl ring-4 ring-brand';
+    const off = 'aspect-[4/3] w-full overflow-hidden rounded-xl opacity-80 ring-1 ring-plum/10 hover:opacity-100';
+    const i = this.state.i;
+    return {
+      photo: PHOTOS[i],
+      photoIndex: i + 1,
+      photoCount: PHOTOS.length,
+      thumbs: PHOTOS.map((p, k) => ({ src: p.src, label: 'Show photo ' + (k + 1) + ': ' + p.alt, pressed: k === i ? 'true' : 'false', cls: k === i ? on : off, pick: () => this.setState({ i: k }) })),
+      videoRef: (el) => { if (!el) return; this.video = el; el.muted = true; el.loop = true; el.playsInline = true; if (this.state.playing) { const p = el.play(); if (p && p.catch) p.catch(() => {}); } },
+      videoLabel: this.state.playing ? 'Pause film' : 'Play film',
+      videoText: this.state.playing ? 'Pause' : 'Play',
+      toggleVideo: () => { const next = !this.state.playing; try { next ? this.video.play() : this.video.pause(); } catch (e) {} this.setState({ playing: next }); }
+    };
+  }
+}
+
+return Component;
+})();
+
+DC["Van-crafter-manual"] = (function () {
+
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { i: 0, playing: true }; this.video = null; }
+  renderVals() {
+    const PHOTOS = [
+      { src: 'assets/v-crafter-manual.jpg', alt: "Silver VW Crafter campervan among olive trees" }
+    ];
+    const on = 'aspect-[4/3] w-full overflow-hidden rounded-xl ring-4 ring-brand';
+    const off = 'aspect-[4/3] w-full overflow-hidden rounded-xl opacity-80 ring-1 ring-plum/10 hover:opacity-100';
+    const i = this.state.i;
+    return {
+      photo: PHOTOS[i],
+      photoIndex: i + 1,
+      photoCount: PHOTOS.length,
+      thumbs: PHOTOS.map((p, k) => ({ src: p.src, label: 'Show photo ' + (k + 1) + ': ' + p.alt, pressed: k === i ? 'true' : 'false', cls: k === i ? on : off, pick: () => this.setState({ i: k }) })),
+      videoRef: (el) => { if (!el) return; this.video = el; el.muted = true; el.loop = true; el.playsInline = true; if (this.state.playing) { const p = el.play(); if (p && p.catch) p.catch(() => {}); } },
+      videoLabel: this.state.playing ? 'Pause film' : 'Play film',
+      videoText: this.state.playing ? 'Pause' : 'Play',
+      toggleVideo: () => { const next = !this.state.playing; try { next ? this.video.play() : this.video.pause(); } catch (e) {} this.setState({ playing: next }); }
+    };
+  }
+}
+
+return Component;
+})();
+
+DC["Van-toleno"] = (function () {
+
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { i: 0, playing: true }; this.video = null; }
+  renderVals() {
+    const PHOTOS = [
+      { src: 'assets/v-toleno.jpg', alt: "White Toleno R campervan on a woodland road" },
+      { src: 'assets/toleno-door.jpg', alt: "Open side door showing the kitchen and dining area" },
+      { src: 'assets/toleno-bed.jpg', alt: "Bed looking out through open rear doors" }
+    ];
+    const on = 'aspect-[4/3] w-full overflow-hidden rounded-xl ring-4 ring-brand';
+    const off = 'aspect-[4/3] w-full overflow-hidden rounded-xl opacity-80 ring-1 ring-plum/10 hover:opacity-100';
+    const i = this.state.i;
+    return {
+      photo: PHOTOS[i],
+      photoIndex: i + 1,
+      photoCount: PHOTOS.length,
+      thumbs: PHOTOS.map((p, k) => ({ src: p.src, label: 'Show photo ' + (k + 1) + ': ' + p.alt, pressed: k === i ? 'true' : 'false', cls: k === i ? on : off, pick: () => this.setState({ i: k }) })),
+      videoRef: (el) => { if (!el) return; this.video = el; el.muted = true; el.loop = true; el.playsInline = true; if (this.state.playing) { const p = el.play(); if (p && p.catch) p.catch(() => {}); } },
+      videoLabel: this.state.playing ? 'Pause film' : 'Play film',
+      videoText: this.state.playing ? 'Pause' : 'Play',
+      toggleVideo: () => { const next = !this.state.playing; try { next ? this.video.play() : this.video.pause(); } catch (e) {} this.setState({ playing: next }); }
+    };
+  }
+}
+
+return Component;
+})();
+
+DC["Van-t5-spacious"] = (function () {
+
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { i: 0, playing: true }; this.video = null; }
+  renderVals() {
+    const PHOTOS = [
+      { src: 'assets/v-t5-spacious.jpg', alt: "Grey VW T5 campervan with pop-top raised" }
+    ];
+    const on = 'aspect-[4/3] w-full overflow-hidden rounded-xl ring-4 ring-brand';
+    const off = 'aspect-[4/3] w-full overflow-hidden rounded-xl opacity-80 ring-1 ring-plum/10 hover:opacity-100';
+    const i = this.state.i;
+    return {
+      photo: PHOTOS[i],
+      photoIndex: i + 1,
+      photoCount: PHOTOS.length,
+      thumbs: PHOTOS.map((p, k) => ({ src: p.src, label: 'Show photo ' + (k + 1) + ': ' + p.alt, pressed: k === i ? 'true' : 'false', cls: k === i ? on : off, pick: () => this.setState({ i: k }) })),
+      videoRef: (el) => { if (!el) return; this.video = el; el.muted = true; el.loop = true; el.playsInline = true; if (this.state.playing) { const p = el.play(); if (p && p.catch) p.catch(() => {}); } },
+      videoLabel: this.state.playing ? 'Pause film' : 'Play film',
+      videoText: this.state.playing ? 'Pause' : 'Play',
+      toggleVideo: () => { const next = !this.state.playing; try { next ? this.video.play() : this.video.pause(); } catch (e) {} this.setState({ playing: next }); }
+    };
+  }
+}
+
+return Component;
+})();
+
+DC["Van-t5-widebed"] = (function () {
+
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { i: 0, playing: true }; this.video = null; }
+  renderVals() {
+    const PHOTOS = [
+      { src: 'assets/v-t5-widebed.jpg', alt: "Silver VW T5 campervan with pop-top on a country lane" }
+    ];
+    const on = 'aspect-[4/3] w-full overflow-hidden rounded-xl ring-4 ring-brand';
+    const off = 'aspect-[4/3] w-full overflow-hidden rounded-xl opacity-80 ring-1 ring-plum/10 hover:opacity-100';
+    const i = this.state.i;
+    return {
+      photo: PHOTOS[i],
+      photoIndex: i + 1,
+      photoCount: PHOTOS.length,
+      thumbs: PHOTOS.map((p, k) => ({ src: p.src, label: 'Show photo ' + (k + 1) + ': ' + p.alt, pressed: k === i ? 'true' : 'false', cls: k === i ? on : off, pick: () => this.setState({ i: k }) })),
+      videoRef: (el) => { if (!el) return; this.video = el; el.muted = true; el.loop = true; el.playsInline = true; if (this.state.playing) { const p = el.play(); if (p && p.catch) p.catch(() => {}); } },
+      videoLabel: this.state.playing ? 'Pause film' : 'Play film',
+      videoText: this.state.playing ? 'Pause' : 'Play',
+      toggleVideo: () => { const next = !this.state.playing; try { next ? this.video.play() : this.video.pause(); } catch (e) {} this.setState({ playing: next }); }
+    };
+  }
+}
+
+return Component;
+})();
+
+DC["Van-t5-compact"] = (function () {
+
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { i: 0, playing: true }; this.video = null; }
+  renderVals() {
+    const PHOTOS = [
+      { src: 'assets/v-t5-compact.jpg', alt: "White VW T5 campervan on a clifftop campsite" }
+    ];
+    const on = 'aspect-[4/3] w-full overflow-hidden rounded-xl ring-4 ring-brand';
+    const off = 'aspect-[4/3] w-full overflow-hidden rounded-xl opacity-80 ring-1 ring-plum/10 hover:opacity-100';
+    const i = this.state.i;
+    return {
+      photo: PHOTOS[i],
+      photoIndex: i + 1,
+      photoCount: PHOTOS.length,
+      thumbs: PHOTOS.map((p, k) => ({ src: p.src, label: 'Show photo ' + (k + 1) + ': ' + p.alt, pressed: k === i ? 'true' : 'false', cls: k === i ? on : off, pick: () => this.setState({ i: k }) })),
+      videoRef: (el) => { if (!el) return; this.video = el; el.muted = true; el.loop = true; el.playsInline = true; if (this.state.playing) { const p = el.play(); if (p && p.catch) p.catch(() => {}); } },
+      videoLabel: this.state.playing ? 'Pause film' : 'Play film',
+      videoText: this.state.playing ? 'Pause' : 'Play',
+      toggleVideo: () => { const next = !this.state.playing; try { next ? this.video.play() : this.video.pause(); } catch (e) {} this.setState({ playing: next }); }
+    };
+  }
+}
+
+return Component;
+})();
+
 DC["Header"] = (function () {
 
 class Component extends DCLogic {
@@ -299,15 +520,15 @@ return Component;
 DC["Van3D"] = (function () {
 
 const VAN_SPECS = {
-  'man-lwb-auto':   { name: 'MAN TGE LWB Luxury · Automatic', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#47474b', layout: 'northsouth', bath: true, rearAxle: 1.75, doors: 'barn' },
-  'man-lwb-manual': { name: 'MAN TGE LWB Luxury · Manual', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#404145', layout: 'transverse', bedDepth: 1.5, bath: true, rearAxle: 1.75, doors: 'barn' },
-  'man-mwb':        { name: 'MAN TGE MWB · 2 berth', L: 5.99, W: 2.04, H: 2.6, kind: 'high', paint: '#4b4c51', layout: 'transverse', bedDepth: 1.6, bath: true, rearAxle: 1.15, doors: 'barn' },
-  'crafter-auto':   { name: 'VW Crafter LWB · Automatic', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#eeeeec', layout: 'transverse', bedDepth: 1.4, bath: true, dinette: true, rearAxle: 1.75, doors: 'barn' },
-  'crafter-manual': { name: 'VW Crafter LWB · Manual', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#c4c7cb', layout: 'transverse', bedDepth: 1.4, bath: true, dinette: true, rearAxle: 1.75, doors: 'barn' },
-  'toleno':         { name: 'Toleno R · 4 berth', L: 6.36, W: 2.05, H: 2.62, kind: 'high', paint: '#f4f4f2', stripes: true, layout: 'transverse', bedDepth: 1.45, bath: true, dinette: true, rearAxle: 1.5, doors: 'barn' },
-  't5-spacious':    { name: 'VW T5 Spacious · Pop-top', L: 4.9, W: 1.9, H: 1.97, kind: 'pop', paint: '#53575d', layout: 'rockroll', bath: false, rearAxle: 1.0, doors: 'tailgate' },
-  't5-widebed':     { name: 'VW T5 Wide Bed · Pop-top', L: 4.9, W: 1.9, H: 1.97, kind: 'pop', paint: '#b3b7bd', layout: 'rockroll', wideBed: true, bath: false, rearAxle: 1.0, doors: 'tailgate' },
-  't5-compact':     { name: 'VW T5 Compact · Pop-top', L: 4.9, W: 1.9, H: 1.97, kind: 'pop', paint: '#efefed', layout: 'rockroll', bath: false, rearAxle: 1.0, doors: 'tailgate' }
+  'man-lwb-auto': { env: 'loch', name: 'MAN TGE LWB Luxury · Automatic', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#47474b', layout: 'northsouth', bath: true, rearAxle: 1.75, doors: 'barn' },
+  'man-lwb-manual': { env: 'alps', name: 'MAN TGE LWB Luxury · Manual', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#404145', layout: 'transverse', bedDepth: 1.5, bath: true, rearAxle: 1.75, doors: 'barn' },
+  'man-mwb': { env: 'lakes', name: 'MAN TGE MWB · 2 berth', L: 5.99, W: 2.04, H: 2.6, kind: 'high', paint: '#4b4c51', layout: 'transverse', bedDepth: 1.6, bath: true, rearAxle: 1.15, doors: 'barn' },
+  'crafter-auto': { env: 'coast', name: 'VW Crafter LWB · Automatic', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#eeeeec', layout: 'transverse', bedDepth: 1.4, bath: true, dinette: true, rearAxle: 1.75, doors: 'barn' },
+  'crafter-manual': { env: 'dales', name: 'VW Crafter LWB · Manual', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#c4c7cb', layout: 'transverse', bedDepth: 1.4, bath: true, dinette: true, rearAxle: 1.75, doors: 'barn' },
+  'toleno': { env: 'forest', name: 'Toleno R · 4 berth', L: 6.36, W: 2.05, H: 2.62, kind: 'high', paint: '#f4f4f2', stripes: true, layout: 'transverse', bedDepth: 1.45, bath: true, dinette: true, rearAxle: 1.5, doors: 'barn' },
+  't5-spacious': { env: 'dales', name: 'VW T5 Spacious · Pop-top', L: 4.9, W: 1.9, H: 1.97, kind: 'pop', paint: '#53575d', layout: 'rockroll', bath: false, rearAxle: 1.0, doors: 'tailgate' },
+  't5-widebed': { env: 'lakes', name: 'VW T5 Wide Bed · Pop-top', L: 4.9, W: 1.9, H: 1.97, kind: 'pop', paint: '#b3b7bd', layout: 'rockroll', wideBed: true, bath: false, rearAxle: 1.0, doors: 'tailgate' },
+  't5-compact': { env: 'coast', name: 'VW T5 Compact · Pop-top', L: 4.9, W: 1.9, H: 1.97, kind: 'pop', paint: '#efefed', layout: 'rockroll', bath: false, rearAxle: 1.0, doors: 'tailgate' }
 };
 const VAN_ORDER = ['man-lwb-auto', 'man-lwb-manual', 'man-mwb', 'crafter-auto', 'crafter-manual', 'toleno', 't5-spacious', 't5-widebed', 't5-compact'];
 const VIEWS = [
@@ -727,24 +948,50 @@ function buildVan(T, c) {
   return res;
 }
 
-// ---------- the world: sky, mountains, loch, hills, road
-function buildWorld(T, renderer) {
+// ---------- environments: each van page gets its own setting
+const ENVS = {
+  loch:   { label: 'Highland loch', sky: ['#2f6dbf', '#b9d3ec', '#b9ad97'], fog: [120, 900], grass: ['#4c6634', '#6f7a3c'], accent: '#6f5446', water: { x0: 12, x1: 142, y: -0.22, color: '#1d3a4b' }, shore: true, trees: 'pine', ridges: [['#2f3b2e', '#4a5446', 0], ['#4b5468', '#6c7488', 1], ['#7d86a0', '#a3aac0', 1]] },
+  lakes:  { label: 'Lake District', sky: ['#3574c2', '#c2d9ee', '#b8b09a'], fog: [100, 800], grass: ['#4f6e36', '#7a8547'], accent: '#7a6a50', water: { x0: 12, x1: 72, y: -0.22, color: '#20404f' }, shore: true, trees: 'mixed', ridges: [['#3a4a34', '#56664a', 0], ['#5a6474', '#7a8496', 0], ['#8a93a8', '#aab1c4', 1]] },
+  coast:  { label: 'Clifftop & sea', sky: ['#2a78cf', '#cde2f3', '#cfc6b0'], fog: [160, 1400], grass: ['#5d7a3a', '#8a8a4a'], accent: '#b8a874', sea: true, trees: 'tufts', ridges: [['#4e5c45', '#6b7656', 0], ['#7d8a8f', '#9aa5ab', 0]], westOnly: true },
+  dales:  { label: 'Rolling countryside', sky: ['#3179cf', '#cbe0f3', '#c2b48e'], fog: [140, 1000], grass: ['#5f8a3a', '#9aa04a'], accent: '#c8b25a', fields: true, trees: 'oak', ridges: [['#56704a', '#6f8a5a', 0], ['#7f93a0', '#9eb0bb', 0]] },
+  forest: { label: 'Pine forest', sky: ['#4a7fb8', '#c4d6e3', '#8f9a84'], fog: [45, 420], grass: ['#3e5a2e', '#56693a'], accent: '#5a4a36', trees: 'dense', ridges: [['#2d3a2c', '#3c4a38', 0], ['#4a5662', '#606c78', 0]] },
+  alps:   { label: 'Alpine pass', sky: ['#2268cf', '#d3e5f5', '#c9d2d6'], fog: [160, 1300], grass: ['#5c8a3a', '#86a04e'], accent: '#9aa07a', alpine: true, trees: 'larch', ridges: [['#56606e', '#e9edf2', 2], ['#6a7486', '#f2f5f8', 2], ['#8e98ad', '#f7f9fb', 2]] }
+};
+
+// ---------- the world: sky, terrain, water, trees, road
+function buildWorld(T, renderer, E) {
   const world = new T.Group(), disposables = [];
   const sunDir = new T.Vector3(SKY.sun[0], SKY.sun[1], SKY.sun[2]).normalize();
   const skyMat = new T.ShaderMaterial({
     side: T.BackSide, depthWrite: false, fog: false,
-    uniforms: { top: { value: new T.Color(SKY.top) }, horizon: { value: new T.Color(SKY.horizon) }, bottom: { value: new T.Color(SKY.bottom) }, sunDir: { value: sunDir } },
+    uniforms: { top: { value: new T.Color(E.sky[0]) }, horizon: { value: new T.Color(E.sky[1]) }, bottom: { value: new T.Color(E.sky[2]) }, sunDir: { value: sunDir }, time: { value: 0 } },
     vertexShader: 'varying vec3 vDir; void main(){ vDir = normalize(position); vec4 p = modelViewMatrix * vec4(position,1.0); gl_Position = projectionMatrix * p; }',
-    fragmentShader: 'uniform vec3 top; uniform vec3 horizon; uniform vec3 bottom; uniform vec3 sunDir; varying vec3 vDir;' +
-      'void main(){ float h = vDir.y; vec3 c = h > 0.0 ? mix(horizon, top, pow(clamp(h,0.0,1.0), 0.55)) : mix(horizon, bottom, pow(clamp(-h,0.0,1.0), 0.4));' +
-      'float s = max(dot(normalize(vDir), sunDir), 0.0); c += vec3(1.0,0.86,0.62) * (pow(s, 900.0) * 6.0 + pow(s, 24.0) * 0.35 + pow(s, 4.0) * 0.08);' +
-      'float cl = 0.0; vec2 q = vDir.xz / max(h, 0.06) * 0.6; cl = smoothstep(0.55, 0.85, 0.5 + 0.5 * sin(q.x * 2.1 + sin(q.y * 1.3)) * sin(q.y * 1.7 + sin(q.x * 0.9)));' +
-      'c = mix(c, vec3(1.0,0.97,0.93), cl * 0.35 * smoothstep(0.02, 0.25, h));' +
-      'gl_FragColor = vec4(c, 1.0);\n#include <tonemapping_fragment>\n#include <colorspace_fragment>\n}'
+    fragmentShader: [
+      'uniform vec3 top; uniform vec3 horizon; uniform vec3 bottom; uniform vec3 sunDir; uniform float time; varying vec3 vDir;',
+      'float hsh(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }',
+      'float vn(vec2 p){ vec2 i = floor(p), f = fract(p); vec2 u = f * f * (3.0 - 2.0 * f); return mix(mix(hsh(i), hsh(i + vec2(1.0, 0.0)), u.x), mix(hsh(i + vec2(0.0, 1.0)), hsh(i + vec2(1.0, 1.0)), u.x), u.y); }',
+      'float fb(vec2 p){ float s = 0.0, a = 0.5; for (int i = 0; i < 5; i++) { s += a * vn(p); p *= 2.03; a *= 0.5; } return s; }',
+      'void main(){',
+      '  vec3 d = normalize(vDir); float h = d.y; float sl = length(sunDir); vec3 sd = sunDir / max(sl, 0.001);',
+      '  vec3 c = h > 0.0 ? mix(horizon, top, pow(clamp(h, 0.0, 1.0), 0.5)) : mix(horizon, bottom, pow(clamp(-h, 0.0, 1.0), 0.4));',
+      '  float s = max(dot(d, sd), 0.0);',
+      '  c += vec3(1.0, 0.88, 0.66) * (pow(s, 900.0) * 6.0 + pow(s, 24.0) * 0.3 + pow(s, 4.0) * 0.06) * sl;',
+      '  if (h > 0.0) {',
+      '    vec2 uv = d.xz / (h + 0.12) * 1.15 + vec2(time * 0.012, time * 0.004);',
+      '    float n = fb(uv * 1.3) * 0.75 + fb(uv * 4.1 + 7.0) * 0.25;',
+      '    float cov = smoothstep(0.5, 0.78, n) * smoothstep(0.0, 0.16, h);',
+      '    float shade = smoothstep(0.5, 0.95, fb(uv * 1.3 + vec2(0.04, 0.06)));',
+      '    vec3 lit = mix(vec3(1.0), horizon * 1.15 + vec3(0.12, 0.06, 0.04), clamp(1.0 - sd.y * 3.0, 0.0, 1.0) * 0.75);',
+      '    vec3 cc = mix(lit, lit * vec3(0.78, 0.8, 0.86), shade * 0.6) * (0.2 + 0.8 * sl);',
+      '    c = mix(c, cc, cov * 0.92);',
+      '  }',
+      '  gl_FragColor = vec4(c, 1.0);',
+      '#include <tonemapping_fragment>',
+      '#include <colorspace_fragment>',
+      '}'
+    ].join('\n')
   });
   const sky = new T.Mesh(new T.SphereGeometry(900, 48, 24), skyMat); world.add(sky); disposables.push(sky.geometry, skyMat);
-
-  // environment lighting from the sky
   const pm = new T.PMREMGenerator(renderer);
   const envScene = new T.Scene(); const envSky = new T.Mesh(new T.SphereGeometry(100, 32, 16), skyMat); envScene.add(envSky);
   const env = pm.fromScene(envScene, 0.035).texture;
@@ -755,39 +1002,55 @@ function buildWorld(T, renderer) {
     u.top.value.copy(keep[0]); u.horizon.value.copy(keep[1]); u.bottom.value.copy(keep[2]); u.sunDir.value.copy(keep[3]);
     return t;
   };
-  // stars, faded in at night
   const sN = 1600, sp = new Float32Array(sN * 3);
   for (let i = 0; i < sN; i++) { const th = hash2(i, 11) * Math.PI * 2, y = 0.08 + hash2(i, 12) * 0.92, r = Math.sqrt(1 - y * y); sp[i * 3] = Math.cos(th) * r * 850; sp[i * 3 + 1] = y * 850; sp[i * 3 + 2] = Math.sin(th) * r * 850; }
   const sGeo = new T.BufferGeometry(); sGeo.setAttribute('position', new T.BufferAttribute(sp, 3));
   const sMat = new T.PointsMaterial({ color: '#ffffff', size: 1.6, sizeAttenuation: false, transparent: true, opacity: 0, depthWrite: false, fog: false });
   const stars = new T.Points(sGeo, sMat); stars.visible = false; world.add(stars); disposables.push(sGeo, sMat);
 
-  // terrain height
+  const cl01 = (v) => Math.min(1, Math.max(0, v));
+  const W0 = E.water;
   const heightAt = (x, z) => {
-    const ax = Math.abs(x);
-    let h = 0;
-    if (x < 0) h = Math.max(0, (ax - 28) / 60) * 7 * fbm(x * 0.012 + 3, z * 0.012, 4) * Math.min(1, Math.max(0, (ax - 28) / 40));
-    else { const lochEdge = Math.min(1, Math.max(0, (x - 9) / 7)); h = -0.9 * lochEdge + Math.min(1, Math.max(0, (x - 112) / 30)) * (1.2 + 34 * fbm(x * 0.011, z * 0.011 + 7, 4) * Math.min(1, (x - 112) / 90 + 0.25)); }
-    if (ax < 8) h *= 0; return h;
+    const ax = Math.abs(x); let h = 0;
+    if (ax < 8) return 0;
+    if (E.sea) {
+      if (x < 0) h = cl01((ax - 10) / 20) * (1.5 + 4 * fbm(x * 0.03, z * 0.03, 3));
+      else h = -1.4 * cl01((x - 9) / 14) - Math.max(0, x - 23) * 0.06;
+    } else if (E.fields) {
+      h = cl01((ax - 10) / 35) * (2 + 10 * fbm(x * 0.006 + 2, z * 0.006, 3));
+    } else if (E.trees === 'dense') {
+      h = cl01((ax - 10) / 40) * (1.5 + 6 * fbm(x * 0.01, z * 0.01, 3));
+    } else if (E.alpine) {
+      if (x < 0) h = cl01((ax - 24) / 30) * (4 + 80 * fbm(x * 0.006, z * 0.006 + 3, 4) * cl01((ax - 24) / 120 + 0.2));
+      else h = cl01((x - 18) / 40) * 3 * fbm(x * 0.02, z * 0.02, 2) + cl01((x - 70) / 40) * (6 + 90 * fbm(x * 0.006 + 9, z * 0.006, 4));
+    } else if (W0) {
+      const fellsL = E.trees === 'mixed';
+      if (x < 0) h = fellsL ? cl01((ax - 16) / 25) * (4 + 28 * fbm(x * 0.008, z * 0.008, 4)) : Math.max(0, (ax - 28) / 60) * 7 * fbm(x * 0.012 + 3, z * 0.012, 4) * cl01((ax - 28) / 40);
+      else { const edge = cl01((x - 9) / 7), far = W0.x1 - 30; h = -0.9 * edge + cl01((x - far) / 30) * (1.2 + (fellsL ? 44 : 34) * fbm(x * 0.011, z * 0.011 + 7, 4) * Math.min(1, (x - far) / 90 + 0.25)); }
+    }
+    return h;
   };
   const gGeo = new T.PlaneGeometry(1000, 1000, 200, 200); gGeo.rotateX(-Math.PI / 2);
   const pos = gGeo.attributes.position, cols = [], col = new T.Color();
-  const grassA = new T.Color('#4c6634'), grassB = new T.Color('#6f7a3c'), heather = new T.Color('#6f5446'), verge = new T.Color('#7e7a5e'), rock = new T.Color('#7b7a74'), beach = new T.Color('#8f8878');
+  const gA = new T.Color(E.grass[0]), gB = new T.Color(E.grass[1]), acc = new T.Color(E.accent), verge = new T.Color('#7e7a5e'), rock = new T.Color('#7b7a74'), beach = new T.Color(E.sea ? '#d9c9a0' : '#8f8878'), snow = new T.Color('#f3f5f8');
+  const fieldPal = ['#6d9a3e', '#86a548', '#a9a957', '#c8b25a', '#5f8a3a', '#7c9440'].map((h) => new T.Color(h));
   for (let i = 0; i < pos.count; i++) {
     const x = pos.getX(i), z = pos.getZ(i), h = heightAt(x, z); pos.setY(i, h);
     const n = fbm(x * 0.05, z * 0.05, 3), m = fbm(x * 0.008 + 11, z * 0.008, 3);
-    col.copy(grassA).lerp(grassB, n).lerp(heather, Math.max(0, m - 0.45) * 1.6);
-    if (h > 9) col.lerp(rock, Math.min(1, (h - 9) / 10));
+    col.copy(gA).lerp(gB, n).lerp(acc, Math.max(0, m - 0.45) * 1.6);
+    if (E.fields && Math.abs(x) > 9) { const cx = Math.floor(x / 45), cz = Math.floor(z / 35); col.copy(fieldPal[Math.floor(hash2(cx, cz) * fieldPal.length)]).lerp(gA, n * 0.25); }
+    if (h > 9) col.lerp(rock, cl01((h - 9) / 10));
+    if (E.alpine && h > 28) col.lerp(snow, cl01((h - 28) / 12));
     if (Math.abs(x) < 6.5) col.lerp(verge, 0.55);
-    if (x > 8.5 && x < 17) col.lerp(beach, Math.min(1, (x - 8.5) / 2) * 0.85);
-    if (x > 112 && x < 120) col.lerp(beach, 0.7 * (1 - Math.abs(x - 116) / 4));
+    if ((W0 || E.sea) && x > 8.5 && x < (E.sea ? 40 : 17)) col.lerp(beach, cl01((x - 8.5) / 2) * 0.85);
+    if (W0 && x > W0.x1 - 30 && x < W0.x1 - 22) col.lerp(beach, 0.7 * (1 - Math.abs(x - (W0.x1 - 26)) / 4));
     cols.push(col.r, col.g, col.b);
   }
   gGeo.setAttribute('color', new T.Float32BufferAttribute(cols, 3)); gGeo.computeVertexNormals();
   const groundMat = new T.MeshStandardMaterial({ vertexColors: true, roughness: 1 });
   const ground = new T.Mesh(gGeo, groundMat); ground.receiveShadow = true; world.add(ground); disposables.push(gGeo, groundMat);
 
-  // loch
+  // water with procedural ripples (lake or open sea)
   const waveTex = (() => {
     const N = 256, d = new Uint8Array(N * N * 4), hgt = (x, y) => Math.sin((x * 6 + y * 2) * Math.PI * 2 / N * 4) * 0.5 + Math.sin((x * -3 + y * 7) * Math.PI * 2 / N * 3) * 0.35 + (fbm(x / N * 16, y / N * 16, 3) - 0.5) * 1.6;
     for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
@@ -797,50 +1060,77 @@ function buildWorld(T, renderer) {
     const t = new T.DataTexture(d, N, N); t.wrapS = t.wrapT = T.RepeatWrapping; t.repeat.set(60, 150);
     t.magFilter = T.LinearFilter; t.minFilter = T.LinearMipmapLinearFilter; t.generateMipmaps = true; t.needsUpdate = true; return t;
   })();
-  const waterMat = new T.MeshStandardMaterial({ color: '#1d3a4b', roughness: 0.14, metalness: 0.0, envMapIntensity: 0.75, normalMap: waveTex, normalScale: new T.Vector2(0.45, 0.45) });
-  const water = new T.Mesh(new T.PlaneGeometry(130, 1000), waterMat); water.rotation.x = -Math.PI / 2; water.position.set(12 + 65, -0.22, 0); water.receiveShadow = true; world.add(water); disposables.push(water.geometry, waterMat, waveTex);
-  const pebG = new T.DodecahedronGeometry(0.12, 0), pebM = new T.MeshStandardMaterial({ color: '#8a8478', roughness: 1, flatShading: true });
-  const pebN = 260, peb = new T.InstancedMesh(pebG, pebM, pebN), pm4 = new T.Matrix4(), pq = new T.Quaternion(), ps = new T.Vector3(), pv = new T.Vector3();
-  for (let i = 0; i < pebN; i++) { const x = 10.5 + hash2(i, 21) * 3.5, z = (hash2(i, 22) - 0.5) * 120, sc0 = 0.5 + hash2(i, 23) * 1.4; pv.set(x, heightAt(x, z) + 0.03, z); pq.setFromEuler(new T.Euler(hash2(i, 24) * 3, hash2(i, 25) * 3, 0)); ps.set(sc0, sc0 * 0.6, sc0); pm4.compose(pv, pq, ps); peb.setMatrixAt(i, pm4); }
-  peb.receiveShadow = true; world.add(peb); disposables.push(pebG, pebM);
+  disposables.push(waveTex);
+  if (W0 || E.sea) {
+    const wm = new T.MeshStandardMaterial({ color: E.sea ? '#22597a' : W0.color, roughness: E.sea ? 0.18 : 0.14, metalness: 0, envMapIntensity: E.sea ? 0.9 : 0.75, normalMap: waveTex, normalScale: new T.Vector2(E.sea ? 0.7 : 0.45, E.sea ? 0.7 : 0.45) });
+    const wx0 = E.sea ? 14 : W0.x0, wx1 = E.sea ? 1400 : W0.x1;
+    const water = new T.Mesh(new T.PlaneGeometry(wx1 - wx0, E.sea ? 2400 : 1000), wm); water.rotation.x = -Math.PI / 2; water.position.set((wx0 + wx1) / 2, E.sea ? -0.75 : W0.y, 0); water.receiveShadow = true; world.add(water); disposables.push(water.geometry, wm);
+  }
+  if (E.shore || E.sea) {
+    const pebG = new T.DodecahedronGeometry(E.sea ? 0.35 : 0.12, 0), pebM = new T.MeshStandardMaterial({ color: E.sea ? '#77726a' : '#8a8478', roughness: 1, flatShading: true });
+    const pebN = E.sea ? 60 : 260, peb = new T.InstancedMesh(pebG, pebM, pebN), pm4 = new T.Matrix4(), pq = new T.Quaternion(), ps = new T.Vector3(), pv = new T.Vector3();
+    for (let i = 0; i < pebN; i++) { const x = (E.sea ? 14 : 10.5) + hash2(i, 21) * (E.sea ? 10 : 3.5), z = (hash2(i, 22) - 0.5) * (E.sea ? 200 : 120), sc0 = 0.5 + hash2(i, 23) * 1.4; pv.set(x, heightAt(x, z) + 0.03, z); pq.setFromEuler(new T.Euler(hash2(i, 24) * 3, hash2(i, 25) * 3, 0)); ps.set(sc0, sc0 * 0.6, sc0); pm4.compose(pv, pq, ps); peb.setMatrixAt(i, pm4); }
+    peb.receiveShadow = true; peb.castShadow = true; world.add(peb); disposables.push(pebG, pebM);
+  }
 
   // mountain ridges
-  const ridge = (radius, base, amp, seed, cA, cB, snow) => {
-    const segs = 360, p = [], cl = [], idx = [], ca = new T.Color(cA), cb = new T.Color(cB), sn = new T.Color('#eef0f3'), tmp = new T.Color();
+  E.ridges.forEach((rg, k) => {
+    const radius = [330, 460, 600][k], base = [30, 50, 70][k] * (E.alpine ? 1.5 : 1), amp = [70, 110, 150][k] * (E.alpine ? 1.7 : E.fields ? 0.5 : 1), seed = [1.3, 4.1, 7.7][k];
+    const segs = 360, p = [], cl = [], idx = [], ca = new T.Color(rg[0]), cb = new T.Color(rg[1]), sn = new T.Color('#eef0f3'), tmp = new T.Color();
     for (let i = 0; i <= segs; i++) {
       const a = (i / segs) * Math.PI * 2;
-      let n = 0; [2, 3, 5, 7, 11, 17, 29].forEach((f, k) => { n += Math.sin(a * f + seed * (k + 1)) / (k * 0.9 + 1); });
-      const hgt = base + amp * (0.5 + 0.35 * n) * (0.75 + 0.25 * Math.sin(a * 1 + seed));
+      let n = 0; [2, 3, 5, 7, 11, 17, 29].forEach((f, j) => { n += Math.sin(a * f + seed * (j + 1)) / (j * 0.9 + 1); });
+      let hgt = base + amp * (0.5 + 0.35 * n) * (0.75 + 0.25 * Math.sin(a + seed));
+      if (E.westOnly) hgt *= cl01((-Math.cos(a) + 0.15) / 0.5);
       const x = Math.cos(a) * radius, z = Math.sin(a) * radius;
-      p.push(x, -10, z, x, Math.max(base * 0.4, hgt), z);
+      p.push(x, -10, z, x, Math.max(E.westOnly ? -12 : base * 0.4, hgt), z);
       cl.push(ca.r, ca.g, ca.b);
-      tmp.copy(cb); if (snow && hgt > base + amp * 0.85) tmp.lerp(sn, 0.7); cl.push(tmp.r, tmp.g, tmp.b);
+      tmp.copy(cb); if (rg[2] === 1 && hgt > base + amp * 0.85) tmp.lerp(sn, 0.7); cl.push(tmp.r, tmp.g, tmp.b);
       if (i < segs) { const j = i * 2; idx.push(j, j + 1, j + 2, j + 1, j + 3, j + 2); }
     }
     const geo = new T.BufferGeometry(); geo.setAttribute('position', new T.Float32BufferAttribute(p, 3)); geo.setAttribute('color', new T.Float32BufferAttribute(cl, 3)); geo.setIndex(idx); geo.computeVertexNormals();
     const mat = new T.MeshStandardMaterial({ vertexColors: true, roughness: 1, side: T.DoubleSide, flatShading: true });
-    const m = new T.Mesh(geo, mat); world.add(m); disposables.push(geo, mat);
-  };
-  ridge(330, 30, 70, 1.3, '#2f3b2e', '#4a5446', false);
-  ridge(460, 50, 110, 4.1, '#4b5468', '#6c7488', true);
-  ridge(600, 70, 150, 7.7, '#7d86a0', '#a3aac0', true);
+    world.add(new T.Mesh(geo, mat)); disposables.push(geo, mat);
+  });
 
-  // pines
-  const coneG = new T.ConeGeometry(1.4, 5.5, 7), trunkG = new T.CylinderGeometry(0.18, 0.22, 1.4, 6);
-  coneG.translate(0, 4, 0); trunkG.translate(0, 0.7, 0);
-  const pineM = new T.MeshStandardMaterial({ color: '#2b3d2a', roughness: 1, flatShading: true }), trunkM = new T.MeshStandardMaterial({ color: '#4a3a2c', roughness: 1 });
-  const N = 420, cones = new T.InstancedMesh(coneG, pineM, N), trunks = new T.InstancedMesh(trunkG, trunkM, N), mtx = new T.Matrix4(), q = new T.Quaternion(), sc = new T.Vector3(), pp = new T.Vector3();
-  for (let i = 0; i < N; i++) {
-    let x, z, tries = 0;
-    const far = i % 3 === 0;
-    do { x = far ? 122 + Math.pow(hash2(i, 1), 1.2) * 150 : -60 - Math.pow(hash2(i, 1), 1.3) * 240; z = (hash2(i, 2) - 0.5) * 700; tries++; } while (fbm(x * 0.02, z * 0.02, 2) < 0.42 && tries < 6);
-    const s = 0.55 + hash2(i, 3) * 0.7; sc.set(s, s * (0.9 + hash2(i, 4) * 0.4), s); pp.set(x, heightAt(x, z), z);
-    q.setFromAxisAngle(new T.Vector3(0, 1, 0), hash2(i, 5) * 6.28); mtx.compose(pp, q, sc); cones.setMatrixAt(i, mtx); trunks.setMatrixAt(i, mtx);
+  // vegetation
+  const mtx = new T.Matrix4(), q = new T.Quaternion(), sc = new T.Vector3(), pp = new T.Vector3(), up = new T.Vector3(0, 1, 0);
+  const scatter = (geoTop, geoTrunk, cTop, cTrunk, N, place, flat) => {
+    const mt = new T.MeshStandardMaterial({ color: cTop, roughness: 1, flatShading: flat !== false }), mk = new T.MeshStandardMaterial({ color: cTrunk, roughness: 1 });
+    const A = new T.InstancedMesh(geoTop, mt, N), B = geoTrunk ? new T.InstancedMesh(geoTrunk, mk, N) : null;
+    for (let i = 0; i < N; i++) { const r = place(i); pp.set(r[0], heightAt(r[0], r[1]), r[1]); const s = r[2]; sc.set(s, s * (0.9 + hash2(i, 4) * 0.4), s); q.setFromAxisAngle(up, hash2(i, 5) * 6.28); mtx.compose(pp, q, sc); A.setMatrixAt(i, mtx); if (B) B.setMatrixAt(i, mtx); }
+    world.add(A); if (B) world.add(B); disposables.push(geoTop, mt, mk); if (geoTrunk) disposables.push(geoTrunk);
+  };
+  const pineG = () => { const g = new T.ConeGeometry(1.4, 5.5, 7); g.translate(0, 4, 0); return g; };
+  const trunkG = () => { const g = new T.CylinderGeometry(0.18, 0.22, 1.4, 6); g.translate(0, 0.7, 0); return g; };
+  const roundG = () => { const g = new T.IcosahedronGeometry(2.4, 1); g.translate(0, 3.6, 0); g.scale(1, 0.85, 1); return g; };
+  const trunkTall = () => { const g = new T.CylinderGeometry(0.22, 0.3, 2.4, 6); g.translate(0, 1.2, 0); return g; };
+  const sideX = (i, near, span, farSide) => (farSide ? 1 : -1) * (near + Math.pow(hash2(i, 1), 1.3) * span);
+  if (E.trees === 'pine' || E.trees === 'mixed') {
+    scatter(pineG(), trunkG(), '#2b3d2a', '#4a3a2c', 420, (i) => { const far = i % 3 === 0 && W0; return [far ? W0.x1 - 20 + Math.pow(hash2(i, 1), 1.2) * 150 : sideX(i, E.trees === 'mixed' ? 30 : 60, 240), (hash2(i, 2) - 0.5) * 700, 0.55 + hash2(i, 3) * 0.7]; });
+    if (E.trees === 'mixed') scatter(roundG(), trunkTall(), '#4f6b33', '#4a3a2c', 160, (i) => [sideX(i, 14, 120), (hash2(i, 6) - 0.5) * 500, 0.5 + hash2(i, 7) * 0.6]);
+  } else if (E.trees === 'dense') {
+    scatter(pineG(), trunkG(), '#263a26', '#4a3a2c', 1300, (i) => [sideX(i, 11, 230, i % 2 === 0), (hash2(i, 2) - 0.5) * 700, 0.75 + hash2(i, 3) * 0.9]);
+  } else if (E.trees === 'oak') {
+    scatter(roundG(), trunkTall(), '#46682e', '#4a3a2c', 260, (i) => { const cx = Math.floor(hash2(i, 8) * 8) - 4, side = cx >= 0 ? 1 : -1; return [side * 12 + cx * 45 + (hash2(i, 9) - 0.5) * 6, Math.floor((hash2(i, 10) - 0.5) * 20) * 35 + hash2(i, 11) * 35, 0.6 + hash2(i, 3) * 0.6]; });
+    // hedgerows along the field edges
+    const hedgeG = new T.BoxGeometry(1.1, 1.1, 1); const hedgeM = new T.MeshStandardMaterial({ color: '#3d5a2a', roughness: 1 });
+    const segs = []; for (let k = -4; k <= 4; k++) { const x = k * 45; if (Math.abs(x) < 12) continue; for (let zz = -350; zz < 350; zz += 6) segs.push([x, zz, 0]); }
+    for (let m = -10; m <= 10; m++) { const z = m * 35; for (let xx = -180; xx < 180; xx += 6) { if (Math.abs(xx) < 12) continue; segs.push([xx, z, 1]); } }
+    const hedges = new T.InstancedMesh(hedgeG, hedgeM, segs.length);
+    segs.forEach((sgm, i) => { pp.set(sgm[0], heightAt(sgm[0], sgm[1]) + 0.5, sgm[1]); q.setFromAxisAngle(up, sgm[2] ? Math.PI / 2 : 0); sc.set(1, 0.8 + hash2(i, 3) * 0.5, 6.2); mtx.compose(pp, q, sc); hedges.setMatrixAt(i, mtx); });
+    hedges.receiveShadow = true; world.add(hedges); disposables.push(hedgeG, hedgeM);
+  } else if (E.trees === 'larch') {
+    scatter(pineG(), trunkG(), '#45633a', '#4a3a2c', 520, (i) => [sideX(i, 26, 200, i % 4 === 0), (hash2(i, 2) - 0.5) * 700, 0.6 + hash2(i, 3) * 0.8]);
+  } else if (E.trees === 'tufts') {
+    const tg = new T.ConeGeometry(0.35, 0.9, 5); tg.translate(0, 0.45, 0);
+    scatter(tg, null, '#a7a35c', '#000', 900, (i) => [i % 3 === 0 ? 9 + hash2(i, 1) * 6 : -9 - Math.pow(hash2(i, 1), 1.5) * 60, (hash2(i, 2) - 0.5) * 300, 0.6 + hash2(i, 3) * 0.9]);
+    const gorse = new T.IcosahedronGeometry(0.9, 0); gorse.translate(0, 0.6, 0);
+    scatter(gorse, null, '#5b6b2a', '#000', 120, (i) => [-12 - hash2(i, 1) * 80, (hash2(i, 2) - 0.5) * 300, 0.6 + hash2(i, 3) * 0.8]);
   }
-  cones.castShadow = false; world.add(cones, trunks); disposables.push(coneG, trunkG, pineM, trunkM);
 
   // road
-  const asphalt = dataTex(T, 256, (u, v) => { const n = fbm(u * 40, v * 40, 3), sp = hash2(Math.floor(u * 256), Math.floor(v * 256)) > 0.93 ? 18 : 0; const k = 58 + n * 22 + sp; return [k, k, k + 3]; }, 3, 140);
+  const asphalt = dataTex(T, 256, (u, v) => { const n = fbm(u * 40, v * 40, 3), spk = hash2(Math.floor(u * 256), Math.floor(v * 256)) > 0.93 ? 18 : 0; const k = 58 + n * 22 + spk; return [k, k, k + 3]; }, 3, 140);
   const roadMat = new T.MeshStandardMaterial({ color: '#ffffff', map: asphalt, roughness: 0.9 });
   const roadGroup = new T.Group(); world.add(roadGroup);
   const road = new T.Mesh(new T.PlaneGeometry(6.6, 1000), roadMat); road.rotation.x = -Math.PI / 2; road.position.y = 0.012; road.receiveShadow = true; roadGroup.add(road);
@@ -852,10 +1142,9 @@ function buildWorld(T, renderer) {
   const posts = new T.Group(); roadGroup.add(posts);
   const postG = new T.BoxGeometry(0.1, 1.0, 0.1), postM = new T.MeshStandardMaterial({ color: '#f1efe8', roughness: 0.6 }), refG = new T.BoxGeometry(0.105, 0.12, 0.105), refM = new T.MeshStandardMaterial({ color: '#c41e30', emissive: '#5a0010', emissiveIntensity: 0.6 });
   for (let z = -300; z <= 300; z += 24) [-1, 1].forEach((s) => { const pz = z + (s > 0 ? 12 : 0); const p = new T.Mesh(postG, postM); p.position.set(s * 4.4, 0.5, pz); p.castShadow = true; posts.add(p); const r = new T.Mesh(refG, refM); r.position.set(s * 4.4, 0.85, pz); posts.add(r); });
-  disposables.push(asphalt, roadMat, road.geometry, lineMat, dashG, postG, postM, refG, refM);
+  disposables.push(asphalt, roadMat, road.geometry, lineMat, dashG, postG, postM, refG, refM, envSky.geometry, { dispose: () => pm.dispose() });
 
-  disposables.push(envSky.geometry, { dispose: () => pm.dispose() });
-  return { world, env, bakeSky, stars, skyMat, roadGroup, waveTex, dashes, posts, sunDir, disposables, fogColor: SKY.horizon };
+  return { world, env, bakeSky, stars, skyMat, roadGroup, waveTex, dashes, posts, sunDir, disposables, fogColor: E.sky[1], E };
 }
 
 // ---------- evening camp beside the van: awning, string lights, chairs, rug, campfire
@@ -953,10 +1242,12 @@ class Component extends DCLogic {
 
     const scene = new T.Scene();
     const camera = new T.PerspectiveCamera(45, 16 / 9, 0.03, 2000);
-    const W = buildWorld(T, renderer);
+    const spec0 = VAN_SPECS[this.state.van] || VAN_SPECS['man-lwb-auto'];
+    const E = ENVS[this.props.env] || ENVS[spec0.env] || ENVS.loch;
+    const W = buildWorld(T, renderer, E);
     scene.add(W.world);
     scene.environment = W.env;
-    scene.fog = new T.Fog(W.fogColor, 120, 900);
+    scene.fog = new T.Fog(W.fogColor, E.fog[0], E.fog[1]);
     scene.background = new T.Color(W.fogColor);
     const hemi = new T.HemisphereLight(0xdfe8ff, 0x5d5638, 0.6); scene.add(hemi);
     const sun = new T.DirectionalLight(0xffe2bf, 3.2);
@@ -975,8 +1266,8 @@ class Component extends DCLogic {
 
     this.v = {
       T, canvas: el, renderer, scene, camera, sun, hemi, inner, worldParts: W, contact: cs, van: null, offX: 0, offY: 0, camp: null, campT: 0, envDusk: null,
-      cDayTop: new T.Color(SKY.top), cDayHor: new T.Color(SKY.horizon), cDayBot: new T.Color(SKY.bottom), cDuskTop: new T.Color(DUSK.top), cDuskHor: new T.Color(DUSK.horizon), cDuskBot: new T.Color(DUSK.bottom),
-      cDayFog: new T.Color(DAY.fog), cDuskFog: new T.Color(DUSK.fog), cDaySun: new T.Color(DAY.sunColor), cDuskSun: new T.Color(DUSK.sunColor),
+      cDayTop: new T.Color(E.sky[0]), cDayHor: new T.Color(E.sky[1]), cDayBot: new T.Color(E.sky[2]), cDuskTop: new T.Color(DUSK.top), cDuskHor: new T.Color(DUSK.horizon), cDuskBot: new T.Color(DUSK.bottom),
+      cDayFog: new T.Color(E.sky[1]), cDuskFog: new T.Color(DUSK.fog), cDaySun: new T.Color(DAY.sunColor), cDuskSun: new T.Color(DUSK.sunColor),
       dDay: new T.Vector3(SKY.sun[0], SKY.sun[1], SKY.sun[2]).normalize(), dDusk: new T.Vector3(DUSK.sun[0], DUSK.sun[1], DUSK.sun[2]).normalize(), tmpV: new T.Vector3(),
       cNightTop: new T.Color(NIGHT.top), cNightHor: new T.Color(NIGHT.horizon), cNightBot: new T.Color(NIGHT.bottom), cNightFog: new T.Color(NIGHT.fog), cMoon: new T.Color(NIGHT.moonColor),
       dMoon: new T.Vector3(NIGHT.moon[0], NIGHT.moon[1], NIGHT.moon[2]).normalize(), envs: {}, tod: 19.6, todTarget: 19.6,
@@ -1208,6 +1499,7 @@ class Component extends DCLogic {
       }
     }
     v.worldParts.waveTex.offset.set((t0 * 0.004) % 1, (t0 * 0.0025) % 1);
+    v.worldParts.skyMat.uniforms.time.value = t0;
     const want = (v.mode === 'bed' || v.mode === 'camp') ? 1 : 0;
     v.doorT += (want - v.doorT) * (1 - Math.exp(-dt * 3));
     v.van.doors.forEach((d) => { d.pivot.rotation[d.axis] = d.open * v.doorT; });
@@ -1254,7 +1546,7 @@ class Component extends DCLogic {
       vanName: spec.name,
       viewLabel,
       hint: s.view === 'outside' || s.view === 'camp' ? 'Drag to rotate · scroll or pinch to zoom' : 'Drag to look around · scroll or pinch to zoom',
-      ariaLabel: '3D model of the ' + spec.name + ', ' + viewLabel.toLowerCase() + (s.view === 'camp' ? ', parked at a lochside campsite at sunset with a campfire, chairs and string lights' : ' view, on a Highland road beside a loch'),
+      ariaLabel: '3D model of the ' + spec.name + ', ' + viewLabel.toLowerCase() + ' view, ' + (s.view === 'camp' ? 'parked up for the night with a campfire, chairs and string lights' : 'on the road') + ', setting: ' + ((ENVS[this.props.env] || ENVS[spec.env] || ENVS.loch).label),
       vanOptions: VAN_ORDER.map((id) => ({ id, name: VAN_SPECS[id].name })),
       pickVan: (e) => this.setState({ van: e.target.value }),
       isCamp: s.view === 'camp',

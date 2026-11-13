@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VW Crafter LWB · Automatic, 4 berth · CampervanTours</title>
+<meta name="description" content="Self-contained campervan hire from Cambridge for touring the UK and Europe.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&amp;family=Lato:wght@400;700;900&amp;display=swap">
+<link rel="stylesheet" href="assets/site.css?v=17">
+<script defer src="js/three.min.js?v=158b"></script>
+<script defer src="js/site.js?v=17"></script>
+<script defer src="js/alpine.min.js"></script>
+<style>body{margin:0}[x-cloak]{display:none}</style>
+</head>
+<body>
+<div x-data="dc('Van-crafter-auto', {})">
+
+<div class="min-h-screen bg-white font-sans text-[18px] leading-relaxed text-ink antialiased" style="font-family: Lato, system-ui, sans-serif; color: #1C1424">
+<div x-data="dc('Header', {&quot;active&quot;: &quot;vans&quot;})" style="display:contents">
+
+<header class="sticky top-0 z-50 w-full font-sans" style="font-family: Lato, system-ui, sans-serif; color: #1C1424">
+  <div class="bg-plum-deep text-white/80">
+    <div class="mx-auto flex max-w-[1400px] items-center justify-between gap-4 px-5 py-2 text-[15px] md:px-10">
+      <p class="m-0 hidden sm:block">Campervan hire from Cambridge · Touring the UK &amp; Europe</p>
+      <p class="m-0 sm:hidden">Open Mon–Sat</p>
+      <a href="tel:08006889668" class="flex min-h-[32px] items-center gap-2 font-bold text-white hover:text-brand-rose">
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"></path></svg>
+        Free call 0800 688 9668
+      </a>
+    </div>
+  </div>
+  <div class="border-b border-plum/10 bg-white/95 backdrop-blur">
+    <div class="mx-auto flex max-w-[1400px] items-center justify-between gap-4 px-5 py-3 md:px-10">
+      <a href="index.html" aria-label="CampervanTours home" class="flex min-h-[48px] items-center font-sans text-[22px] font-black tracking-tight md:text-[26px]">
+        <span class="text-plum">CAMPERVAN</span><span class="text-brand">TOURS</span>
+      </a>
+      <nav aria-label="Main" class="hidden items-center gap-1 lg:flex">
+        <template x-for="l in V.links">
+          <a :href="l.href" :aria-current="l.current" :class="l.cls" x-text="l.label"></a>
+        </template>
+      </nav>
+      <div class="flex items-center gap-2">
+        <a href="campervans.html" class="hidden min-h-[48px] items-center rounded-full bg-brand px-6 text-[17px] font-bold text-white hover:bg-brand-dark sm:inline-flex">Book a campervan</a>
+        <button type="button" aria-label="Menu" :aria-expanded="V.expanded" @click="(V.toggle)($event)" class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-plum text-white lg:hidden">
+          <template x-if="V.open"><span style="display:contents">
+            <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+          </span></template>
+          <template x-if="V.closed"><span style="display:contents">
+            <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
+          </span></template>
+        </button>
+      </div>
+    </div>
+    <template x-if="V.open"><span style="display:contents">
+      <nav aria-label="Mobile" class="border-t border-plum/10 bg-white px-5 pb-6 lg:hidden">
+        <ul class="m-0 list-none divide-y divide-plum/10 p-0">
+          <template x-for="l in V.links">
+            <li><a :href="l.href" class="flex min-h-[60px] items-center justify-between font-display text-[24px] font-bold text-plum"><span x-text="l.label"></span><span aria-hidden="true" class="text-brand">→</span></a></li>
+          </template>
+        </ul>
+        <a href="campervans.html" class="mt-4 flex min-h-[56px] items-center justify-center rounded-full bg-brand text-[18px] font-bold text-white">Book a campervan</a>
+      </nav>
+    </span></template>
+  </div>
+</header>
+</div>
+
+<!-- 3D HERO -->
+<div x-data="dc('Van3D', {&quot;hero&quot;: &quot;true&quot;, &quot;van&quot;: &quot;crafter-auto&quot;, &quot;eyebrow&quot;: &quot;Premium · 4 berth · Automatic&quot;, &quot;title&quot;: &quot;VW Crafter LWB&quot;, &quot;intro&quot;: &quot;Room for four, with two beds, a bathroom, a kitchen and a dining area, and an automatic gearbox.&quot;})" style="display:contents">
+
+<div class="font-sans text-ink" style="font-family: Lato, system-ui, sans-serif; color: #1C1424">
+<template x-if="V.isHero"><span style="display:contents">
+<section x-init="(V.sectionRef)($el)" aria-labelledby="page-h" :class="V.heroCls">
+  <canvas x-init="(V.canvasRef)($el)" :class="V.canvasCls" role="img" :aria-label="V.ariaLabel"></canvas>
+  <template x-if="V.noGL"><span style="display:contents"><img src="assets/hero-man.jpg" alt="" class="absolute inset-0 -z-20 h-full w-full object-cover"></span></template>
+  <template x-if="V.outsideMode"><span style="display:contents">
+    <div class="pointer-events-none absolute inset-0 -z-10 scrim-b"></div>
+    <div class="pointer-events-none absolute inset-0 -z-10 hidden scrim-l lg:block"></div>
+  </span></template>
+  <div :class="V.innerCls">
+    <template x-if="V.outsideMode"><span style="display:contents">
+      <nav aria-label="Breadcrumb" class="pointer-events-auto mb-4 text-[15px] text-white/80"><a href="index.html" class="underline hover:text-white">Home</a> <span aria-hidden="true">/</span> <a href="campervans.html" class="underline hover:text-white">Campervans</a> <span aria-hidden="true">/</span> <span x-text="V.title"></span></nav>
+      <p class="m-0 inline-flex w-fit items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-[15px] font-bold text-white backdrop-blur"><span class="h-2 w-2 rounded-full bg-brand"></span><span x-text="V.eyebrow"></span></p>
+      <h1 id="page-h" class="m-0 mt-4 max-w-[13ch] font-display text-[52px] font-extrabold leading-[0.92] tracking-[-0.035em] text-white sm:text-[76px] lg:text-[104px]" x-text="V.title"></h1>
+      <p class="m-0 mt-5 max-w-[38rem] text-[20px] leading-relaxed text-white/90 lg:text-[22px]" x-text="V.intro"></p>
+      <div class="pointer-events-auto mt-8 flex flex-col gap-3 sm:flex-row">
+        <a href="#book" class="inline-flex min-h-[58px] items-center justify-center rounded-full bg-brand px-8 text-[18px] font-bold text-white hover:bg-brand-dark">Check availability</a>
+        <button type="button" @click="(V.enterInside)($event)" class="inline-flex min-h-[58px] items-center justify-center gap-2 rounded-full border-2 border-white px-8 text-[18px] font-bold text-white hover:bg-white hover:text-plum"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 3 8l9 5 9-5-9-5Z"></path><path d="m3 16 9 5 9-5"></path><path d="m3 12 9 5 9-5"></path></svg>Look inside in 3D</button>
+      </div>
+    </span></template>
+    <template x-if="V.insideMode"><span style="display:contents">
+      <div class="absolute left-5 right-5 top-5 flex items-start justify-between gap-3 md:left-10 md:right-10">
+        <p class="m-0 rounded-2xl bg-plum-deep/75 px-4 py-2 text-white backdrop-blur"><span class="block text-[13px] font-bold uppercase tracking-[0.14em] text-brand-rose" x-text="V.viewLabel"></span><span class="font-display text-[20px] font-bold leading-tight sm:text-[24px]" x-text="V.vanName"></span></p>
+        <div class="flex items-center gap-2">
+          <template x-if="V.isCamp"><span style="display:contents">
+          <button type="button" @click="(V.advanceTime)($event)" :aria-label="`Time of day: ${V.timeLabel}. Tap to move on to the next part of the day`" class="pointer-events-auto inline-flex min-h-[48px] shrink-0 items-center gap-2 rounded-full bg-plum px-4 text-[16px] font-bold text-white shadow-lg hover:bg-plum-mid">
+            <template x-if="V.isDay"><span style="display:contents"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF8A9B" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg></span></template>
+            <template x-if="V.isNight"><span style="display:contents"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF8A9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg></span></template>
+            <span x-text="V.timeLabel"></span>
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+          </button>
+          </span></template>
+        <button type="button" @click="(V.exitInside)($event)" aria-label="Close the 3D view" class="pointer-events-auto inline-flex min-h-[48px] items-center gap-2 rounded-full bg-white px-5 text-[16px] font-bold text-plum hover:bg-brand hover:text-white"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg>Close</button>
+        </div>
+      </div>
+      <p class="m-0 mb-3 w-fit rounded-full bg-white/85 px-3 py-1.5 text-[14px] font-bold text-plum" x-text="V.hint"></p>
+      <div role="group" aria-label="Choose a viewpoint" class="no-scrollbar pointer-events-auto -mx-5 flex gap-2 overflow-x-auto px-5 pb-1 md:mx-0 md:px-0">
+        <template x-for="v in V.views">
+          <button type="button" @click="(v.pick)($event)" :aria-pressed="v.pressed" :class="v.cls" x-text="v.label"></button>
+        </template>
+      </div>
+    </span></template>
+  </div>
+</section>
+<template x-if="V.insideMode"><span style="display:contents"><div aria-hidden="true" class="min-h-[580px] bg-plum-deep lg:min-h-[720px]"></div></span></template>
+</span></template>
+
+<template x-if="V.isTour"><span style="display:contents">
+  <div class="relative overflow-hidden rounded-[28px] bg-plum-deep shadow-2xl">
+    <canvas x-init="(V.canvasRef)($el)" class="block aspect-[4/5] w-full cursor-grab touch-pan-y select-none active:cursor-grabbing sm:aspect-[16/9]" role="img" :aria-label="V.ariaLabel"></canvas>
+    <div class="pointer-events-none absolute inset-x-0 top-0 flex flex-wrap items-start justify-between gap-2 p-4 sm:p-5">
+      <p class="m-0 rounded-2xl bg-plum-deep/75 px-4 py-2 text-white backdrop-blur"><span class="block text-[13px] font-bold uppercase tracking-[0.14em] text-brand-rose" x-text="V.viewLabel"></span><span class="font-display text-[20px] font-bold leading-tight sm:text-[24px]" x-text="V.vanName"></span></p>
+      <p class="m-0 hidden rounded-full bg-white/85 px-3 py-1.5 text-[14px] font-bold text-plum sm:block" x-text="V.hint"></p>
+    </div>
+    <template x-if="V.noGL"><span style="display:contents">
+      <div class="absolute inset-0 flex items-center justify-center bg-plum-deep p-8 text-center text-[18px] text-white">The 3D view needs WebGL, which this browser has switched off. The photos show every van.</div>
+    </span></template>
+  </div>
+  <div class="mt-4 flex flex-col gap-4">
+    <template x-if="V.showPicker"><span style="display:contents">
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+        <label for="v3d-van" class="text-[16px] font-bold text-plum">Campervan</label>
+        <select id="v3d-van" @change="(V.pickVan)($event)" x-effect="$nextTick(() => { $el.value = V.van })" class="min-h-[52px] rounded-2xl border-2 border-plum/20 bg-white px-4 text-[18px] font-bold text-plum focus:border-brand focus:outline-none sm:min-w-[320px]">
+          <template x-for="o in V.vanOptions"><option :value="o.id" x-text="o.name"></option></template>
+        </select>
+      </div>
+    </span></template>
+    <template x-if="V.isCamp"><span style="display:contents">
+      <div class="flex">
+          <button type="button" @click="(V.advanceTime)($event)" :aria-label="`Time of day: ${V.timeLabel}. Tap to move on to the next part of the day`" class="inline-flex min-h-[48px] shrink-0 items-center gap-2 rounded-full bg-plum px-5 text-[16px] font-bold text-white shadow-lg hover:bg-plum-mid">
+            <template x-if="V.isDay"><span style="display:contents"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF8A9B" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg></span></template>
+            <template x-if="V.isNight"><span style="display:contents"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF8A9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg></span></template>
+            <span x-text="V.timeLabel"></span>
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+          </button>
+      </div>
+    </span></template>
+    <div role="group" aria-label="Choose a viewpoint" class="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+      <template x-for="v in V.views">
+        <button type="button" @click="(v.pick)($event)" :aria-pressed="v.pressed" :class="v.cls" x-text="v.label"></button>
+      </template>
+    </div>
+    <p class="m-0 text-[14px] text-ink/60">Illustrative 3D model to show layout and space; finishes and details vary by van.</p>
+  </div>
+</span></template>
+</div>
+</div>
+<!-- /3D HERO -->
+
+<main class="mx-auto max-w-[1400px] px-5 md:px-10">
+
+  <div class="grid gap-10 pt-14 lg:grid-cols-12 lg:gap-14 lg:pt-20">
+    <!-- Gallery + details -->
+    <div class="lg:col-span-7">
+      <section aria-labelledby="photos-h">
+        <h2 id="photos-h" class="m-0 mb-5 font-display text-[32px] font-extrabold text-plum">Photos</h2>
+        <div class="relative overflow-hidden rounded-[28px] bg-plum-tint">
+          <img :src="V.photo.src" :alt="V.photo.alt" class="aspect-[3/2] w-full object-cover">
+          <span class="absolute bottom-4 right-4 rounded-full bg-plum-deep/80 px-4 py-2 text-[15px] font-bold text-white"><span x-text="V.photoIndex"></span> / <span x-text="V.photoCount"></span></span>
+        </div>
+        <div class="mt-3 grid grid-cols-5 gap-2 sm:gap-3">
+          <template x-for="t in V.thumbs">
+            <button type="button" @click="(t.pick)($event)" :aria-label="t.label" :aria-pressed="t.pressed" :class="t.cls"><img :src="t.src" alt="" class="h-full w-full object-cover"></button>
+          </template>
+        </div>
+        <p class="m-0 mt-2 text-[14px] text-ink/60">[Add more photos of this van: cab, bed, kitchen, bathroom]</p>
+      </section>
+
+      <h2 class="m-0 mt-12 font-display text-[32px] font-extrabold text-plum">At a glance</h2>
+      <dl class="m-0 mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div class="rounded-2xl bg-plum-tint p-4"><dt class="text-[14px] font-bold uppercase tracking-[0.1em] text-ink/70">Sleeps</dt><dd class="m-0 font-display text-[28px] font-extrabold text-plum">4</dd></div>
+        <div class="rounded-2xl bg-plum-tint p-4"><dt class="text-[14px] font-bold uppercase tracking-[0.1em] text-ink/70">Gearbox</dt><dd class="m-0 font-display text-[28px] font-extrabold text-plum">Auto</dd></div>
+        <div class="rounded-2xl bg-plum-tint p-4"><dt class="text-[14px] font-bold uppercase tracking-[0.1em] text-ink/70">Bathroom</dt><dd class="m-0 font-display text-[28px] font-extrabold text-plum">Yes</dd></div>
+        <div class="rounded-2xl bg-plum-tint p-4"><dt class="text-[14px] font-bold uppercase tracking-[0.1em] text-ink/70">Drivers</dt><dd class="m-0 font-display text-[28px] font-extrabold text-plum">2 insured</dd></div>
+      </dl>
+
+      <h2 class="m-0 mt-12 font-display text-[32px] font-extrabold text-plum">On board</h2>
+      <ul class="m-0 mt-4 grid list-none gap-3 p-0 text-[18px] sm:grid-cols-2">
+        <li class="flex gap-3"><span class="text-brand">✓</span>Two beds</li>
+        <li class="flex gap-3"><span class="text-brand">✓</span>Bathroom</li>
+        <li class="flex gap-3"><span class="text-brand">✓</span>Kitchen</li>
+        <li class="flex gap-3"><span class="text-brand">✓</span>Dining area</li>
+        <li class="flex gap-3"><span class="text-brand">✓</span>Fully self-contained</li>
+        <li class="flex gap-3"><span class="text-brand">✓</span>[Further equipment from the van's spec sheet]</li>
+      </ul>
+
+      <h2 class="m-0 mt-12 font-display text-[32px] font-extrabold text-plum">Good to know</h2>
+      <dl class="m-0 mt-4 divide-y divide-plum/10 rounded-[24px] ring-1 ring-plum/10">
+        <div class="grid gap-1 p-5 sm:grid-cols-3"><dt class="font-bold text-plum">Collection</dt><dd class="m-0 sm:col-span-2">From 10am on day one, at our Cambridge depot</dd></div>
+        <div class="grid gap-1 p-5 sm:grid-cols-3"><dt class="font-bold text-plum">Return</dt><dd class="m-0 sm:col-span-2">By 5pm on your last day. We're closed on Sundays.</dd></div>
+        <div class="grid gap-1 p-5 sm:grid-cols-3"><dt class="font-bold text-plum">Drivers</dt><dd class="m-0 sm:col-span-2">Aged 23–79. UK, EU, Australian, New Zealand, US and Canadian licences held for 2+ years.</dd></div>
+        <div class="grid gap-1 p-5 sm:grid-cols-3"><dt class="font-bold text-plum">Deposit</dt><dd class="m-0 sm:col-span-2">£200 holds your dates. Free changes if government travel rules stop you travelling.</dd></div>
+      </dl>
+    </div>
+
+    <!-- Booking card -->
+    <aside id="book" aria-label="Book this campervan" class="lg:col-span-5">
+      <div class="rounded-[28px] bg-white p-6 shadow-xl ring-1 ring-plum/10 lg:sticky lg:top-36 lg:p-8">
+        <p class="m-0 text-[16px] text-ink/70">8 days from</p>
+        <p class="m-0 font-display text-[48px] font-extrabold leading-none text-plum">£[2027 rate]</p>
+        <p class="m-0 mt-2 text-[16px] text-ink/70">VAT and two-driver insurance included</p>
+        <form class="mt-6 grid gap-4" aria-label="Check dates">
+          <div class="grid grid-cols-2 gap-3">
+            <div class="flex flex-col gap-1.5"><label for="v-from" class="text-[15px] font-bold text-plum">Pick-up</label><input id="v-from" type="date" class="min-h-[56px] rounded-2xl border-2 border-plum/15 bg-plum-tint px-3 text-[17px] focus:border-brand focus:outline-none"></div>
+            <div class="flex flex-col gap-1.5"><label for="v-to" class="text-[15px] font-bold text-plum">Return</label><input id="v-to" type="date" class="min-h-[56px] rounded-2xl border-2 border-plum/15 bg-plum-tint px-3 text-[17px] focus:border-brand focus:outline-none"></div>
+          </div>
+          <div class="flex flex-col gap-1.5"><label for="v-from-country" class="text-[15px] font-bold text-plum">Travelling from</label><select id="v-from-country" class="min-h-[56px] rounded-2xl border-2 border-plum/15 bg-plum-tint px-3 text-[17px] focus:border-brand focus:outline-none"><option>Australia</option><option>New Zealand</option><option>Europe</option><option>United Kingdom</option><option>Elsewhere</option></select></div>
+          <a href="contact.html" class="inline-flex min-h-[60px] items-center justify-center rounded-full bg-brand text-[19px] font-bold text-white hover:bg-brand-dark">Check availability</a>
+        </form>
+        <ul class="m-0 mt-6 flex list-none flex-col gap-2 border-t border-plum/10 p-0 pt-5 text-[16px]">
+          <li class="flex gap-2"><span class="text-brand">✓</span>£200 deposit holds your dates</li>
+          <li class="flex gap-2"><span class="text-brand">✓</span>No card fees, no surcharges</li>
+          <li class="flex gap-2"><span class="text-brand">✓</span>Free airport pick-up on 30+ day hires</li>
+        </ul>
+        <a href="tel:08006889668" class="mt-6 flex min-h-[56px] items-center justify-center gap-2 rounded-full border-2 border-plum text-[17px] font-bold text-plum hover:bg-plum hover:text-white">Rather talk? 0800 688 9668</a>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Similar -->
+  <section aria-labelledby="sim-h" class="py-20">
+    <h2 id="sim-h" class="m-0 font-display text-[36px] font-extrabold text-plum lg:text-[48px]">You might also like</h2>
+    <div class="mt-8 grid gap-5 sm:grid-cols-3">
+      <a href="van-crafter-manual.html" class="group overflow-hidden rounded-[24px] ring-1 ring-plum/10 hover:ring-2 hover:ring-brand"><div class="aspect-[3/2] overflow-hidden"><img src="assets/v-crafter-manual.jpg" alt="VW Crafter LWB · Manual" class="h-full w-full object-cover transition duration-700 group-hover:scale-105"></div><p class="m-0 p-5 font-display text-[22px] font-bold text-plum">VW Crafter LWB · Manual</p></a>
+      <a href="van-toleno.html" class="group overflow-hidden rounded-[24px] ring-1 ring-plum/10 hover:ring-2 hover:ring-brand"><div class="aspect-[3/2] overflow-hidden"><img src="assets/v-toleno.jpg" alt="Toleno R" class="h-full w-full object-cover transition duration-700 group-hover:scale-105"></div><p class="m-0 p-5 font-display text-[22px] font-bold text-plum">Toleno R</p></a>
+      <a href="van-man-lwb-auto.html" class="group overflow-hidden rounded-[24px] ring-1 ring-plum/10 hover:ring-2 hover:ring-brand"><div class="aspect-[3/2] overflow-hidden"><img src="assets/v-man-lwb-auto.jpg" alt="MAN TGE LWB Luxury" class="h-full w-full object-cover transition duration-700 group-hover:scale-105"></div><p class="m-0 p-5 font-display text-[22px] font-bold text-plum">MAN TGE LWB Luxury</p></a>
+    </div>
+  </section>
+</main>
+
+<div x-data="dc('Footer', {})" style="display:contents">
+
+<div class="font-sans" style="font-family: Lato, system-ui, sans-serif; color: #1C1424">
+
+<!-- Closing call to action over a full-bleed photo -->
+<section aria-labelledby="cta-h" class="relative isolate overflow-hidden">
+  <img src="assets/lakes.jpg" alt="" class="absolute inset-0 -z-10 h-full w-full object-cover">
+  <div class="absolute inset-0 -z-10 bg-plum-deep/60"></div>
+  <div class="mx-auto flex max-w-[1400px] flex-col items-start gap-6 px-5 py-24 md:px-10 lg:py-36">
+    <p class="m-0 rounded-full bg-white/15 px-4 py-1.5 text-[15px] font-bold uppercase tracking-[0.14em] text-white backdrop-blur">Your dates, held for £200</p>
+    <h2 id="cta-h" class="m-0 max-w-[16ch] font-display text-[48px] font-extrabold leading-[0.95] tracking-[-0.03em] text-white sm:text-[64px] lg:text-[96px]">Somewhere, a sunset has your name on it.</h2>
+    <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+      <a href="campervans.html" class="inline-flex min-h-[60px] items-center justify-center rounded-full bg-brand px-9 text-[19px] font-bold text-white hover:bg-brand-dark">Choose your campervan</a>
+      <a href="tel:08006889668" class="inline-flex min-h-[60px] items-center justify-center rounded-full border-2 border-white px-9 text-[19px] font-bold text-white hover:bg-white hover:text-plum">Call 0800 688 9668</a>
+    </div>
+  </div>
+</section>
+
+<footer class="bg-plum-deep pb-24 text-white/75 md:pb-0">
+  <div class="mx-auto grid max-w-[1400px] gap-10 px-5 py-16 sm:grid-cols-2 md:px-10 lg:grid-cols-12">
+    <div class="lg:col-span-4">
+      <p class="m-0 text-[26px] font-black tracking-tight"><span class="text-white">CAMPERVAN</span><span class="text-brand-rose">TOURS</span></p>
+      <p class="m-0 mt-4 max-w-[32ch] text-[17px] leading-relaxed">Self-contained campervan hire from Cambridge, for unhurried journeys across the UK and Europe.</p>
+      <p class="m-0 mt-6 text-[17px] leading-relaxed"><b class="text-white">Head office &amp; depot</b><br>Unit C, Ronald Rolph Court<br>Cambridge CB5 8PX</p>
+    </div>
+    <nav aria-label="Footer: hire" class="lg:col-span-2">
+      <p class="m-0 text-[14px] font-bold uppercase tracking-[0.16em] text-brand-rose">Hire</p>
+      <ul class="m-0 mt-4 flex list-none flex-col gap-1 p-0 text-[17px]">
+        <li><a href="campervans.html" class="inline-flex min-h-[40px] items-center hover:text-white">Campervans</a></li>
+        <li><a href="prices.html" class="inline-flex min-h-[40px] items-center hover:text-white">Prices</a></li>
+        <li><a href="prices.html" class="inline-flex min-h-[40px] items-center hover:text-white">Special offers</a></li>
+        <li><a href="prices.html" class="inline-flex min-h-[40px] items-center hover:text-white">Inclusions &amp; extras</a></li>
+      </ul>
+    </nav>
+    <nav aria-label="Footer: travel" class="lg:col-span-2">
+      <p class="m-0 text-[14px] font-bold uppercase tracking-[0.16em] text-brand-rose">Travel</p>
+      <ul class="m-0 mt-4 flex list-none flex-col gap-1 p-0 text-[17px]">
+        <li><a href="routes.html" class="inline-flex min-h-[40px] items-center hover:text-white">Self-drive routes</a></li>
+        <li><a href="europe.html" class="inline-flex min-h-[40px] items-center hover:text-white">Into Europe</a></li>
+        <li><a href="overseas-visitors.html" class="inline-flex min-h-[40px] items-center hover:text-white">Flying in</a></li>
+        <li><a href="routes.html" class="inline-flex min-h-[40px] items-center hover:text-white">Where to stay</a></li>
+      </ul>
+    </nav>
+    <div class="sm:col-span-2 lg:col-span-4">
+      <p class="m-0 text-[14px] font-bold uppercase tracking-[0.16em] text-brand-rose">Talk to us</p>
+      <a href="tel:08006889668" class="mt-3 block font-display text-[34px] font-extrabold text-white hover:text-brand-rose">0800 688 9668</a>
+      <p class="m-0 mt-1 text-[16px]">Monday to Saturday · Closed Sundays</p>
+      <ul class="m-0 mt-6 flex list-none flex-wrap gap-2 p-0 text-[14px] font-bold text-white">
+        <li class="rounded-lg border border-white/25 px-3 py-2">BVRLA</li>
+        <li class="rounded-lg border border-white/25 px-3 py-2">FSB member</li>
+        <li class="rounded-lg border border-white/25 px-3 py-2">Camping &amp; Caravanning Club</li>
+      </ul>
+    </div>
+  </div>
+  <div class="border-t border-white/10">
+    <div class="mx-auto flex max-w-[1400px] flex-col gap-2 px-5 py-6 text-[14px] md:flex-row md:justify-between md:px-10">
+      <p class="m-0">© 2014–2026 CampervanTours · Company reg. [number] · VAT [number]</p>
+      <p class="m-0"><a href="contact.html" class="underline hover:text-white">Terms</a> · <a href="contact.html" class="underline hover:text-white">Privacy</a></p>
+    </div>
+  </div>
+</footer>
+
+<!-- Phone-only action bar, always reachable -->
+<div class="fixed inset-x-0 bottom-0 z-50 grid grid-cols-2 gap-2 border-t border-plum/10 bg-white/95 p-3 backdrop-blur md:hidden">
+  <a href="tel:08006889668" class="inline-flex min-h-[54px] items-center justify-center gap-2 rounded-full border-2 border-plum text-[17px] font-bold text-plum">
+    <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"></path></svg>Call us
+  </a>
+  <a href="campervans.html" class="inline-flex min-h-[54px] items-center justify-center rounded-full bg-brand text-[17px] font-bold text-white">Book now</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>
