@@ -1766,7 +1766,7 @@ class Component extends DCLogic {
     const v = this.v; if (!v || !v.van) return;
     v.mode = mode;
     if (mode === 'outside') { v.radius = v.van.L * 1.25 + 3; v.phi = 1.3; v.fov = 40; }
-    else if (mode === 'camp') { v.radius = v.van.L * 1.2 + 4.5; v.phi = 1.33; v.theta = 0.62; v.fov = 40; if (v.campT < 0.05) { v.tod = 18.6; v.jumpTo = null; } }
+    else if (mode === 'camp') { v.radius = v.van.L * 1.2 + 4.5; v.phi = 1.33; v.theta = 0.62; v.fov = 40; if (v.campT < 0.05) { v.tod = 15.5; v.jumpTo = null; } }
     else if (mode === 'drive') { v.fov = 26; }
     else { const p = v.van[mode]; if (!p) return; v.yaw = p.yaw || 0; v.pitch = p.pitch || 0; v.fov = 72; }
     if (snap) { const t = this.target(); v.camera.position.copy(t.pos); v.look.copy(t.look); v.camera.fov = v.fov; const o = this.offsetTarget(); v.offX = o[0]; v.offY = o[1]; v.camera.updateProjectionMatrix(); }

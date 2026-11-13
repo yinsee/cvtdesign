@@ -1449,16 +1449,11 @@ async function buildWorld(T, renderer, E) {
   const trunkTall = () => { const g = new T.CylinderGeometry(0.22, 0.3, 2.4, 6); g.translate(0, 1.2, 0); return g; };
   const site = new T.Group(); site.visible = false; world.add(site);
   if (LS) {
-    // pebble tracks (in, and back out to the road): many small stones of mixed size and colour
+    // pebbles round the pond's shore (no track: the van simply drives over the grass)
     const pgeo = new T.DodecahedronGeometry(1, 0), pmat = new T.MeshStandardMaterial({ color: '#ffffff', roughness: 0.9, flatShading: true });
     const pcols = ['#9a958c', '#b8b2a6', '#7d776d', '#cfc8b8', '#8a7f70', '#a39a8b', '#6e6a64', '#d9d3c7'], c3 = new T.Color(), stones = [];
-    [LS.inR, LS.outR].forEach((R0, ri) => R0.route.forEach((p0, i) => {
-      if (ri === 0 && i < 8) return;
-      const nx = Math.cos(p0.th), nz = -Math.sin(p0.th);
-      for (let k = 0; k < 8; k++) { const j = i * 31 + k * 7 + ri * 997, off = (hash2(j, 1) - 0.5) * 2.6, al = (hash2(j, 2) - 0.5) * 0.3; stones.push([p0.x + nx * off + Math.sin(p0.th) * al, p0.z + nz * off + Math.cos(p0.th) * al, 0.05 + Math.pow(hash2(j, 3), 2.2) * 0.17, j]); }
-    }));
     const P = LS.POND;
-    for (let i = 0; i < 220; i++) { const a = hash2(i, 61) * Math.PI * 2, rr = P.r + 0.6 + 0.9 * Math.sin(a * 3 + 0.7) + 0.5 * Math.sin(a * 5 + 2.1) + (hash2(i, 62) - 0.3) * 1.3; stones.push([P.x + Math.cos(a) * rr, P.z - Math.sin(a) * rr, 0.06 + Math.pow(hash2(i, 63), 2) * 0.22, i + 5000]); }
+    for (let i = 0; i < 60; i++) { const a = hash2(i, 61) * Math.PI * 2, rr = P.r + 0.6 + 0.9 * Math.sin(a * 3 + 0.7) + 0.5 * Math.sin(a * 5 + 2.1) + (hash2(i, 62) - 0.3) * 1.3; stones.push([P.x + Math.cos(a) * rr, P.z - Math.sin(a) * rr, 0.06 + Math.pow(hash2(i, 63), 2) * 0.22, i + 5000]); }
     const pim = new T.InstancedMesh(pgeo, pmat, stones.length);
     stones.forEach(([x, z, r, j], i) => { pp.set(x, r * 0.22, z); q.setFromEuler(new T.Euler(hash2(j, 4) * 3, hash2(j, 5) * 6, hash2(j, 6) * 3)); sc.set(r * (1 + hash2(j, 7) * 0.5), r * 0.45, r); mtx.compose(pp, q, sc); pim.setMatrixAt(i, mtx); pim.setColorAt(i, c3.set(pcols[Math.floor(hash2(j, 8) * pcols.length)])); });
     pim.receiveShadow = true; site.add(pim);
@@ -1808,7 +1803,7 @@ class Component extends DCLogic {
     v.mode = mode;
     if (mode === 'outside') { v.radius = v.van.L * 1.25 + 3; v.phi = 1.3; v.fov = 40; }
     else if (mode === 'camp') { v.radius = v.van.L * 1.2 + 4.5; v.phi = 1.33; v.theta = 0.62; v.fov = 40;
-      if (v.worldParts.LS) { v.radius = v.van.L * 1.5 + 7; v.phi = 1.02; v.theta = -0.64; } /* lakeside: look across the van and the camp to the water */ if (v.campT < 0.05) { v.tod = 18.6; v.jumpTo = null; } }
+      if (v.worldParts.LS) { v.radius = v.van.L * 1.5 + 7; v.phi = 1.02; v.theta = -0.64; } /* lakeside: look across the van and the camp to the water */ if (v.campT < 0.05) { v.tod = 15.5; v.jumpTo = null; } }
     else if (mode === 'drive') { v.fov = 26; }
     else { const p = v.van[mode]; if (!p) return; v.yaw = p.yaw || 0; v.pitch = p.pitch || 0; v.fov = 72; }
     if (snap) { const t = this.target(); v.camera.position.copy(t.pos); v.look.copy(t.look); v.camera.fov = v.fov; const o = this.offsetTarget(); v.offX = o[0]; v.offY = o[1]; v.camera.updateProjectionMatrix(); }
