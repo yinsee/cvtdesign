@@ -1081,7 +1081,10 @@ function buildVan(T, c) {
 }
 
 // ---------- environments: each van page gets its own setting
-const PARK_X = 5.0; // where the van pulls in, off the road on the camp side
+const PARK_X = 5.0;
+// performance tier: phones and low-power machines get lighter scenery, smaller shadows and resolution
+const PERF = { low: false };
+const yieldTask = () => new Promise((r) => setTimeout(r, 0)); // where the van pulls in, off the road on the camp side
 const ENVS = {
   loch:   { label: 'Highland loch', sky: ['#1a5fc6', '#86bdf0', '#b9ad97'], fog: [120, 900], grass: ['#4c6634', '#6f7a3c'], accent: '#6f5446', water: { x0: 12, x1: 142, y: -0.22, color: '#1d3a4b' }, shore: true, trees: 'pine', ridges: [['#2f3b2e', '#4a5446', 0], ['#4b5468', '#6c7488', 1], ['#7d86a0', '#a3aac0', 1]] },
   lakes:  { label: 'Lake District', sky: ['#1d63c8', '#8dc1ef', '#b8b09a'], fog: [100, 800], grass: ['#4f6e36', '#7a8547'], accent: '#7a6a50', water: { x0: 12, x1: 72, y: -0.22, color: '#20404f' }, shore: true, trees: 'mixed', ridges: [['#3a4a34', '#56664a', 0], ['#5a6474', '#7a8496', 0], ['#8a93a8', '#aab1c4', 1]] },
@@ -1110,6 +1113,22 @@ function softMat(T, color, along) {
   });
 }
 function glowTex(T) { const t = dataTex(T, 64, (u, v) => { const dx = u - 0.5, dy = v - 0.5, r = Math.min(1, Math.sqrt(dx * dx + dy * dy) * 2), a = Math.pow(1 - r, 2.4); return [255, 255, 255, Math.round(a * 255)]; }, 1, 1); t.colorSpace = T.NoColorSpace; return t; }
+
+// merge every static mesh under root that shares a material into one mesh: far fewer draw calls
+function mergeStatic(T, root, disp) {
+  root.updateMatrixWorld(true);
+  const inv = new T.Matrix4().copy(root.matrixWorld).invert(), buckets = new Map(), kill = [], m4 = new T.Matrix4();
+  root.traverse((o) => {
+    if (!o.isMesh || o.isSprite || !o.material || o.material.isShaderMaterial || o.material.transparent) return;
+    for (let q = o.parent; q && q !== root; q = q.parent) if (q.userData.keep) return;
+    const g0 = o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone();
+    g0.applyMatrix4(m4.multiplyMatrices(inv, o.matrixWorld));
+    if (!buckets.has(o.material.uuid)) buckets.set(o.material.uuid, { m: o.material, list: [] });
+    buckets.get(o.material.uuid).list.push(g0); kill.push(o);
+  });
+  kill.forEach((o) => o.parent.remove(o));
+  buckets.forEach(({ m, list }) => { const geo = mergeGeos(T, list); list.forEach((x) => x.dispose()); const mesh = new T.Mesh(geo, m); mesh.receiveShadow = true; root.add(mesh); disp.push(geo); });
+}
 
 // ---------- architecture: a few buildings that belong to each setting (glowing windows after dark)
 function buildArch(T, key, heightAt, MS) {
@@ -1201,7 +1220,7 @@ function buildArch(T, key, heightAt, MS) {
     const gt = glowTex(T); disp.push(gt); const gm = new T.SpriteMaterial({ map: gt, color: '#ffe9b0', transparent: true, depthWrite: false, blending: T.AdditiveBlending, opacity: 0.3 }); disp.push(gm);
     glow = new T.Sprite(gm); glow.scale.set(9, 9, 1); glow.position.set(0, 18.2, 0); p.add(glow);
     const bg = new T.ConeGeometry(5, 80, 64, 1, true); bg.translate(0, -40, 0); bg.rotateZ(Math.PI / 2); disp.push(bg);
-    beam = new T.Group(); beam.position.set(0, 18.2, 0); p.add(beam); [0, Math.PI].forEach((a) => { const b = new T.Mesh(bg, bm); b.rotation.y = a; beam.add(b); }); beam.userData.m = bm;
+    beam = new T.Group(); beam.userData.keep = true; beam.position.set(0, 18.2, 0); p.add(beam); [0, Math.PI].forEach((a) => { const b = new T.Mesh(bg, bm); b.rotation.y = a; beam.add(b); }); beam.userData.m = bm;
     for (let i = 0; i < 4; i++) { const [cx, cz] = at(52 + i * 7, 168 - i * 3); cottage(cx, cz, 0.3, C.white, C.slate, 5, 7); }
   } else if (key === 'dales') {
     // a village church with a spire across the fields, a stone barn and a farmhouse
@@ -1245,7 +1264,7 @@ function buildArch(T, key, heightAt, MS) {
 }
 
 // ---------- the world: sky, terrain, water, trees, road
-function buildWorld(T, renderer, E) {
+async function buildWorld(T, renderer, E) {
   const world = new T.Group(), disposables = [];
   const sunDir = new T.Vector3(SKY.sun[0], SKY.sun[1], SKY.sun[2]).normalize();
   const skyMat = new T.ShaderMaterial({
@@ -1278,10 +1297,20 @@ function buildWorld(T, renderer, E) {
     ].join('\n')
   });
   skyMat.toneMapped = false;
-  const sky = new T.Mesh(new T.SphereGeometry(900, 48, 24), skyMat); world.add(sky); disposables.push(sky.geometry, skyMat);
+  const cubeRT = new T.WebGLCubeRenderTarget(PERF.low ? 256 : 512, { type: T.HalfFloatType, generateMipmaps: false });
+  const cubeCam = new T.CubeCamera(1, 1000, cubeRT);
+  const skyView = new T.ShaderMaterial({
+    side: T.BackSide, depthWrite: false, fog: false, toneMapped: false, uniforms: { tSky: { value: cubeRT.texture } },
+    vertexShader: 'varying vec3 vDir; void main(){ vDir = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: 'uniform samplerCube tSky; varying vec3 vDir; void main(){ gl_FragColor = vec4(textureCube(tSky, normalize(vDir)).rgb, 1.0);\n#include <colorspace_fragment>\n}'
+  });
+  const sky = new T.Mesh(new T.SphereGeometry(900, 48, 24), skyView); world.add(sky); disposables.push(sky.geometry, skyMat, skyView, cubeRT);
   const pm = new T.PMREMGenerator(renderer);
   const envScene = new T.Scene(); const envSky = new T.Mesh(new T.SphereGeometry(100, 32, 16), skyMat); envScene.add(envSky);
   const env = pm.fromScene(envScene, 0.035).texture;
+  const bakeView = () => cubeCam.update(renderer, envScene);
+  bakeView();
+  await yieldTask();
   const bakeSky = (pal) => {
     const u = skyMat.uniforms, keep = [u.top.value.clone(), u.horizon.value.clone(), u.bottom.value.clone(), u.sunDir.value.clone()];
     u.top.value.set(pal.top); u.horizon.value.set(pal.horizon); u.bottom.value.set(pal.bottom); u.sunDir.value.set(pal.sun[0], pal.sun[1], pal.sun[2]).normalize();
@@ -1321,11 +1350,13 @@ function buildWorld(T, renderer, E) {
     if (xw > 0) h *= cl01((xw - 13) / 7);
     return h;
   };
-  const gGeo = new T.PlaneGeometry(1000, 1000, 200, 200); gGeo.rotateX(-Math.PI / 2);
+  const SEG = PERF.low ? 110 : 150;
+  const gGeo = new T.PlaneGeometry(1000, 1000, SEG, SEG); gGeo.rotateX(-Math.PI / 2);
   const pos = gGeo.attributes.position, cols = [], col = new T.Color();
   const gA = new T.Color(E.grass[0]), gB = new T.Color(E.grass[1]), acc = new T.Color(E.accent), verge = new T.Color('#7e7a5e'), rock = new T.Color('#7b7a74'), beach = new T.Color(E.sea ? '#d9c9a0' : '#8f8878'), snow = new T.Color('#f3f5f8');
   const fieldPal = ['#6d9a3e', '#86a548', '#a9a957', '#c8b25a', '#5f8a3a', '#7c9440'].map((h) => new T.Color(h));
   for (let i = 0; i < pos.count; i++) {
+    if (i % 6000 === 5999) await yieldTask();
     const xw = pos.getX(i), z = pos.getZ(i), h = heightAt(xw, z), x = xw * MS; pos.setY(i, h);
     const n = fbm(x * 0.05, z * 0.05, 3), m = fbm(x * 0.008 + 11, z * 0.008, 3);
     col.copy(gA).lerp(gB, n).lerp(acc, Math.max(0, m - 0.45) * 1.6);
@@ -1342,10 +1373,13 @@ function buildWorld(T, renderer, E) {
   const ground = new T.Mesh(gGeo, groundMat); ground.receiveShadow = true; world.add(ground); disposables.push(gGeo, groundMat);
 
   // water with procedural ripples (lake or open sea)
-  const waveTex = (() => {
-    const N = 256, d = new Uint8Array(N * N * 4), TAU = Math.PI * 2 / N, hgt = (x, y) => Math.sin((x * 3 + y * 1) * TAU * 2) * 0.55 + Math.sin((x * -2 + y * 3) * TAU * 2) * 0.4 + Math.sin((x * 1 - y * 4) * TAU * 3) * 0.22 + Math.sin((x * 5 + y * 2) * TAU * 2) * 0.12 + (fbm(x / N * 6, y / N * 6, 2) - 0.5) * 0.35;
+  const waveTex = await (async () => {
+    const N = 256, d = new Uint8Array(N * N * 4), TAU = Math.PI * 2 / N, Hf = new Float32Array(N * N);
+    const hgt = (x, y) => Math.sin((x * 3 + y * 1) * TAU * 2) * 0.55 + Math.sin((x * -2 + y * 3) * TAU * 2) * 0.4 + Math.sin((x * 1 - y * 4) * TAU * 3) * 0.22 + Math.sin((x * 5 + y * 2) * TAU * 2) * 0.12 + (fbm(x / N * 6, y / N * 6, 2) - 0.5) * 0.35;
+    for (let y = 0; y < N; y++) { for (let x = 0; x < N; x++) Hf[y * N + x] = hgt(x, y); if (y % 64 === 63) await yieldTask(); }
+    const at = (x, y) => Hf[((y + N) % N) * N + ((x + N) % N)];
     for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
-      const dx = hgt(x + 1, y) - hgt(x - 1, y), dy = hgt(x, y + 1) - hgt(x, y - 1), nz = 1 / Math.sqrt(dx * dx + dy * dy + 1), i = (y * N + x) * 4;
+      const dx = at(x + 1, y) - at(x - 1, y), dy = at(x, y + 1) - at(x, y - 1), nz = 1 / Math.sqrt(dx * dx + dy * dy + 1), i = (y * N + x) * 4;
       d[i] = (-dx * nz * 0.5 + 0.5) * 255; d[i + 1] = (-dy * nz * 0.5 + 0.5) * 255; d[i + 2] = (nz * 0.5 + 0.5) * 255; d[i + 3] = 255;
     }
     const t = new T.DataTexture(d, N, N); t.wrapS = t.wrapT = T.RepeatWrapping; t.repeat.set(26, 64);
@@ -1364,6 +1398,7 @@ function buildWorld(T, renderer, E) {
     peb.receiveShadow = true; peb.castShadow = true; world.add(peb); disposables.push(pebG, pebM);
   }
 
+  await yieldTask();
   // mountain ridges
   E.ridges.forEach((rg, k) => {
     const radius = [330, 460, 600][k], base = [30, 50, 70][k] * (E.alpine ? 1.5 : 1), amp = [70, 110, 150][k] * (E.alpine ? 1.7 : E.fields ? 0.5 : 1), seed = [1.3, 4.1, 7.7][k];
@@ -1386,12 +1421,13 @@ function buildWorld(T, renderer, E) {
 
   // buildings for this setting
   const envKey = Object.keys(ENVS).find((k) => ENVS[k] === E) || 'loch';
-  const arch = buildArch(T, envKey, heightAt, MS); world.add(arch.group); arch.disp.forEach((d) => disposables.push(d));
+  const arch = buildArch(T, envKey, heightAt, MS); world.add(arch.group); mergeStatic(T, arch.group, arch.disp); arch.disp.forEach((d) => disposables.push(d));
   const blocked = (x, z) => arch.sites.some(([sx, sz, r]) => (x - sx) * (x - sx) + (z - sz) * (z - sz) < r * r);
 
   // vegetation
   const mtx = new T.Matrix4(), q = new T.Quaternion(), sc = new T.Vector3(), pp = new T.Vector3(), up = new T.Vector3(0, 1, 0);
   const scatter = (geoTop, geoTrunk, cTop, cTrunk, N, place, flat) => {
+    N = Math.round(N * (PERF.low ? 0.6 : 1));
     const mt = new T.MeshStandardMaterial({ color: cTop, roughness: 1, flatShading: flat !== false }), mk = new T.MeshStandardMaterial({ color: cTrunk, roughness: 1 });
     const A = new T.InstancedMesh(geoTop, mt, N), B = geoTrunk ? new T.InstancedMesh(geoTrunk, mk, N) : null;
     for (let i = 0; i < N; i++) { const r = place(i); r[0] *= MS; if ((r[0] - 17) * (r[0] - 17) + (r[1] - 12) * (r[1] - 12) < 160 || (r[0] > 7 && r[0] < 30 && r[1] > -2 && r[1] < 26)) r[0] += r[0] > 0 ? 30 : -30; if (r[0] > -6 && r[0] < 17) r[0] = r[0] > 4 ? r[0] + 13 : r[0] - 10; pp.set(r[0], heightAt(r[0], r[1]), r[1]); const s = blocked(r[0], r[1]) ? 0.0001 : r[2]; sc.set(s, s * (0.9 + hash2(i, 4) * 0.4), s); q.setFromAxisAngle(up, hash2(i, 5) * 6.28); mtx.compose(pp, q, sc); A.setMatrixAt(i, mtx); if (B) B.setMatrixAt(i, mtx); }
@@ -1433,6 +1469,7 @@ function buildWorld(T, renderer, E) {
   }
 
 
+  await yieldTask();
   // foliage. The scenery's own scatter is fixed and never moves. The campsite brings its own patch of grass and flowers,
   // which glides in with the pitch as the van pulls up (the van is the thing that moves; the patch is placed relative to it).
   const patch = new T.Group(); patch.visible = false; world.add(patch);
@@ -1455,6 +1492,7 @@ function buildWorld(T, renderer, E) {
     const matFor = (key, o) => { if (!mats[key]) { mats[key] = new T.MeshStandardMaterial(Object.assign({ roughness: 1 }, o)); disposables.push(mats[key]); } return mats[key]; };
     // N instances placed by place(i) -> [x, z] or null; ground height follows the terrain when onTerrain is set
     const scatterInst = (parent, geo, mat, N, place, scl, colors, onTerrain, seed) => {
+      N = Math.round(N * (PERF.low ? 0.5 : 1));
       const im = new T.InstancedMesh(geo, mat, N), c = new T.Color(); let k = 0;
       for (let i = 0; i < N * 6 && k < N; i++) {
         const r = place(i); if (!r) continue;
@@ -1488,7 +1526,8 @@ function buildWorld(T, renderer, E) {
   }
 
   // road
-  const asphalt = dataTex(T, 256, (u, v) => { const n = fbm(u * 40, v * 40, 3), spk = hash2(Math.floor(u * 256), Math.floor(v * 256)) > 0.93 ? 18 : 0; const k = 58 + n * 22 + spk; return [k, k, k + 3]; }, 3, 140);
+  await yieldTask();
+  const asphalt = dataTex(T, 128, (u, v) => { const n = fbm(u * 40, v * 40, 3), spk = hash2(Math.floor(u * 128), Math.floor(v * 128)) > 0.93 ? 18 : 0; const k = 58 + n * 22 + spk; return [k, k, k + 3]; }, 3, 140);
   const roadMat = new T.MeshStandardMaterial({ color: '#ffffff', map: asphalt, roughness: 0.9 });
   const roadGroup = new T.Group(); world.add(roadGroup);
   const road = new T.Mesh(new T.PlaneGeometry(6.6, 1000), roadMat); road.rotation.x = -Math.PI / 2; road.position.y = 0.012; road.receiveShadow = true; roadGroup.add(road);
@@ -1500,9 +1539,10 @@ function buildWorld(T, renderer, E) {
   const posts = new T.Group(); roadGroup.add(posts);
   const postG = new T.BoxGeometry(0.1, 1.0, 0.1), postM = new T.MeshStandardMaterial({ color: '#f1efe8', roughness: 0.6 }), refG = new T.BoxGeometry(0.105, 0.12, 0.105), refM = new T.MeshStandardMaterial({ color: '#c41e30', emissive: '#5a0010', emissiveIntensity: 0.6 });
   for (let z = -300; z <= 300; z += 24) [-1].forEach((s) => { const pz = z + (s > 0 ? 12 : 0); const p = new T.Mesh(postG, postM); p.position.set(s * 4.4, 0.5, pz); p.castShadow = true; p.userData = { right: s > 0, y: 0.5 }; posts.add(p); const r = new T.Mesh(refG, refM); r.position.set(s * 4.4, 0.85, pz); r.userData = { right: s > 0, y: 0.85 }; posts.add(r); });
+  mergeStatic(T, dashes, disposables); mergeStatic(T, posts, disposables);
   disposables.push(asphalt, roadMat, road.geometry, lineMat, dashG, postG, postM, refG, refM, envSky.geometry, { dispose: () => pm.dispose() });
 
-  return { world, arch, patch, env, bakeSky, stars, skyMat, roadGroup, waveTex, dashes, posts, sunDir, disposables, fogColor: E.sky[1], E };
+  return { world, arch, patch, env, bakeSky, bakeView, stars, skyMat, roadGroup, waveTex, dashes, posts, sunDir, disposables, fogColor: E.sky[1], E };
 }
 
 // ---------- evening camp beside the van: awning, string lights, chairs, rug, campfire
@@ -1595,24 +1635,29 @@ class Component extends DCLogic {
   }
   componentWillUnmount() { this.destroy(); }
 
-  mount(el) {
-    if (!el || (this.v && this.v.canvas === el)) return;
+  async mount(el) {
+    if (!el || this.mountEl === el) return;
+    this.mountEl = el;
+    try { PERF.low = (window.matchMedia && window.matchMedia('(max-width: 820px)').matches) || (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4; } catch (e) {}
     const T = window.THREE;
     if (!T) { this.setState({ noGL: true }); return; }
     let renderer;
-    try { renderer = new T.WebGLRenderer({ canvas: el, antialias: true, powerPreference: 'high-performance' }); } catch (e) { this.setState({ noGL: true }); return; }
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    try { renderer = new T.WebGLRenderer({ canvas: el, antialias: !PERF.low, powerPreference: 'high-performance' }); } catch (e) { this.setState({ noGL: true }); return; }
+    const prMax = Math.min(window.devicePixelRatio || 1, PERF.low ? 1 : 1.5);
+    renderer.setPixelRatio(prMax);
     renderer.outputColorSpace = T.SRGBColorSpace;
     renderer.toneMapping = T.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.12;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = T.VSMShadowMap; // low-res map, blurred: soft, natural shadows
+    renderer.shadowMap.autoUpdate = false; // redrawn only when something casting a shadow moves
 
     const scene = new T.Scene();
     const camera = new T.PerspectiveCamera(45, 16 / 9, 0.03, 2000);
     const spec0 = VAN_SPECS[this.state.van] || VAN_SPECS['man-lwb-auto'];
     const E = ENVS[this.props.env] || ENVS[spec0.env] || ENVS.loch;
-    const W = buildWorld(T, renderer, E);
+    const W = await buildWorld(T, renderer, E);
+    if (this.dead || this.mountEl !== el) { W.disposables.forEach((d) => d.dispose && d.dispose()); renderer.dispose(); return; }
     scene.add(W.world);
     scene.environment = W.env;
     scene.fog = new T.Fog(W.fogColor, E.fog[0], E.fog[1]);
@@ -1620,9 +1665,9 @@ class Component extends DCLogic {
     const hemi = new T.HemisphereLight(0xdfe8ff, 0x5d5638, 0.6); scene.add(hemi);
     const sun = new T.DirectionalLight(0xffe2bf, 3.2);
     sun.position.copy(W.sunDir).multiplyScalar(30); sun.castShadow = true;
-    sun.shadow.mapSize.set(512, 512);
+    sun.shadow.mapSize.set(PERF.low ? 256 : 512, PERF.low ? 256 : 512);
     Object.assign(sun.shadow.camera, { left: -8, right: 8, top: 8, bottom: -8, near: 5, far: 70 });
-    sun.shadow.bias = -0.0005; sun.shadow.normalBias = 0.02; sun.shadow.radius = 18; sun.shadow.blurSamples = 25;
+    sun.shadow.bias = -0.0005; sun.shadow.normalBias = 0.02; sun.shadow.radius = PERF.low ? 10 : 18; sun.shadow.blurSamples = PERF.low ? 12 : 25;
     scene.add(sun);
     const inner = [new T.PointLight(0xffd9a8, 2.2, 5, 2), new T.PointLight(0xffd9a8, 2.2, 5, 2)];
     inner.forEach((l) => scene.add(l));
@@ -1641,19 +1686,21 @@ class Component extends DCLogic {
       dMoon: new T.Vector3(NIGHT.moon[0], NIGHT.moon[1], NIGHT.moon[2]).normalize(), envs: {}, tod: 19.6, todTarget: 19.6,
       pTop: new T.Color(), pHor: new T.Color(), pBot: new T.Color(), pFog: new T.Color(), pSun: new T.Color(), pDir: new T.Vector3(), tmpC: new T.Color(),
       mode: 'outside', theta: 0.85, phi: 1.22, radius: 11, yaw: 0, pitch: 0, fov: 45,
+      pr: prMax, prMax, ftA: 0, ftN: 0, frame: 0, skyAcc: 99, shadowDirty: true, lastSun: new T.Vector3(), camSettled: false,
       look: new T.Vector3(0, 1.2, 0), lastInteract: 0, doorT: 0, running: true, raf: 0, last: performance.now(), pointers: new Map()
     };
     this.bindInput(el);
     this.loadVan(this.state.van);
     this.setView(this.state.view, true);
     this.resize();
-    this.ro = new ResizeObserver(() => this.resize()); this.ro.observe(el);
+    this.ro = new ResizeObserver(() => { if (this.v) { this.v.pr = this.v.prMax; this.v.renderer.setPixelRatio(this.v.pr); } this.resize(); }); this.ro.observe(el);
     this.io = new IntersectionObserver((es) => { const vis = es.some((e) => e.isIntersecting); if (this.v) { this.v.running = vis; if (vis) this.tick(); } });
     this.io.observe(el);
     this.tick();
   }
 
   destroy() {
+    this.dead = true;
     const v = this.v; if (!v) return;
     cancelAnimationFrame(v.raf); v.running = false;
     if (this.ro) this.ro.disconnect(); if (this.io) this.io.disconnect();
@@ -1683,7 +1730,7 @@ class Component extends DCLogic {
   loadVan(id) {
     const v = this.v; if (!v) return;
     this.disposeVan();
-    v.van = buildVan(v.T, VAN_SPECS[id] || VAN_SPECS['man-lwb-auto']);
+    v.van = buildVan(v.T, VAN_SPECS[id] || VAN_SPECS['man-lwb-auto']); v.shadowDirty = true;
     v.scene.add(v.van.group);
     v.camp = buildCamp(v.T, v.van); v.scene.add(v.camp.group);
     v.van.lights.forEach((p, i) => v.inner[i].position.set(p[0], p[1], p[2]));
@@ -1772,8 +1819,12 @@ class Component extends DCLogic {
     const v = this.v; if (!v || !v.running) return;
     cancelAnimationFrame(v.raf);
     v.raf = requestAnimationFrame(() => this.tick());
-    const now = performance.now(), dt = Math.min(0.05, (now - v.last) / 1000); v.last = now;
+    const now = performance.now();
     if (!v.van) return;
+    // parked, set up, nobody touching it: 30 frames a second is plenty for firelight and drifting clouds
+    const idle = v.mode !== 'drive' && v.park >= 1 && !(v.speed > 0) && v.setupT >= 1 && v.jumpTo == null && now - v.lastInteract > 2500 && v.camSettled;
+    if (idle && now - v.last < 31) return;
+    const rawDt = (now - v.last) / 1000, dt = Math.min(0.05, rawDt); v.last = now; v.frame++;
     const t0 = now / 1000, driving = v.mode === 'drive', ease = 1 - Math.exp(-dt * 4), g = v.van.group;
     // every look-inside view is parked up at camp: only the hero's driving shot is on the road
     const atCamp = v.mode !== 'drive' && v.mode !== 'outside';
@@ -1919,10 +1970,21 @@ class Component extends DCLogic {
     }
     v.worldParts.waveTex.offset.set((t0 * 0.004) % 1, (t0 * 0.0025) % 1);
     v.worldParts.skyMat.uniforms.time.value = t0;
+    // the sky is rendered into a cube map now and then (faster while the clock is jumping), not every frame
+    v.skyAcc += dt;
+    if (v.skyAcc > (v.jumpTo != null ? 0.08 : atCamp ? 0.3 : 1.0)) { v.worldParts.bakeView(); v.skyAcc = 0; }
     const want = (v.mode === 'bed' || v.mode === 'camp') && v.setupT > 0.04 ? 1 : 0;
     v.doorT += (want - v.doorT) * (1 - Math.exp(-dt * 3));
     v.van.doors.forEach((d) => { d.pivot.rotation[d.axis] = d.open * v.doorT; });
+    // shadows are redrawn only when something that casts one has moved, or the sun has
+    const sunMoved = v.sun.position.distanceToSquared(v.lastSun) > 0.0004;
+    const moving = sp > 0.001 || Math.abs(v.yawV || 0) > 1e-4 || (v.setupT > 0 && v.setupT < 1) || (v.pOff > -999 && v.pOff !== 0) || Math.abs(v.doorT - want) > 0.002;
+    if (v.shadowDirty || sunMoved || (moving && (sp < 0.001 || v.frame % 2 === 0))) { v.renderer.shadowMap.needsUpdate = true; v.lastSun.copy(v.sun.position); v.shadowDirty = false; }
+    v.camSettled = v.camera.position.distanceToSquared(tg.pos) < 1e-4;
     v.renderer.render(v.scene, v.camera);
+    // adaptive resolution: if frames are slow, render fewer pixels (resets on resize)
+    if (!idle && rawDt < 0.1) { v.ftA += rawDt; v.ftN++; }
+    if (v.ftN >= 90) { const avg = v.ftA / v.ftN; v.ftA = 0; v.ftN = 0; if (avg > 0.024 && v.pr > 0.75) { v.pr = Math.max(0.75, v.pr - 0.25); v.renderer.setPixelRatio(v.pr); this.resize(); } }
   }
 
   renderVals() {
