@@ -1375,16 +1375,21 @@ function buildWorld(T, renderer, E) {
 
 
   // undergrowth around the camp: grass clumps, wildflowers, bushes and reeds at the water's edge
-  const bandL = new T.Group(), bandR = new T.Group(), campU = { value: 0 }; world.add(bandR);
+  const bandL = new T.Group(), bandR = new T.Group(), campU = { value: 0 }, growU = { value: 0 }, camU = { value: new T.Vector3(15, 2, 12) }; world.add(bandR);
+  const folGroup = new T.Group(); world.add(folGroup);
+  const foliageHook = (m, cut) => { m.onBeforeCompile = (sh) => {
+    sh.uniforms.uCamp = campU; sh.uniforms.uGrow = growU; sh.uniforms.uCam = camU;
+    sh.vertexShader = 'uniform float uCamp; uniform float uGrow; uniform vec3 uCam;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n#ifdef USE_INSTANCING\nvec4 io = modelMatrix * instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0);\nfloat dC = max(max(io.x - 7.6, 0.4 - io.x), max(io.z - 6.8, -6.8 - io.z));\nfloat ph = fract(sin(dot(io.xz, vec2(12.9898, 78.233))) * 43758.5453) * 0.45;\nfloat gk = clamp((uGrow * 1.45 - ph) / 1.0, 0.0, 1.0); gk = gk * gk * (3.0 - 2.0 * gk);\nfloat ck = ' + (cut ? '1.0 - uCamp * (1.0 - smoothstep(-0.9, 0.5, dC))' : '1.0') + ';\nfloat nk = smoothstep(3.5, 7.5, distance(io.xz, uCam.xz));\ntransformed *= gk * ck * nk;\n#endif');
+  }; m.customProgramCacheKey = () => 'foliage' + (cut ? 1 : 0); };
   {
     const dry = E.alpine ? '#7a9a4a' : E.sea ? '#a7a35e' : E.fields ? '#7c9a44' : '#5f7a3a';
     const sightline = (x, z) => { const d = Math.hypot(x, z), along = (x * 0.78 + z * 0.62); return along > 0 && d < 40 && Math.abs(x * 0.62 - z * 0.78) < along * 0.5 + 3; };
     const free = (x, z, tall) => { if (x > -10.5 && x < 8.6) return false; if (sightline(x, z)) return false; if (Math.hypot(x - 13, z - 10.5) < 9) return false; if (blocked(x, z)) return false; const h = heightAt(x, z); return h > (W0 ? W0.y + 0.12 : E.sea ? -0.55 : -9); };
     const pick = (i, near, far, tall) => { for (let t = 0; t < 12; t++) { const a = hash2(i, 31 + t) * Math.PI * 2, r = near + Math.pow(hash2(i, 47 + t), 1.6) * far, x = Math.cos(a) * r, z = Math.sin(a) * r; if (free(x, z, tall)) return [x, z]; } return null; };
     const inst = (geo, matO, N, near, far, tall, scl, colors) => {
-      const m = new T.MeshStandardMaterial(Object.assign({ roughness: 1 }, matO)), im = new T.InstancedMesh(geo, m, N), c = new T.Color();
+      const m = new T.MeshStandardMaterial(Object.assign({ roughness: 1 }, matO)), im = new T.InstancedMesh(geo, m, N), c = new T.Color(); foliageHook(m, false);
       for (let i = 0; i < N; i++) { const p0 = pick(i * 7 + N, near, far, tall); const s0 = p0 ? scl[0] + hash2(i, 61) * scl[1] : 0.0001; const px = p0 ? p0[0] : 0, pz = p0 ? p0[1] : -500; pp.set(px, heightAt(px, pz) - 0.02, pz); sc.set(s0, s0 * (0.8 + hash2(i, 62) * 0.5), s0); q.setFromAxisAngle(up, hash2(i, 63) * 6.28); mtx.compose(pp, q, sc); im.setMatrixAt(i, mtx); if (colors) im.setColorAt(i, c.set(colors[Math.floor(hash2(i, 64) * colors.length)])); }
-      im.receiveShadow = true; world.add(im); disposables.push(geo, m); return im;
+      im.receiveShadow = true; im.frustumCulled = false; folGroup.add(im); disposables.push(geo, m); return im;
     };
     // grass clumps: a few crossed blades
     const blade = new T.ConeGeometry(0.05, 0.5, 3); blade.translate(0, 0.25, 0);
@@ -1400,7 +1405,7 @@ function buildWorld(T, renderer, E) {
     const P = 24, CP = [-4, -3, -2, -1, 0, 1, 2, 3, 4];
     const band = (parent, x0, x1, geo, matO, per, scl, colors, cut, seed) => {
       const m = new T.MeshStandardMaterial(Object.assign({ roughness: 1 }, matO));
-      if (cut) m.onBeforeCompile = (sh) => { sh.uniforms.uCamp = campU; sh.vertexShader = 'uniform float uCamp;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n#ifdef USE_INSTANCING\nvec4 io = modelMatrix * instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0);\nfloat dC = max(max(io.x - 7.6, 0.4 - io.x), max(io.z - 6.8, -6.8 - io.z));\ntransformed *= 1.0 - uCamp * (1.0 - smoothstep(-0.9, 0.5, dC));\n#endif'); };
+      foliageHook(m, cut);
       const im = new T.InstancedMesh(geo, m, per * CP.length), c = new T.Color(); let k = 0;
       for (let i = 0; i < per; i++) {
         const x = x0 + hash2(i, seed) * (x1 - x0), z = hash2(i, seed + 1) * P, s0 = scl[0] + hash2(i, seed + 2) * scl[1], col = colors ? colors[Math.floor(hash2(i, seed + 3) * colors.length)] : null;
@@ -1419,9 +1424,9 @@ function buildWorld(T, renderer, E) {
     if (W0) {
       const reed = new T.ConeGeometry(0.025, 1.3, 3); reed.translate(0, 0.65, 0); const rp = []; for (let k = 0; k < 7; k++) { const b = reed.clone(); b.rotateZ((hash2(k, 5) - 0.5) * 0.35); b.translate((hash2(k, 6) - 0.5) * 0.35, 0, (hash2(k, 7) - 0.5) * 0.35); rp.push(b); }
       const reeds = mergeGeos(T, rp); reed.dispose(); rp.forEach((b) => b.dispose());
-      const rm = new T.MeshStandardMaterial({ color: '#7b7a45', roughness: 1, flatShading: true }), RN = 420, ri = new T.InstancedMesh(reeds, rm, RN);
+      const rm = new T.MeshStandardMaterial({ color: '#7b7a45', roughness: 1, flatShading: true }); foliageHook(rm, false); const RN = 420, ri = new T.InstancedMesh(reeds, rm, RN);
       for (let i = 0; i < RN; i++) { const z = (hash2(i, 71) - 0.5) * 220; let xs = 10.3 + shoreOff(z) + (hash2(i, 72) - 0.4) * 1.6; let ok = Math.abs(z) > 8 || xs > 11.5; if (!(xs * 0.62 - z * 0.78 < -6 || xs * 0.62 - z * 0.78 > 4) && Math.hypot(xs, z) < 34) ok = ok && hash2(i, 74) > 0.6; const x = xs * MS, s0 = ok ? 0.7 + hash2(i, 73) * 0.7 : 0.0001; pp.set(x, Math.max(heightAt(x, z), W0.y - 0.15), z); sc.set(s0, s0, s0); q.setFromAxisAngle(up, hash2(i, 75) * 6.28); mtx.compose(pp, q, sc); ri.setMatrixAt(i, mtx); }
-      world.add(ri); disposables.push(reeds, rm);
+      ri.frustumCulled = false; folGroup.add(ri); disposables.push(reeds, rm);
       // a few boulders breaking the waterline
       const bg = new T.DodecahedronGeometry(1, 1), bm = new T.MeshStandardMaterial({ color: '#77736b', roughness: 0.95, flatShading: true }), BN = 26, bi = new T.InstancedMesh(bg, bm, BN);
       for (let i = 0; i < BN; i++) { const z = (hash2(i, 81) - 0.5) * 160, sd = Math.abs(z) < 10 ? 4 : 0, xs = 11 + sd + shoreOff(z) + hash2(i, 82) * 6, x = xs * MS, s0 = 0.4 + hash2(i, 83) * 1.1; pp.set(x, Math.min(heightAt(x, z), W0.y) - s0 * 0.35, z); sc.set(s0 * 1.3, s0 * 0.7, s0); q.setFromEuler(new T.Euler(hash2(i, 84), hash2(i, 85) * 6, 0)); mtx.compose(pp, q, sc); bi.setMatrixAt(i, mtx); }
@@ -1444,7 +1449,7 @@ function buildWorld(T, renderer, E) {
   for (let z = -300; z <= 300; z += 24) [-1, 1].forEach((s) => { const pz = z + (s > 0 ? 12 : 0); const p = new T.Mesh(postG, postM); p.position.set(s * 4.4, 0.5, pz); p.castShadow = true; p.userData = { right: s > 0, y: 0.5 }; posts.add(p); const r = new T.Mesh(refG, refM); r.position.set(s * 4.4, 0.85, pz); r.userData = { right: s > 0, y: 0.85 }; posts.add(r); });
   disposables.push(asphalt, roadMat, road.geometry, lineMat, dashG, postG, postM, refG, refM, envSky.geometry, { dispose: () => pm.dispose() });
 
-  return { world, arch, bandL, bandR, campU, env, bakeSky, stars, skyMat, roadGroup, waveTex, dashes, posts, sunDir, disposables, fogColor: E.sky[1], E };
+  return { world, arch, bandL, bandR, folGroup, campU, growU, camU, env, bakeSky, stars, skyMat, roadGroup, waveTex, dashes, posts, sunDir, disposables, fogColor: E.sky[1], E };
 }
 
 // ---------- evening camp beside the van: awning, string lights, chairs, rug, campfire
@@ -1464,6 +1469,7 @@ function buildCamp(T, van) {
   const bulbs = 16, pts = [];
   for (let i = 0; i <= bulbs; i++) { const t = i / bulbs, z = z0 + (z1 - z0) * t, y = ay - drop - 0.05 - Math.sin(t * Math.PI) * 0.22; pts.push(new T.Vector3(ax + reach - 0.05, y, z)); add(new T.SphereGeometry(0.035, 10, 8), bulbM, ax + reach - 0.05, y - 0.04, z).castShadow = false; }
   add(new T.TubeGeometry(new T.CatmullRomCurve3(pts), 64, 0.004, 4), wireM, 0, 0, 0);
+  const nAwn = g.children.length;
   // rug
   const rugTex = dataTex(T, 128, (u, v) => { const b = Math.floor(u * 9) % 3; const c = b === 0 ? [176, 64, 74] : b === 1 ? [236, 222, 196] : [52, 70, 112]; const n = 0.9 + 0.1 * hash2(Math.floor(u * 128), Math.floor(v * 128)); return [c[0] * n, c[1] * n, c[2] * n]; }, 1, 1); disp.push(rugTex);
   const rg = new T.PlaneGeometry(1.7, 2.4); rg.rotateX(-Math.PI / 2);
@@ -1513,8 +1519,9 @@ function buildCamp(T, van) {
   const hMat = new T.PointsMaterial({ map: gTex, color: '#ffcf86', size: 0.42, transparent: true, opacity: 0, depthWrite: false, blending: T.AdditiveBlending });
   const halos = new T.Points(hGeo, hMat); g.add(halos); disp.push(hGeo, hMat);
   // everything is set out one piece at a time, in the order it was built: awning, lights, rug, fire, chairs, table
-  const items = g.children.filter((o) => !o.isPoints && !o.isLight).map((o, i, arr) => ({ o, d: 0.62 * i / Math.max(1, arr.length - 1), p: o.position.clone(), s: o.scale.clone(), awn: i === 0 }));
-  return { group: g, items, ax, halos, bulbM, lanternM, flames, fireLight, embers, smoke, sPos, sSeed, ePos, eSeed, fx, fz, center: new T.Vector3(ax + 1.6, 0.9, fz), disp };
+  const awnSet = new Set(g.children.slice(0, nAwn));
+  const items = g.children.filter((o) => !o.isPoints && !o.isLight).map((o, i) => ({ o, p: o.position.clone(), s: o.scale.clone(), kind: i === 0 ? 'awn' : awnSet.has(o) ? 'edge' : flames.includes(o) ? 'flame' : 'ground', pole: awnSet.has(o) && o.geometry && o.geometry.type === 'CylinderGeometry', h: o.geometry && o.geometry.parameters ? o.geometry.parameters.height || 0 : 0 }));
+  return { group: g, items, ax, reach, halos, bulbM, lanternM, flames, fireLight, embers, smoke, sPos, sSeed, ePos, eSeed, fx, fz, center: new T.Vector3(ax + 1.6, 0.9, fz), disp };
 }
 
 class Component extends DCLogic {
@@ -1728,7 +1735,7 @@ class Component extends DCLogic {
       if (v.stopAt == null) { v.p0 = v.park; v.pR0 = Math.max((1 - v.park) * 11, vel * vel / (2 * BR)); v.stopAt = dist0 + v.pR0; }
       const Rm = Math.max(0, v.stopAt - dist0);
       vel = Math.min(vel + ACC * dt, Math.sqrt(2 * BR * Rm), VMAX);
-      const step = Math.min(Rm, vel * dt), Rn = Rm - step; v.dist = dist0 + step;
+      const step = Math.min(Rm, vel * dt), Rn = Rm - step; v.dist = dist0 + step; v.fol = Rn;
       v.park = v.pR0 > 1e-4 ? v.p0 + (1 - v.p0) * (1 - Rn / v.pR0) : 1;
       if (Rn < 1e-3) { vel = 0; v.park = 1; }
     } else {
@@ -1736,6 +1743,7 @@ class Component extends DCLogic {
       const go = driving && v.setupT < 0.02;
       vel = go ? Math.min(VMAX, vel + ACC * 0.75 * dt) : Math.max(0, vel - BR * dt);
       v.dist = dist0 + vel * dt;
+      v.fol = (v.fol || 0) - vel * dt;
       v.park = Math.max(0, v.park - (v.dist - dist0) / 13);
     }
     v.speed = vel / VMAX;
@@ -1747,8 +1755,14 @@ class Component extends DCLogic {
     v.worldParts.posts.children.forEach((o) => { if (o.userData.right) o.position.y = o.userData.y - 1.3 * Math.min(1, Math.max(0, (lat - 0.15) / 1.6)); });
     // the camp is set out once the van has stopped, and packed away before it leaves
     const setWant = atCamp && v.park >= 1 && vel < 0.05;
-    v.setupT = setWant ? Math.min(1, v.setupT + dt * 0.55) : Math.max(0, v.setupT - dt * 1.4);
+    v.setupT = setWant ? Math.min(1, v.setupT + dt * 0.42) : Math.max(0, v.setupT - dt * 1.3);
     v.worldParts.campU.value = smp(v.setupT);
+    const growWant = atCamp ? 1 : 0;
+    v.growT = growWant ? Math.min(1, (v.growT || 0) + dt * 0.75) : (v.setupT > 0.02 ? v.growT : Math.max(0, (v.growT || 0) - dt * 1.2));
+    v.worldParts.folGroup.position.z = v.fol || 0;
+    if (v.camp) v.camp.group.position.z = v.fol || 0;
+    v.worldParts.growU.value = v.growT;
+    v.worldParts.camU.value.copy(v.camera.position);
     v.worldParts.bandL.position.z = v.worldParts.bandR.position.z = -(v.dist % 24);
     g.position.y = sp * (0.012 * Math.sin(t0 * 8.3) + 0.006 * Math.sin(t0 * 13.7 + 1.3));
     g.rotation.x = sp * 0.004 * Math.sin(t0 * 6.1) + (driving ? 0 : 0.006 * (sp * (1 - sp)) * 4);
@@ -1807,22 +1821,28 @@ class Component extends DCLogic {
     const A = WP.arch; A.winM.emissiveIntensity = 0.05 + 2.4 * dark * ck; A.lampM.emissiveIntensity = 0.4 + 4 * dark * ck;
     if (A.beam) { A.beam.rotation.y = t0 * 0.9; A.beam.userData.m.uniforms.uOp.value = 0.55 * dark * ck; A.beam.visible = dark * ck > 0.05; A.glow.material.opacity = 0.25 + 0.75 * dark * ck; }
     if (v.camp) {
-      const c = v.camp; c.group.visible = v.setupT > 0.001;
+      const c = v.camp; c.group.visible = v.setupT > 0.001 || (atCamp && (v.growT || 0) > 0.001) || (v.growT || 0) > 0.001;
       if (c.group.visible) {
-        const S = v.setupT, ax0 = c.ax;
+        // 1) the pitch has glided in with the stop; 2) the awning rolls out and its legs drop; 3) the fire is lit; 4) the lights come on
+        const S = v.setupT, ax0 = c.ax, ph = (x, a0, a1) => { const t = Math.min(1, Math.max(0, (x - a0) / (a1 - a0))); return t * t * (3 - 2 * t); };
+        const G = v.growT || 0, gk = ph(G, 0, 0.8), awnK = ph(S, 0.0, 0.4), legK = ph(S, 0.3, 0.48), fireK = ph(S, 0.5, 0.75), lightK = ph(S, 0.78, 0.95);
         c.items.forEach((it) => {
-          const kk = Math.min(1, Math.max(0, (S * 1.25 - it.d) / 0.4)), e = 1 - Math.pow(1 - kk, 3), o = it.o;
-          o.visible = kk > 0.001; o.userData.k = e; if (!o.visible) return;
-          if (it.awn) { o.scale.set(it.s.x * Math.max(e, 0.001), it.s.y, it.s.z); o.position.set(ax0 + (it.p.x - ax0) * e, it.p.y, it.p.z); }
-          else { o.scale.copy(it.s).multiplyScalar(Math.max(e, 0.001)); o.position.set(ax0 + (it.p.x - ax0) * e, it.p.y > 1 ? it.p.y : it.p.y * e, it.p.z); }
+          const o = it.o;
+          if (it.kind === 'awn') { o.visible = awnK > 0.002; o.scale.set(it.s.x * Math.max(awnK, 0.001), it.s.y, it.s.z); o.position.set(ax0 + (it.p.x - ax0) * awnK, it.p.y, it.p.z); }
+          else if (it.kind === 'edge') {
+            o.visible = awnK > 0.02; o.position.x = it.p.x + (awnK - 1) * c.reach;
+            if (it.pole) { const top = it.p.y + it.h / 2, k = Math.max(legK, 0.001); o.scale.y = it.s.y * k; o.position.y = top - (top - it.p.y) * k; o.visible = legK > 0.002; }
+          } else if (it.kind === 'flame') { o.userData.k = fireK * gk; }
+          else { o.visible = gk > 0.002; o.scale.copy(it.s).multiplyScalar(Math.max(gk, 0.001)); }
         });
-        c.halos.material.opacity = 0.9 * dark * S * S;
-        c.bulbM.emissiveIntensity = 0.15 + 3.2 * dark; c.lanternM.emissiveIntensity = 0.3 + 2.6 * dark;
+        c.fireK = fireK; c.lightK = lightK;
+        c.halos.material.opacity = 0.9 * dark * lightK;
+        c.bulbM.emissiveIntensity = (0.15 + 3.2 * dark) * c.lightK; c.lanternM.emissiveIntensity = (0.3 + 2.6 * dark) * c.lightK;
         // the fire burns from late afternoon through the night; by morning it is out and only smoking
         const tt = v.tod, lit = tt >= 17 ? Math.min(1, (tt - 17) / 0.8) : tt < 6.2 ? 1 : tt < 7.2 ? 1 - (tt - 6.2) : 0;
         c.flames.forEach((fm) => { fm.visible = lit > 0.02; });
         c.flames.forEach((fm, i) => { fm.scale.set(1 + 0.08 * Math.sin(t0 * 17 + i), 0.85 + 0.25 * Math.sin(t0 * (11 + i * 3)) + 0.1 * Math.sin(t0 * 29 + i), 1 + 0.08 * Math.cos(t0 * 15 + i)); fm.rotation.y = t0 * (0.8 + i * 0.4); fm.material.uniforms.uOp.value = (0.65 + 0.12 * i) * Math.min(1, ck * 1.5) * (0.45 + 0.55 * dark) * lit; fm.scale.multiplyScalar((0.35 + 0.65 * lit) * (fm.userData.k === undefined ? 1 : Math.max(0.001, fm.userData.k))); });
-        c.fireLight.intensity = v.setupT * ck * lit * (0.6 + 3 * dark) * (1 + 0.22 * Math.sin(t0 * 13) + 0.12 * Math.sin(t0 * 31));
+        c.fireLight.intensity = c.fireK * ck * lit * (0.6 + 3 * dark) * (1 + 0.22 * Math.sin(t0 * 13) + 0.12 * Math.sin(t0 * 31));
         const ep = c.ePos;
         for (let i = 0; i < c.eSeed.length; i++) {
           const s0 = c.eSeed[i]; ep[i * 3 + 1] += dt * (0.5 + s0 * 0.7);
@@ -1830,8 +1850,8 @@ class Component extends DCLogic {
           if (ep[i * 3 + 1] > 1.6 + s0 * 1.4) ep[i * 3 + 1] = 0.25;
         }
         c.embers.geometry.attributes.position.needsUpdate = true;
-        c.embers.material.opacity = (0.3 + 0.6 * dark) * lit; c.embers.visible = lit > 0.02;
-        const smokeAmt = ck * (1 - lit) * (tt >= 6 && tt < 12 ? 1 : 0.45);
+        c.embers.material.opacity = (0.3 + 0.6 * dark) * lit * c.fireK; c.embers.visible = lit > 0.02;
+        const smokeAmt = c.fireK * ck * (1 - lit) * (tt >= 6 && tt < 12 ? 1 : 0.45);
         c.smoke.visible = smokeAmt > 0.01; c.smoke.material.opacity = 0.42 * smokeAmt;
         if (c.smoke.visible) {
           const sp2 = c.sPos;
