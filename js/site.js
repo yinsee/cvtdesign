@@ -1093,7 +1093,7 @@ const ENVS = {
   forest: { label: 'Pine forest', sky: ['#2265bd', '#98c3e9', '#8f9a84'], fog: [45, 420], grass: ['#3e5a2e', '#56693a'], accent: '#5a4a36', trees: 'dense', ridges: [['#2d3a2c', '#3c4a38', 0], ['#4a5662', '#606c78', 0]] },
   farmland: { label: 'Open farmland', sky: ['#1b64cc', '#9ccaf3', '#c2b48e'], fog: [170, 1400], grass: ['#5f8a3a', '#8fa04a'], accent: '#b9a85a', fields: true, flatFields: true, trees: 'oak', treeN: 0.35, ridges: [['#6f8a5a', '#86a06c', 0]] },
   grove:  { label: 'Olive groves', sky: ['#1f68c8', '#a9d0f0', '#c9b48a'], fog: [150, 1250], grass: ['#8a8a4a', '#b3a35e'], accent: '#b08a52', trees: 'olive', ridges: [['#7c7a55', '#958f68', 0], ['#8a96a0', '#a7b1b8', 0]] },
-  alps:   { label: 'Alpine pass', sky: ['#0f56cc', '#94c7f5', '#c9d2d6'], fog: [160, 1300], grass: ['#5c8a3a', '#86a04e'], accent: '#9aa07a', alpine: true, trees: 'larch', ridges: [['#56606e', '#e9edf2', 2], ['#6a7486', '#f2f5f8', 2], ['#8e98ad', '#f7f9fb', 2]] }
+  alps:   { lakeside: true, label: 'Alpine pass', sky: ['#0f56cc', '#94c7f5', '#c9d2d6'], fog: [160, 1300], grass: ['#5c8a3a', '#86a04e'], accent: '#9aa07a', alpine: true, trees: 'larch', ridges: [['#56606e', '#e9edf2', 2], ['#6a7486', '#f2f5f8', 2], ['#8e98ad', '#f7f9fb', 2]] }
 };
 
 function mergeGeos(T, list) {
@@ -1326,6 +1326,21 @@ async function buildWorld(T, renderer, E) {
 
   const cl01 = (v) => Math.min(1, Math.max(0, v));
   const W0 = E.water, MS = E.mirror ? -1 : 1;
+  // LAKESIDE PROTOTYPE: a gravel track leaves the road, winds inland between trees and ends at a clearing by a lake
+  const LS = E.lakeside ? (() => {
+    const D = { x: 22, z: 44 }, LK = { x: 54, z: 50, r: 15 };
+    const bz = (a, b, c, d, t) => { const u = 1 - t; return u * u * u * a + 3 * u * u * t * b + 3 * u * t * t * c + t * t * t * d; };
+    const pts = []; for (let i = 0; i <= 8; i++) pts.push([0, i * 5 / 8]);
+    for (let i = 1; i <= 160; i++) { const t = i / 160; pts.push([bz(0, 0, D.x, D.x, t), bz(5, 22, 24, D.z, t)]); }
+    const route = []; let L = 0;
+    pts.forEach((q, i) => { if (i) L += Math.hypot(q[0] - pts[i - 1][0], q[1] - pts[i - 1][1]); route.push({ x: q[0], z: q[1], s: L }); });
+    route.forEach((r, i) => { const a = route[Math.max(0, i - 1)], b = route[Math.min(route.length - 1, i + 1)]; r.th = Math.atan2(b.x - a.x, b.z - a.z); });
+    route[0].th = 0; route[route.length - 1].th = 0;
+    const segDist = (x, z) => { if (x < -14 || x > D.x + 16 || z < -14 || z > D.z + 16) return 99; let m = 1e9; for (let i = 8; i < route.length - 2; i += 2) { const a = route[i], b = route[i + 2], dx = b.x - a.x, dz = b.z - a.z, t = Math.max(0, Math.min(1, ((x - a.x) * dx + (z - a.z) * dz) / (dx * dx + dz * dz || 1))); m = Math.min(m, Math.hypot(x - a.x - dx * t, z - a.z - dz * t)); } return m; };
+    const shoreR = (x, z) => { const a = Math.atan2(z - LK.z, x - LK.x); return LK.r + 2.6 * Math.sin(a * 3 + 0.7) + 1.4 * Math.sin(a * 7 + 2.1); };
+    const clear = (x, z) => Math.hypot(x - D.x - 4, z - D.z);
+    return { D, LK, route, len: L, segDist, shoreR, clear };
+  })() : null;
   const shoreOff = (z) => { const o = (fbm(z * 0.022 + 3.1, 1.7, 4) - 0.5) * 22 + Math.sin(z * 0.083 + 1.2) * 2.6 + Math.sin(z * 0.21) * 0.9; const keep = cl01((Math.abs(z) - 7) / 18); return Math.max(-1.2, o * keep + (1 - keep) * Math.max(o, 0.6)); };
   const heightAt = (xw, z) => { const x = xw * MS;
     const ax = Math.abs(x); let h = 0;
@@ -1349,6 +1364,11 @@ async function buildWorld(T, renderer, E) {
     }
     // the camp side stays level well past the pitch and its patch; hills and shorelines start further out
     if (xw > 0) h *= cl01((xw - 24) / 16);
+    if (LS) {
+      h *= Math.min(cl01((LS.clear(xw, z) - 16) / 10), cl01((LS.segDist(xw, z) - 3.5) / 6));
+      const dl = Math.hypot(xw - LS.LK.x, z - LS.LK.z), sr = LS.shoreR(xw, z);
+      if (dl < sr + 6) { const t = cl01((dl - sr) / 6); h = h * t + (dl < sr ? -0.35 - 1.6 * cl01((sr - dl) / 6) : 0) * (1 - t); }
+    }
     return h;
   };
   const SEG = PERF.low ? 110 : 150;
@@ -1367,6 +1387,7 @@ async function buildWorld(T, renderer, E) {
     if (Math.abs(x) < 6.5) col.lerp(verge, 0.55);
     { const xs = x - shoreOff(z); if ((W0 || E.sea) && xs > 8.5 && xs < (E.sea ? 40 : 17)) col.lerp(beach, cl01((xs - 8.5) / 2) * 0.85); }
     if (W0 && x > W0.x1 - 30 && x < W0.x1 - 22) col.lerp(beach, 0.7 * (1 - Math.abs(x - (W0.x1 - 26)) / 4));
+    if (LS) { const dl = Math.hypot(xw - LS.LK.x, z - LS.LK.z), sr = LS.shoreR(xw, z); if (dl < sr + 3) col.lerp(beach, 0.85 * cl01((sr + 3 - dl) / 2)); if (LS.segDist(xw, z) < 2.4) col.lerp(new T.Color('#a39880'), 0.8); }
     cols.push(col.r, col.g, col.b);
   }
   gGeo.setAttribute('color', new T.Float32BufferAttribute(cols, 3)); gGeo.computeVertexNormals();
@@ -1423,7 +1444,7 @@ async function buildWorld(T, renderer, E) {
   // buildings for this setting
   const envKey = Object.keys(ENVS).find((k) => ENVS[k] === E) || 'loch';
   const arch = buildArch(T, envKey, heightAt, MS); world.add(arch.group); mergeStatic(T, arch.group, arch.disp); arch.disp.forEach((d) => disposables.push(d));
-  const blocked = (x, z) => arch.sites.some(([sx, sz, r]) => (x - sx) * (x - sx) + (z - sz) * (z - sz) < r * r);
+  const blocked = (x, z) => arch.sites.some(([sx, sz, r]) => (x - sx) * (x - sx) + (z - sz) * (z - sz) < r * r) || (LS && (LS.segDist(x, z) < 5 || LS.clear(x, z) < 17 || Math.hypot(x - LS.LK.x, z - LS.LK.z) < LS.LK.r + 6));
 
   // vegetation
   const mtx = new T.Matrix4(), q = new T.Quaternion(), sc = new T.Vector3(), pp = new T.Vector3(), up = new T.Vector3(0, 1, 0);
@@ -1438,6 +1459,18 @@ async function buildWorld(T, renderer, E) {
   const trunkG = () => { const g = new T.CylinderGeometry(0.18, 0.22, 1.4, 6); g.translate(0, 0.7, 0); return g; };
   const roundG = () => { const g = new T.IcosahedronGeometry(2.4, 1); g.translate(0, 3.6, 0); g.scale(1, 0.85, 1); return g; };
   const trunkTall = () => { const g = new T.CylinderGeometry(0.22, 0.3, 2.4, 6); g.translate(0, 1.2, 0); return g; };
+  if (LS) {
+    scatter(pineG(), trunkG(), '#2c4a2e', '#4a3a2c', 240, (i) => [8 + hash2(i, 41) * 9, 16 + hash2(i, 42) * 110, 0.8 + hash2(i, 43) * 0.6]);
+    scatter(pineG(), trunkG(), '#2f4f33', '#4a3a2c', 160, (i) => { const a = hash2(i, 44) * Math.PI * 2, r = LS.LK.r + 10 + hash2(i, 45) * 26; return [LS.LK.x + Math.cos(a) * r, LS.LK.z + Math.sin(a) * r, 0.8 + hash2(i, 46) * 0.7]; });
+    const lakeN = waveTex.clone(); lakeN.repeat.set(10, 10); lakeN.needsUpdate = true;
+    const lm = new T.MeshStandardMaterial({ color: '#2b5c70', roughness: 0.06, metalness: 0.1, normalMap: lakeN, normalScale: new T.Vector2(0.22, 0.22), transparent: true, opacity: 0.94 });
+    const lake = new T.Mesh(new T.CircleGeometry(LS.LK.r + 9, 72), lm); lake.rotation.x = -Math.PI / 2; lake.position.set(LS.LK.x, -0.25, LS.LK.z); lake.receiveShadow = true; world.add(lake);
+    const tp = [], ti = []; let k0 = 0;
+    LS.route.forEach((r, i) => { if (r.x < 2.6 && i < 40) return; const nx = Math.cos(r.th), nz = -Math.sin(r.th), w = 1.6; tp.push(r.x - nx * w, 0.035, r.z - nz * w, r.x + nx * w, 0.035, r.z + nz * w); if (k0) { const j = (k0 - 1) * 2; ti.push(j, j + 2, j + 1, j + 1, j + 2, j + 3); } k0++; });
+    const tg = new T.BufferGeometry(); tg.setAttribute('position', new T.Float32BufferAttribute(tp, 3)); tg.setIndex(ti); tg.computeVertexNormals();
+    const tm = new T.MeshStandardMaterial({ color: '#a6997e', roughness: 1, side: T.DoubleSide }); const track = new T.Mesh(tg, tm); track.receiveShadow = true; world.add(track);
+    disposables.push(lakeN, lm, lake.geometry, tg, tm);
+  }
   const sideX = (i, near, span, farSide) => (farSide ? 1 : -1) * (near + Math.pow(hash2(i, 1), 1.3) * span);
   if (E.trees === 'pine' || E.trees === 'mixed') {
     scatter(pineG(), trunkG(), '#2b3d2a', '#4a3a2c', 420, (i) => { const far = i % 3 === 0 && W0; return [far ? W0.x1 - 20 + Math.pow(hash2(i, 1), 1.2) * 150 : sideX(i, E.trees === 'mixed' ? 30 : 60, 240), (hash2(i, 2) - 0.5) * 700, 0.55 + hash2(i, 3) * 0.7]; });
@@ -1543,7 +1576,7 @@ async function buildWorld(T, renderer, E) {
   mergeStatic(T, dashes, disposables); mergeStatic(T, posts, disposables);
   disposables.push(asphalt, roadMat, road.geometry, lineMat, dashG, postG, postM, refG, refM, envSky.geometry, { dispose: () => pm.dispose() });
 
-  return { world, arch, patch, env, bakeSky, bakeView, stars, skyMat, roadGroup, waveTex, dashes, posts, sunDir, disposables, fogColor: E.sky[1], E };
+  return { world, arch, patch, LS, env, bakeSky, bakeView, stars, skyMat, roadGroup, waveTex, dashes, posts, sunDir, disposables, fogColor: E.sky[1], E };
 }
 
 // ---------- evening camp beside the van: awning, string lights, chairs, rug, campfire
@@ -1659,7 +1692,9 @@ class Component extends DCLogic {
     const E = ENVS[this.props.env] || ENVS[spec0.env] || ENVS.loch;
     const W = await buildWorld(T, renderer, E);
     if (this.dead || this.mountEl !== el) { W.disposables.forEach((d) => d.dispose && d.dispose()); renderer.dispose(); return; }
-    scene.add(W.world);
+    const worldRoot = new T.Group(); scene.add(worldRoot); worldRoot.add(W.world);
+    { const skyM = W.world.children.find((o) => o.material && o.material.uniforms && o.material.uniforms.tSky); if (skyM) scene.add(skyM); if (W.stars) scene.add(W.stars); }
+    if (W.LS) { W.patch.visible = true; W.patch.position.set(W.LS.D.x, 0, W.LS.D.z); }
     scene.environment = W.env;
     scene.fog = new T.Fog(W.fogColor, E.fog[0], E.fog[1]);
     scene.background = new T.Color(W.fogColor);
@@ -1688,10 +1723,11 @@ class Component extends DCLogic {
       pTop: new T.Color(), pHor: new T.Color(), pBot: new T.Color(), pFog: new T.Color(), pSun: new T.Color(), pDir: new T.Vector3(), tmpC: new T.Color(),
       mode: 'outside', theta: 0.85, phi: 1.22, radius: 11, yaw: 0, pitch: 0, fov: 45,
       pr: prMax, prMax, ftA: 0, ftN: 0, frame: 0, skyAcc: 99, shadowDirty: true, lastSun: new T.Vector3(), camSettled: false,
-      look: new T.Vector3(0, 1.2, 0), lastInteract: 0, doorT: 0, running: true, raf: 0, last: performance.now(), pointers: new Map()
+      worldRoot, look: new T.Vector3(0, 1.2, 0), lastInteract: 0, doorT: 0, running: true, raf: 0, last: performance.now(), pointers: new Map()
     };
     this.bindInput(el);
     this.loadVan(this.state.van);
+    if (typeof window !== 'undefined' && /[?&]debug/.test(location.search)) window.__van3d = this;
     this.setView(this.state.view, true);
     this.resize();
     this.ro = new ResizeObserver(() => { if (this.v) { this.v.pr = this.v.prMax; this.v.renderer.setPixelRatio(this.v.pr); } this.resize(); }); this.ro.observe(el);
@@ -1737,7 +1773,7 @@ class Component extends DCLogic {
 
   disposeCamp() {
     const v = this.v; if (!v || !v.camp) return;
-    v.scene.remove(v.camp.group); v.camp.disp.forEach((d) => d.dispose && d.dispose()); v.camp = null;
+    if (v.camp.group.parent) v.camp.group.parent.remove(v.camp.group); v.camp.disp.forEach((d) => d.dispose && d.dispose()); v.camp = null;
   }
 
   disposeVan() {
@@ -1755,7 +1791,8 @@ class Component extends DCLogic {
     this.disposeVan();
     v.van = buildVan(v.T, VAN_SPECS[id] || VAN_SPECS['man-lwb-auto']); v.shadowDirty = true;
     v.scene.add(v.van.group);
-    v.camp = buildCamp(v.T, v.van); v.scene.add(v.camp.group);
+    v.camp = buildCamp(v.T, v.van);
+    if (v.worldParts.LS) { v.worldRoot.add(v.camp.group); v.camp.group.position.set(v.worldParts.LS.D.x, 0, v.worldParts.LS.D.z); } else v.scene.add(v.camp.group);
     v.van.lights.forEach((p, i) => v.inner[i].position.set(p[0], p[1], p[2]));
     v.contact.scale.set(v.van.W + 1.1, v.van.L + 1.6, 1);
     v.doorT = 0;
@@ -1766,7 +1803,8 @@ class Component extends DCLogic {
     const v = this.v; if (!v || !v.van) return;
     v.mode = mode;
     if (mode === 'outside') { v.radius = v.van.L * 1.25 + 3; v.phi = 1.3; v.fov = 40; }
-    else if (mode === 'camp') { v.radius = v.van.L * 1.2 + 4.5; v.phi = 1.33; v.theta = 0.62; v.fov = 40; if (v.campT < 0.05) { v.tod = 18.6; v.jumpTo = null; } }
+    else if (mode === 'camp') { v.radius = v.van.L * 1.2 + 4.5; v.phi = 1.33; v.theta = 0.62; v.fov = 40;
+      if (v.worldParts.LS) { v.radius = v.van.L * 1.5 + 7; v.phi = 1.02; v.theta = -0.64; } /* lakeside: look across the van and the camp to the water */ if (v.campT < 0.05) { v.tod = 18.6; v.jumpTo = null; } }
     else if (mode === 'drive') { v.fov = 26; }
     else { const p = v.van[mode]; if (!p) return; v.yaw = p.yaw || 0; v.pitch = p.pitch || 0; v.fov = 72; }
     if (snap) { const t = this.target(); v.camera.position.copy(t.pos); v.look.copy(t.look); v.camera.fov = v.fov; const o = this.offsetTarget(); v.offX = o[0]; v.offY = o[1]; v.camera.updateProjectionMatrix(); }
@@ -1775,7 +1813,7 @@ class Component extends DCLogic {
   target() {
     const v = this.v, T = v.T;
     if (v.mode === 'outside' || v.mode === 'camp') {
-      const c = v.mode === 'camp' && v.camp ? v.camp.center.clone().add(new T.Vector3(PARK_X, 0, 0)) : new T.Vector3(v.vx || 0, v.van.H * 0.45, 0);
+      const c = v.mode === 'camp' && v.camp ? v.camp.center.clone().add(new T.Vector3(v.worldParts.LS ? 0 : PARK_X, 0, 0)) : new T.Vector3(v.vx || 0, v.van.H * 0.45, 0);
       const asp = v.camera.aspect || 1.6, rr = v.radius * (asp < 1.2 ? Math.min(2.2, Math.pow(1.2 / asp, 0.85)) : 1);
       const pos = new T.Vector3(c.x + rr * Math.sin(v.phi) * Math.sin(v.theta), c.y + rr * Math.cos(v.phi), c.z + rr * Math.sin(v.phi) * Math.cos(v.theta));
       if (pos.y < 0.5) pos.y = 0.5;
@@ -1789,6 +1827,13 @@ class Component extends DCLogic {
     const pos = new T.Vector3(p[0] + (v.vx || 0), p[1], p[2]);
     const dir = new T.Vector3(Math.sin(v.yaw) * Math.cos(v.pitch), Math.sin(v.pitch), Math.cos(v.yaw) * Math.cos(v.pitch));
     return { pos, look: pos.clone().add(dir) };
+  }
+
+  routePose(LS, s) {
+    const r = LS.route; if (s <= 0) return r[0]; if (s >= LS.len) return r[r.length - 1];
+    let lo = 0, hi = r.length - 1; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (r[m].s < s) lo = m; else hi = m; }
+    const a = r[lo], b = r[hi], t = (s - a.s) / Math.max(1e-6, b.s - a.s);
+    return { x: a.x + (b.x - a.x) * t, z: a.z + (b.z - a.z) * t, th: a.th + (b.th - a.th) * t };
   }
 
   offsetTarget() {
@@ -1849,7 +1894,9 @@ class Component extends DCLogic {
     // parked, set up, nobody touching it: 30 frames a second is plenty for firelight and drifting clouds
     const idle = v.mode !== 'drive' && v.park >= 1 && !(v.speed > 0) && v.setupT >= 1 && v.jumpTo == null && now - v.lastInteract > 2500 && v.camSettled;
     if (idle && now - v.last < 31) return;
-    const rawDt = (now - v.last) / 1000, dt = Math.min(0.05, rawDt); v.last = now; v.frame++;
+    // ?warp=N speeds the animation up N times (testing aid on slow machines)
+    if (v.warp === undefined) { const m = typeof location !== 'undefined' && /[?&]warp=(\d+)/.exec(location.search); v.warp = m ? Math.min(8, +m[1]) : 1; }
+    const rawDt = (now - v.last) / 1000, dt = Math.min(0.05, rawDt) * v.warp; v.last = now; v.frame++;
     const t0 = now / 1000, driving = v.mode === 'drive', ease = 1 - Math.exp(-dt * 4), g = v.van.group;
     // every look-inside view is parked up at camp: only the hero's driving shot is on the road
     const atCamp = v.mode !== 'drive' && v.mode !== 'outside';
@@ -1859,42 +1906,71 @@ class Component extends DCLogic {
     if (v.speed === undefined) v.speed = driving ? 1 : 0;
     if (v.setupT === undefined) v.setupT = atCamp && v.park >= 1 ? 1 : 0;
     if (v.pOff === undefined) v.pOff = atCamp ? 0 : -999;
-    let vel = v.speed * VMAX;
-    const dist0 = v.dist || 0, lat0 = PARK * smp(v.park);
-    if (atCamp) {
-      if (v.stopAt == null) { v.p0 = v.park; v.pR0 = Math.max((1 - v.park) * 11, vel * vel / (2 * BR)); v.stopAt = dist0 + v.pR0; }
-      const Rm = Math.max(0, v.stopAt - dist0);
-      vel = Math.min(vel + ACC * dt, Math.sqrt(2 * BR * Rm), VMAX);
-      const step = Math.min(Rm, vel * dt), Rn = Rm - step; v.dist = dist0 + step;
-      // the campsite starts out of sight behind the camera and closes in as the van slows, arriving exactly as it stops
-      v.pOff = Rn * KP;
-      v.park = v.pR0 > 1e-4 ? v.p0 + (1 - v.p0) * (1 - Rn / v.pR0) : 1;
-      if (Rn < 1e-3) { vel = 0; v.park = 1; v.pOff = 0; }
+    let vel = v.speed * VMAX, sp = 0, lat = 0, signed = 1;
+    const LS = v.worldParts.LS;
+    if (LS) {
+      // LAKESIDE PROTOTYPE: the van leaves the road on a gravel track and drives in to the lake; the world moves around it
+      const dist0 = v.dist || 0;
+      if (v.rs === undefined) { v.rs = atCamp ? LS.len : 0; v.sv = 0; }
+      if (atCamp) {
+        const Rm = Math.max(0, LS.len - v.rs), cap = v.rs < 4 ? VMAX : 6;
+        let sv = v.rs === 0 ? Math.max(vel, v.sv) : Math.max(0, v.sv);
+        sv = sv > cap ? Math.max(cap, sv - BR * dt) : Math.min(cap, sv + ACC * dt);
+        sv = Math.min(sv, Math.sqrt(2 * BR * Rm));
+        v.rs += Math.min(Rm, sv * dt); v.sv = sv;
+        if (LS.len - v.rs < 1e-3) { v.rs = LS.len; v.sv = 0; }
+        v.park = v.rs >= LS.len ? 1 : 0.5; vel = 0;
+      } else if (v.rs > 0) {
+        // packed up first, then it reverses back down the track to the road
+        if (v.setupT < 0.02) { let sv = Math.min(0, v.sv); sv = Math.max(-6, sv - ACC * dt); sv = -Math.min(-sv, Math.sqrt(2 * BR * v.rs) + 0.3); v.rs = Math.max(0, v.rs + sv * dt); v.sv = v.rs <= 1e-3 ? 0 : sv; if (v.rs <= 1e-3) v.rs = 0; } else v.sv = 0;
+        v.park = 0.5; vel = 0;
+      } else {
+        const go = driving && v.setupT < 0.02;
+        vel = go ? Math.min(VMAX, vel + ACC * 0.75 * dt) : Math.max(0, vel - BR * dt);
+        v.dist = dist0 + vel * dt; v.park = 0; v.sv = 0;
+      }
+      const pz = this.routePose(LS, v.rs), c = Math.cos(-pz.th), sn = Math.sin(-pz.th);
+      v.worldRoot.rotation.y = -pz.th; v.worldRoot.position.set(-(pz.x * c + pz.z * sn), 0, -(-pz.x * sn + pz.z * c));
+      v.speed = vel / VMAX; sp = Math.max(v.speed, Math.abs(v.sv) / VMAX); signed = v.sv < 0 ? -1 : 1;
+      v.yawV = 0; g.rotation.y = 0; g.position.x = 0; v.vx = 0; v.contact.position.x = 0; if (v.camp) v.camp.group.visible = true;
+      v.van.lights.forEach((p, i) => v.inner[i].position.set(p[0], p[1], p[2]));
+      vel = Math.abs(v.sv) + vel;
     } else {
-      v.stopAt = null;
-      const go = driving && v.setupT < 0.02;
-      vel = go ? Math.min(VMAX, vel + ACC * 0.75 * dt) : Math.max(0, vel - BR * dt);
-      v.dist = dist0 + vel * dt;
-      if (v.pOff > -999) v.pOff -= vel * dt * KP; if (v.pOff < -90) v.pOff = -999;
-      v.park = Math.max(0, v.park - (v.dist - dist0) / 13);
+    const dist0 = v.dist || 0, lat0 = PARK * smp(v.park);
+      if (atCamp) {
+        if (v.stopAt == null) { v.p0 = v.park; v.pR0 = Math.max((1 - v.park) * 11, vel * vel / (2 * BR)); v.stopAt = dist0 + v.pR0; }
+        const Rm = Math.max(0, v.stopAt - dist0);
+        vel = Math.min(vel + ACC * dt, Math.sqrt(2 * BR * Rm), VMAX);
+        const step = Math.min(Rm, vel * dt), Rn = Rm - step; v.dist = dist0 + step;
+        // the campsite starts out of sight behind the camera and closes in as the van slows, arriving exactly as it stops
+        v.pOff = Rn * KP;
+        v.park = v.pR0 > 1e-4 ? v.p0 + (1 - v.p0) * (1 - Rn / v.pR0) : 1;
+        if (Rn < 1e-3) { vel = 0; v.park = 1; v.pOff = 0; }
+      } else {
+        v.stopAt = null;
+        const go = driving && v.setupT < 0.02;
+        vel = go ? Math.min(VMAX, vel + ACC * 0.75 * dt) : Math.max(0, vel - BR * dt);
+        v.dist = dist0 + vel * dt;
+        if (v.pOff > -999) v.pOff -= vel * dt * KP; if (v.pOff < -90) v.pOff = -999;
+        v.park = Math.max(0, v.park - (v.dist - dist0) / 13);
+      }
+      v.speed = vel / VMAX;
+      sp = v.speed; const dd = v.dist - dist0; lat = PARK * smp(v.park);
+      const yawT = dd > 1e-5 ? Math.atan2(lat - lat0, dd) : 0;
+      v.yawV = (v.yawV || 0) + (yawT - (v.yawV || 0)) * (1 - Math.exp(-dt * 7));
+      g.rotation.y = v.yawV; g.position.x = lat; v.vx = lat;
+      v.contact.position.x = lat;
+      v.van.lights.forEach((p, i) => v.inner[i].position.set(p[0] + lat, p[1], p[2]));
     }
-    v.speed = vel / VMAX;
-    const sp = v.speed, dd = v.dist - dist0, lat = PARK * smp(v.park);
-    const yawT = dd > 1e-5 ? Math.atan2(lat - lat0, dd) : 0;
-    v.yawV = (v.yawV || 0) + (yawT - (v.yawV || 0)) * (1 - Math.exp(-dt * 7));
-    g.rotation.y = v.yawV; g.position.x = lat; v.vx = lat;
-    v.contact.position.x = lat;
-    v.van.lights.forEach((p, i) => v.inner[i].position.set(p[0] + lat, p[1], p[2]));
     // the camp is set out once the van has stopped, and packed away before it leaves
     const setWant = atCamp && v.park >= 1 && vel < 0.05;
     v.setupT = setWant ? Math.min(1, v.setupT + dt * 0.42) : Math.max(0, v.setupT - dt * 1.3);
     const pv = v.pOff > -999;
-    v.worldParts.patch.visible = pv; v.worldParts.patch.position.set(PARK, 0, pv ? v.pOff : 0);
-    if (v.camp) { v.camp.group.position.set(PARK, 0, pv ? v.pOff : 0); v.camp.group.visible = pv; }
+    if (!LS) { v.worldParts.patch.visible = pv; v.worldParts.patch.position.set(PARK, 0, pv ? v.pOff : 0); if (v.camp) { v.camp.group.position.set(PARK, 0, pv ? v.pOff : 0); v.camp.group.visible = pv; } }
     g.position.y = sp * (0.012 * Math.sin(t0 * 8.3) + 0.006 * Math.sin(t0 * 13.7 + 1.3));
     g.rotation.x = sp * 0.004 * Math.sin(t0 * 6.1) + (driving ? 0 : 0.006 * (sp * (1 - sp)) * 4);
     g.rotation.z = sp * 0.0028 * Math.sin(t0 * 4.7 + 0.5);
-    v.van.wheels.forEach((w) => { w.rotation.x += dt * 24 * sp; });
+    v.van.wheels.forEach((w) => { w.rotation.x += dt * 24 * sp * signed; });
     v.worldParts.dashes.position.z = -(v.dist % 9);
     v.worldParts.posts.position.z = -(v.dist % 24);
     const tg = this.target(), k = 1 - Math.exp(-dt * 4.5);
