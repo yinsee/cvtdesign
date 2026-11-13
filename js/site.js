@@ -299,13 +299,13 @@ return Component;
 DC["Van3D"] = (function () {
 
 const VAN_SPECS = {
-  'man-lwb-auto':   { name: 'MAN TGE LWB Luxury · Automatic', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#3d4046', layout: 'northsouth', bath: true, rearAxle: 1.75, doors: 'barn' },
-  'man-lwb-manual': { name: 'MAN TGE LWB Luxury · Manual', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#34373c', layout: 'transverse', bedDepth: 1.5, bath: true, rearAxle: 1.75, doors: 'barn' },
-  'man-mwb':        { name: 'MAN TGE MWB · 2 berth', L: 5.99, W: 2.04, H: 2.6, kind: 'high', paint: '#4a4d53', layout: 'transverse', bedDepth: 1.6, bath: true, rearAxle: 1.15, doors: 'barn' },
+  'man-lwb-auto':   { name: 'MAN TGE LWB Luxury · Automatic', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#47474b', layout: 'northsouth', bath: true, rearAxle: 1.75, doors: 'barn' },
+  'man-lwb-manual': { name: 'MAN TGE LWB Luxury · Manual', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#404145', layout: 'transverse', bedDepth: 1.5, bath: true, rearAxle: 1.75, doors: 'barn' },
+  'man-mwb':        { name: 'MAN TGE MWB · 2 berth', L: 5.99, W: 2.04, H: 2.6, kind: 'high', paint: '#4b4c51', layout: 'transverse', bedDepth: 1.6, bath: true, rearAxle: 1.15, doors: 'barn' },
   'crafter-auto':   { name: 'VW Crafter LWB · Automatic', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#eeeeec', layout: 'transverse', bedDepth: 1.4, bath: true, dinette: true, rearAxle: 1.75, doors: 'barn' },
-  'crafter-manual': { name: 'VW Crafter LWB · Manual', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#bfc2c6', layout: 'transverse', bedDepth: 1.4, bath: true, dinette: true, rearAxle: 1.75, doors: 'barn' },
+  'crafter-manual': { name: 'VW Crafter LWB · Manual', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#c4c7cb', layout: 'transverse', bedDepth: 1.4, bath: true, dinette: true, rearAxle: 1.75, doors: 'barn' },
   'toleno':         { name: 'Toleno R · 4 berth', L: 6.36, W: 2.05, H: 2.62, kind: 'high', paint: '#f4f4f2', stripes: true, layout: 'transverse', bedDepth: 1.45, bath: true, dinette: true, rearAxle: 1.5, doors: 'barn' },
-  't5-spacious':    { name: 'VW T5 Spacious · Pop-top', L: 4.9, W: 1.9, H: 1.97, kind: 'pop', paint: '#4f545b', layout: 'rockroll', bath: false, rearAxle: 1.0, doors: 'tailgate' },
+  't5-spacious':    { name: 'VW T5 Spacious · Pop-top', L: 4.9, W: 1.9, H: 1.97, kind: 'pop', paint: '#53575d', layout: 'rockroll', bath: false, rearAxle: 1.0, doors: 'tailgate' },
   't5-widebed':     { name: 'VW T5 Wide Bed · Pop-top', L: 4.9, W: 1.9, H: 1.97, kind: 'pop', paint: '#b3b7bd', layout: 'rockroll', wideBed: true, bath: false, rearAxle: 1.0, doors: 'tailgate' },
   't5-compact':     { name: 'VW T5 Compact · Pop-top', L: 4.9, W: 1.9, H: 1.97, kind: 'pop', paint: '#efefed', layout: 'rockroll', bath: false, rearAxle: 1.0, doors: 'tailgate' }
 };
@@ -361,7 +361,7 @@ function buildVan(T, c) {
   const woodTex = dataTex(T, 256, (u, v) => {
     const n = fbm(u * 4, v * 40, 3), grain = 0.5 + 0.5 * Math.sin((v * 90 + n * 9));
     const k = 0.84 + 0.12 * grain + 0.06 * (n - 0.5);
-    return [Math.min(255, 214 * k), Math.min(255, 178 * k), Math.min(255, 136 * k)];
+    return [Math.min(255, 212 * k), Math.min(255, 182 * k), Math.min(255, 142 * k)];
   }, 1, 1); texs.push(woodTex);
   const floorTex = dataTex(T, 256, (u, v) => {
     const plank = Math.floor(u * 4), seam = (u * 4 - plank) < 0.02 ? 0.6 : 1;
@@ -369,9 +369,9 @@ function buildVan(T, c) {
     return [150 * k, 122 * k, 96 * k];
   }, 1, 3); texs.push(floorTex);
 
-  const paint = P({ color: c.paint, metalness: 0.45, roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.05 });
+  const paint = P({ color: c.paint, metalness: 0.62, roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.04, envMapIntensity: 1.15 });
   const plastic = S({ color: '#1b1c1f', roughness: 0.78 });
-  const satin = S({ color: '#2a2c30', roughness: 0.45, metalness: 0.2 });
+  const satin = S({ color: '#2b2c30', roughness: 0.5, metalness: 0.15 });
   const chrome = S({ color: '#dfe3e8', roughness: 0.15, metalness: 1 });
   const tyreM = S({ color: '#141416', roughness: 0.92 });
   const rimM = S({ color: '#c5c9cf', roughness: 0.25, metalness: 0.95 });
@@ -381,7 +381,7 @@ function buildVan(T, c) {
   const drlM = S({ color: '#ffffff', emissive: '#ffffff', emissiveIntensity: 2.5 });
   const tailM = P({ color: '#9c1022', roughness: 0.1, clearcoat: 1, emissive: '#6a0a16', emissiveIntensity: 0.9 });
   const plateM = S({ color: '#f2f2ee', roughness: 0.5 });
-  const lining = S({ color: '#d9d4ca', roughness: 0.95 });
+  const lining = P({ color: '#8f8b85', roughness: 1, sheen: 0.5, sheenColor: '#b9b4ab' });
   const ceiling = S({ color: '#efebe4', roughness: 0.9 });
   const wood = S({ color: '#ffffff', map: woodTex, roughness: 0.55 });
   const floorM = S({ color: '#ffffff', map: floorTex, roughness: 0.65 });
@@ -408,7 +408,7 @@ function buildVan(T, c) {
 
   const L = c.L, W = c.W, H = c.H, half = L / 2, rearZ = -half;
   const pop = c.kind === 'pop';
-  const rr = pop ? 0.1 : 0.17;
+  const rr = pop ? 0.12 : 0.25;
   const sillY = 0.34, floorY = 0.56, wheelR = pop ? 0.34 : 0.37;
   const bonnetLen = pop ? 0.66 : 0.82, bonnetH = pop ? 1.04 : 1.12;
   const wsBaseZ = half - bonnetLen;
@@ -432,9 +432,9 @@ function buildVan(T, c) {
     s.absarc(rAx, archY, archR, Math.PI, 0, true);
     s.lineTo(fAx - archR, archY);
     s.absarc(fAx, archY, archR, Math.PI, 0, true);
-    s.lineTo(half - 0.05, archY);
-    s.lineTo(half, bonnetH - 0.2);
-    s.quadraticCurveTo(half, bonnetH - 0.02, half - 0.24, bonnetH);
+    s.lineTo(half - 0.3, archY);
+    s.lineTo(half - 0.3, bonnetH - 0.07);
+    s.lineTo(wsBaseZ, bonnetH - 0.07);
     s.lineTo(wsBaseZ, bonnetH);
     s.lineTo(wsTopZ, Math.min(wsTopY, topY));
     if (!pop) s.quadraticCurveTo(wsTopZ - 0.08, topY, roofFrontZ, topY); else s.lineTo(roofFrontZ, topY);
@@ -463,7 +463,7 @@ function buildVan(T, c) {
   const toPath = (pts, Ctor) => { const p = new Ctor(); p.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) p.lineTo(pts[i][0], pts[i][1]); p.closePath(); return p; };
   const sideMesh = (shape, depth, mat, x, bevel) => {
     const geo = new T.ExtrudeGeometry(shape, bevel
-      ? { depth, bevelEnabled: true, bevelThickness: 0.008, bevelSize: 0.012, bevelSegments: 2, curveSegments: 24 }
+      ? { depth, bevelEnabled: true, bevelThickness: 0.01, bevelSize: 0.014, bevelSegments: 3, curveSegments: 40 }
       : { depth, bevelEnabled: false, curveSegments: 24 });
     geo.rotateY(-Math.PI / 2);
     return add(geo, mat, x, 0, 0);
@@ -478,7 +478,7 @@ function buildVan(T, c) {
     sideMesh(lin, 0.015, lining, side > 0 ? W / 2 - 0.05 : -W / 2 + 0.065, false);
     holes.forEach((h, i) => { const sg = new T.ShapeGeometry(toPath(h, T.Shape)); sg.rotateY(-Math.PI / 2); noShadow(add(sg, i === 0 ? glassFront : glassSide, side > 0 ? W / 2 - 0.022 : -W / 2 + 0.022, 0, 0)); });
     // arch flares
-    [fAx, rAx].forEach((z) => { const f = add(new T.TorusGeometry(archR + 0.012, 0.035, 10, 32, Math.PI), plastic, side * (W / 2 + 0.004), archY, z); f.rotation.y = Math.PI / 2; });
+    [fAx, rAx].forEach((z) => { const f = add(new T.TorusGeometry(archR + 0.012, 0.04, 14, 48, Math.PI), plastic, side * (W / 2 + 0.004), archY, z); f.rotation.y = Math.PI / 2; });
     // sill + rubbing strip
     rbox(0.05, 0.1, (fAx - archR) - (rAx + archR) - 0.04, 0.02, plastic, side * (W / 2 + 0.01), sillY + 0.07, (fAx + rAx) / 2);
     // mirror
@@ -501,7 +501,7 @@ function buildVan(T, c) {
     const th = 0.045, s = new T.Shape(), w = W / 2;
     s.moveTo(-w, -rr); s.quadraticCurveTo(-w, 0, -w + rr, 0); s.lineTo(w - rr, 0); s.quadraticCurveTo(w, 0, w, -rr);
     s.lineTo(w - th, -rr); s.quadraticCurveTo(w - th, -th, w - rr, -th); s.lineTo(-w + rr, -th); s.quadraticCurveTo(-w + th, -th, -w + th, -rr); s.closePath();
-    return new T.ExtrudeGeometry(s, { depth: len, bevelEnabled: false, curveSegments: 10 });
+    return new T.ExtrudeGeometry(s, { depth: len, bevelEnabled: false, curveSegments: 24 });
   };
   add(roofGeo(roofFrontZ - rearZ), paint, 0, H, rearZ);
   if (!pop) {
@@ -537,10 +537,12 @@ function buildVan(T, c) {
   // --- rounded nose (bonnet + front)
   {
     const s = new T.Shape();
-    s.moveTo(wsBaseZ, sillY + 0.1); s.lineTo(half - 0.08, sillY + 0.1); s.lineTo(half - 0.02, sillY + 0.3);
-    s.lineTo(half - 0.01, bonnetH - 0.22); s.quadraticCurveTo(half, bonnetH - 0.03, half - 0.26, bonnetH - 0.005); s.lineTo(wsBaseZ, bonnetH + 0.005); s.closePath();
-    const bev = 0.045, depth = W - 0.06 - 2 * bev;
-    const geo = new T.ExtrudeGeometry(s, { depth, bevelEnabled: true, bevelThickness: bev, bevelSize: 0.02, bevelSegments: 4, curveSegments: 20 });
+    s.moveTo(wsBaseZ, bonnetH - 0.17); s.lineTo(half - 0.4, bonnetH - 0.17); s.lineTo(half - 0.4, sillY + 0.14);
+    s.lineTo(half - 0.12, sillY + 0.14); s.quadraticCurveTo(half - 0.04, sillY + 0.14, half - 0.04, sillY + 0.32);
+    s.lineTo(half - 0.03, bonnetH - 0.26); s.quadraticCurveTo(half - 0.01, bonnetH - 0.03, half - 0.32, bonnetH - 0.005);
+    s.lineTo(wsBaseZ, bonnetH + 0.005); s.closePath();
+    const bev = 0.1, depth = W - 0.012 - 2 * bev;
+    const geo = new T.ExtrudeGeometry(s, { depth, bevelEnabled: true, bevelThickness: bev, bevelSize: 0.035, bevelSegments: 8, curveSegments: 32 });
     geo.rotateY(-Math.PI / 2);
     add(geo, paint, depth / 2, 0, 0);
   }
@@ -569,21 +571,22 @@ function buildVan(T, c) {
   const wheels = [];
   const tyreGeo = (() => {
     const pts = [], r0 = wheelR * 0.68, wdt = 0.125;
-    pts.push(new T.Vector2(r0, -wdt)); pts.push(new T.Vector2(wheelR - 0.04, -wdt)); pts.push(new T.Vector2(wheelR - 0.005, -wdt + 0.03));
-    pts.push(new T.Vector2(wheelR, 0)); pts.push(new T.Vector2(wheelR - 0.005, wdt - 0.03)); pts.push(new T.Vector2(wheelR - 0.04, wdt)); pts.push(new T.Vector2(r0, wdt));
-    return new T.LatheGeometry(pts, 48);
+    for (let i = 0; i <= 16; i++) { const a = -Math.PI / 2 + (i / 16) * Math.PI, rx = wheelR - 0.045 + Math.cos(a) * 0.045, y = Math.sin(a) * wdt; pts.push(new T.Vector2(i === 0 || i === 16 ? r0 : Math.max(r0, rx), y)); }
+    return new T.LatheGeometry(pts, 72);
   })();
   [fAx, rAx].forEach((z) => [-1, 1].forEach((side) => {
     const wg = new T.Group(); wg.position.set(side * (W / 2 - 0.14), wheelR, z); g.add(wg); wheels.push(wg);
     const t = add(tyreGeo, tyreM, 0, 0, 0, wg); t.rotation.z = Math.PI / 2;
-    const rim = add(new T.CylinderGeometry(wheelR * 0.68, wheelR * 0.68, 0.2, 40), satin, 0, 0, 0, wg); rim.rotation.z = Math.PI / 2;
-    const lip = add(new T.TorusGeometry(wheelR * 0.66, 0.012, 8, 40), rimM, side * 0.1, 0, 0, wg); lip.rotation.y = Math.PI / 2;
-    for (let k = 0; k < 5; k++) {
-      const sg = new T.BoxGeometry(0.03, wheelR * 0.6, 0.06); sg.translate(0, wheelR * 0.3, 0);
-      const sp = add(sg, rimM, side * 0.095, 0, 0, wg); sp.rotation.x = (k / 5) * Math.PI * 2;
+    const rim = add(new T.CylinderGeometry(wheelR * 0.68, wheelR * 0.68, 0.2, 64), satin, 0, 0, 0, wg); rim.rotation.z = Math.PI / 2;
+    const lip = add(new T.TorusGeometry(wheelR * 0.66, 0.014, 10, 72), rimM, side * 0.1, 0, 0, wg); lip.rotation.y = Math.PI / 2;
+    for (let k = 0; k < 10; k++) {
+      const sg = rboxGeo(T, 0.025, wheelR * 0.56, 0.035, 0.008); sg.translate(0, wheelR * 0.32, 0);
+      const sp = add(sg, rimM, side * 0.095, 0, 0, wg); sp.rotation.x = (k / 10) * Math.PI * 2;
     }
     const hub = add(new T.CylinderGeometry(0.07, 0.07, 0.04, 24), rimM, side * 0.1, 0, 0, wg); hub.rotation.z = Math.PI / 2;
   }));
+
+  [-1, 1].forEach((side) => rbox(0.11, topY - sillY - 0.06, 0.11, 0.05, paint, side * (W / 2 - 0.05), (topY + sillY) / 2 - 0.01, rearZ + 0.05));
 
   // --- rear doors / tailgate
   const doors = [];
