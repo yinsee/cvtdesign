@@ -738,7 +738,7 @@ function buildWorld(T, renderer) {
   const heightAt = (x, z) => {
     const ax = Math.abs(x);
     let h = 0;
-    if (x < 0) h = Math.max(0, (ax - 9) / 40) * 6 * fbm(x * 0.012 + 3, z * 0.012, 4) * Math.min(1, (ax - 9) / 30 + 0.2);
+    if (x < 0) h = Math.max(0, (ax - 28) / 60) * 7 * fbm(x * 0.012 + 3, z * 0.012, 4) * Math.min(1, Math.max(0, (ax - 28) / 40));
     else { const lochEdge = Math.min(1, Math.max(0, (x - 9) / 6)); h = -0.9 * lochEdge + Math.max(0, (x - 190) / 60) * 26 * fbm(x * 0.01, z * 0.01 + 7, 4); }
     if (ax < 8) h *= 0; return h;
   };
@@ -789,8 +789,8 @@ function buildWorld(T, renderer) {
   const N = 420, cones = new T.InstancedMesh(coneG, pineM, N), trunks = new T.InstancedMesh(trunkG, trunkM, N), mtx = new T.Matrix4(), q = new T.Quaternion(), sc = new T.Vector3(), pp = new T.Vector3();
   for (let i = 0; i < N; i++) {
     let x, z, tries = 0;
-    do { x = -18 - Math.pow(hash2(i, 1), 1.6) * 220; z = (hash2(i, 2) - 0.5) * 700; tries++; } while (fbm(x * 0.02, z * 0.02, 2) < 0.42 && tries < 6);
-    const s = 0.7 + hash2(i, 3) * 0.9; sc.set(s, s * (0.9 + hash2(i, 4) * 0.4), s); pp.set(x, heightAt(x, z), z);
+    do { x = -60 - Math.pow(hash2(i, 1), 1.3) * 240; z = (hash2(i, 2) - 0.5) * 700; tries++; } while (fbm(x * 0.02, z * 0.02, 2) < 0.42 && tries < 6);
+    const s = 0.55 + hash2(i, 3) * 0.7; sc.set(s, s * (0.9 + hash2(i, 4) * 0.4), s); pp.set(x, heightAt(x, z), z);
     q.setFromAxisAngle(new T.Vector3(0, 1, 0), hash2(i, 5) * 6.28); mtx.compose(pp, q, sc); cones.setMatrixAt(i, mtx); trunks.setMatrixAt(i, mtx);
   }
   cones.castShadow = false; world.add(cones, trunks); disposables.push(coneG, trunkG, pineM, trunkM);
@@ -839,7 +839,7 @@ class Component extends DCLogic {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.outputColorSpace = T.SRGBColorSpace;
     renderer.toneMapping = T.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 0.95;
+    renderer.toneMappingExposure = 1.12;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = T.PCFSoftShadowMap;
 
@@ -929,7 +929,7 @@ class Component extends DCLogic {
       return { pos, look: c };
     }
     if (v.mode === 'drive') {
-      const c = new T.Vector3(0, v.van.H * 0.4, 0.15), th = 0.9, el = 0.075, d = v.van.L * 1.9 + 6;
+      const c = new T.Vector3(0, v.van.H * 0.42, 0.15), th = 0.9, el = 0.05, d = v.van.L * 1.9 + 6;
       return { pos: new T.Vector3(c.x + d * Math.sin(th) * Math.cos(el), c.y + d * Math.sin(el), c.z + d * Math.cos(th) * Math.cos(el)), look: c };
     }
     const p = v.van[v.mode].pos;
