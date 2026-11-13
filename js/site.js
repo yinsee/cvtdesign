@@ -952,7 +952,7 @@ function buildVan(T, c) {
 const ENVS = {
   loch:   { label: 'Highland loch', sky: ['#2f6dbf', '#b9d3ec', '#b9ad97'], fog: [120, 900], grass: ['#4c6634', '#6f7a3c'], accent: '#6f5446', water: { x0: 12, x1: 142, y: -0.22, color: '#1d3a4b' }, shore: true, trees: 'pine', ridges: [['#2f3b2e', '#4a5446', 0], ['#4b5468', '#6c7488', 1], ['#7d86a0', '#a3aac0', 1]] },
   lakes:  { label: 'Lake District', sky: ['#3574c2', '#c2d9ee', '#b8b09a'], fog: [100, 800], grass: ['#4f6e36', '#7a8547'], accent: '#7a6a50', water: { x0: 12, x1: 72, y: -0.22, color: '#20404f' }, shore: true, trees: 'mixed', ridges: [['#3a4a34', '#56664a', 0], ['#5a6474', '#7a8496', 0], ['#8a93a8', '#aab1c4', 1]] },
-  coast:  { label: 'Clifftop & sea', sky: ['#2a78cf', '#cde2f3', '#cfc6b0'], fog: [160, 1400], grass: ['#5d7a3a', '#8a8a4a'], accent: '#b8a874', sea: true, trees: 'tufts', ridges: [['#4e5c45', '#6b7656', 0], ['#7d8a8f', '#9aa5ab', 0]], westOnly: true },
+  coast:  { label: 'Clifftop & sea', mirror: true, sky: ['#2a78cf', '#cde2f3', '#cfc6b0'], fog: [160, 1400], grass: ['#5d7a3a', '#8a8a4a'], accent: '#b8a874', sea: true, trees: 'tufts', ridges: [['#4e5c45', '#6b7656', 0], ['#7d8a8f', '#9aa5ab', 0]], westOnly: true },
   dales:  { label: 'Rolling countryside', sky: ['#3179cf', '#cbe0f3', '#c2b48e'], fog: [140, 1000], grass: ['#5f8a3a', '#9aa04a'], accent: '#c8b25a', fields: true, trees: 'oak', ridges: [['#56704a', '#6f8a5a', 0], ['#7f93a0', '#9eb0bb', 0]] },
   forest: { label: 'Pine forest', sky: ['#4a7fb8', '#c4d6e3', '#8f9a84'], fog: [45, 420], grass: ['#3e5a2e', '#56693a'], accent: '#5a4a36', trees: 'dense', ridges: [['#2d3a2c', '#3c4a38', 0], ['#4a5662', '#606c78', 0]] },
   alps:   { label: 'Alpine pass', sky: ['#2268cf', '#d3e5f5', '#c9d2d6'], fog: [160, 1300], grass: ['#5c8a3a', '#86a04e'], accent: '#9aa07a', alpine: true, trees: 'larch', ridges: [['#56606e', '#e9edf2', 2], ['#6a7486', '#f2f5f8', 2], ['#8e98ad', '#f7f9fb', 2]] }
@@ -1009,8 +1009,8 @@ function buildWorld(T, renderer, E) {
   const stars = new T.Points(sGeo, sMat); stars.visible = false; world.add(stars); disposables.push(sGeo, sMat);
 
   const cl01 = (v) => Math.min(1, Math.max(0, v));
-  const W0 = E.water;
-  const heightAt = (x, z) => {
+  const W0 = E.water, MS = E.mirror ? -1 : 1;
+  const heightAt = (xw, z) => { const x = xw * MS;
     const ax = Math.abs(x); let h = 0;
     if (ax < 8) return 0;
     if (E.sea) {
@@ -1035,7 +1035,7 @@ function buildWorld(T, renderer, E) {
   const gA = new T.Color(E.grass[0]), gB = new T.Color(E.grass[1]), acc = new T.Color(E.accent), verge = new T.Color('#7e7a5e'), rock = new T.Color('#7b7a74'), beach = new T.Color(E.sea ? '#d9c9a0' : '#8f8878'), snow = new T.Color('#f3f5f8');
   const fieldPal = ['#6d9a3e', '#86a548', '#a9a957', '#c8b25a', '#5f8a3a', '#7c9440'].map((h) => new T.Color(h));
   for (let i = 0; i < pos.count; i++) {
-    const x = pos.getX(i), z = pos.getZ(i), h = heightAt(x, z); pos.setY(i, h);
+    const xw = pos.getX(i), z = pos.getZ(i), h = heightAt(xw, z), x = xw * MS; pos.setY(i, h);
     const n = fbm(x * 0.05, z * 0.05, 3), m = fbm(x * 0.008 + 11, z * 0.008, 3);
     col.copy(gA).lerp(gB, n).lerp(acc, Math.max(0, m - 0.45) * 1.6);
     if (E.fields && Math.abs(x) > 9) { const cx = Math.floor(x / 45), cz = Math.floor(z / 35); col.copy(fieldPal[Math.floor(hash2(cx, cz) * fieldPal.length)]).lerp(gA, n * 0.25); }
@@ -1064,12 +1064,12 @@ function buildWorld(T, renderer, E) {
   if (W0 || E.sea) {
     const wm = new T.MeshStandardMaterial({ color: E.sea ? '#22597a' : W0.color, roughness: E.sea ? 0.18 : 0.14, metalness: 0, envMapIntensity: E.sea ? 0.9 : 0.75, normalMap: waveTex, normalScale: new T.Vector2(E.sea ? 0.7 : 0.45, E.sea ? 0.7 : 0.45) });
     const wx0 = E.sea ? 14 : W0.x0, wx1 = E.sea ? 1400 : W0.x1;
-    const water = new T.Mesh(new T.PlaneGeometry(wx1 - wx0, E.sea ? 2400 : 1000), wm); water.rotation.x = -Math.PI / 2; water.position.set((wx0 + wx1) / 2, E.sea ? -0.75 : W0.y, 0); water.receiveShadow = true; world.add(water); disposables.push(water.geometry, wm);
+    const water = new T.Mesh(new T.PlaneGeometry(wx1 - wx0, E.sea ? 2400 : 1000), wm); water.rotation.x = -Math.PI / 2; water.position.set(MS * (wx0 + wx1) / 2, E.sea ? -0.75 : W0.y, 0); water.receiveShadow = true; world.add(water); disposables.push(water.geometry, wm);
   }
   if (E.shore || E.sea) {
     const pebG = new T.DodecahedronGeometry(E.sea ? 0.35 : 0.12, 0), pebM = new T.MeshStandardMaterial({ color: E.sea ? '#77726a' : '#8a8478', roughness: 1, flatShading: true });
     const pebN = E.sea ? 60 : 260, peb = new T.InstancedMesh(pebG, pebM, pebN), pm4 = new T.Matrix4(), pq = new T.Quaternion(), ps = new T.Vector3(), pv = new T.Vector3();
-    for (let i = 0; i < pebN; i++) { const x = (E.sea ? 14 : 10.5) + hash2(i, 21) * (E.sea ? 10 : 3.5), z = (hash2(i, 22) - 0.5) * (E.sea ? 200 : 120), sc0 = 0.5 + hash2(i, 23) * 1.4; pv.set(x, heightAt(x, z) + 0.03, z); pq.setFromEuler(new T.Euler(hash2(i, 24) * 3, hash2(i, 25) * 3, 0)); ps.set(sc0, sc0 * 0.6, sc0); pm4.compose(pv, pq, ps); peb.setMatrixAt(i, pm4); }
+    for (let i = 0; i < pebN; i++) { const x = (E.sea ? 14 : 10.5) + hash2(i, 21) * (E.sea ? 10 : 3.5), z = (hash2(i, 22) - 0.5) * (E.sea ? 200 : 120), sc0 = 0.5 + hash2(i, 23) * 1.4; pv.set(x * MS, heightAt(x * MS, z) + 0.03, z); pq.setFromEuler(new T.Euler(hash2(i, 24) * 3, hash2(i, 25) * 3, 0)); ps.set(sc0, sc0 * 0.6, sc0); pm4.compose(pv, pq, ps); peb.setMatrixAt(i, pm4); }
     peb.receiveShadow = true; peb.castShadow = true; world.add(peb); disposables.push(pebG, pebM);
   }
 
@@ -1081,7 +1081,7 @@ function buildWorld(T, renderer, E) {
       const a = (i / segs) * Math.PI * 2;
       let n = 0; [2, 3, 5, 7, 11, 17, 29].forEach((f, j) => { n += Math.sin(a * f + seed * (j + 1)) / (j * 0.9 + 1); });
       let hgt = base + amp * (0.5 + 0.35 * n) * (0.75 + 0.25 * Math.sin(a + seed));
-      if (E.westOnly) hgt *= cl01((-Math.cos(a) + 0.15) / 0.5);
+      if (E.westOnly) hgt *= cl01((-MS * Math.cos(a) + 0.15) / 0.5);
       const x = Math.cos(a) * radius, z = Math.sin(a) * radius;
       p.push(x, -10, z, x, Math.max(E.westOnly ? -12 : base * 0.4, hgt), z);
       cl.push(ca.r, ca.g, ca.b);
@@ -1098,7 +1098,7 @@ function buildWorld(T, renderer, E) {
   const scatter = (geoTop, geoTrunk, cTop, cTrunk, N, place, flat) => {
     const mt = new T.MeshStandardMaterial({ color: cTop, roughness: 1, flatShading: flat !== false }), mk = new T.MeshStandardMaterial({ color: cTrunk, roughness: 1 });
     const A = new T.InstancedMesh(geoTop, mt, N), B = geoTrunk ? new T.InstancedMesh(geoTrunk, mk, N) : null;
-    for (let i = 0; i < N; i++) { const r = place(i); pp.set(r[0], heightAt(r[0], r[1]), r[1]); const s = r[2]; sc.set(s, s * (0.9 + hash2(i, 4) * 0.4), s); q.setFromAxisAngle(up, hash2(i, 5) * 6.28); mtx.compose(pp, q, sc); A.setMatrixAt(i, mtx); if (B) B.setMatrixAt(i, mtx); }
+    for (let i = 0; i < N; i++) { const r = place(i); r[0] *= MS; pp.set(r[0], heightAt(r[0], r[1]), r[1]); const s = r[2]; sc.set(s, s * (0.9 + hash2(i, 4) * 0.4), s); q.setFromAxisAngle(up, hash2(i, 5) * 6.28); mtx.compose(pp, q, sc); A.setMatrixAt(i, mtx); if (B) B.setMatrixAt(i, mtx); }
     world.add(A); if (B) world.add(B); disposables.push(geoTop, mt, mk); if (geoTrunk) disposables.push(geoTrunk);
   };
   const pineG = () => { const g = new T.ConeGeometry(1.4, 5.5, 7); g.translate(0, 4, 0); return g; };
@@ -1123,10 +1123,10 @@ function buildWorld(T, renderer, E) {
   } else if (E.trees === 'larch') {
     scatter(pineG(), trunkG(), '#45633a', '#4a3a2c', 520, (i) => [sideX(i, 26, 200, i % 4 === 0), (hash2(i, 2) - 0.5) * 700, 0.6 + hash2(i, 3) * 0.8]);
   } else if (E.trees === 'tufts') {
-    const tg = new T.ConeGeometry(0.35, 0.9, 5); tg.translate(0, 0.45, 0);
-    scatter(tg, null, '#a7a35c', '#000', 900, (i) => [i % 3 === 0 ? 9 + hash2(i, 1) * 6 : -9 - Math.pow(hash2(i, 1), 1.5) * 60, (hash2(i, 2) - 0.5) * 300, 0.6 + hash2(i, 3) * 0.9]);
-    const gorse = new T.IcosahedronGeometry(0.9, 0); gorse.translate(0, 0.6, 0);
-    scatter(gorse, null, '#5b6b2a', '#000', 120, (i) => [-12 - hash2(i, 1) * 80, (hash2(i, 2) - 0.5) * 300, 0.6 + hash2(i, 3) * 0.8]);
+    const tg = new T.ConeGeometry(0.16, 0.55, 5); tg.translate(0, 0.27, 0);
+    scatter(tg, null, '#b3ad66', '#000', 1400, (i) => [i % 4 === 0 ? 9.5 + hash2(i, 1) * 4 : -10 - Math.pow(hash2(i, 1), 1.4) * 70, (hash2(i, 2) - 0.5) * 300, 0.5 + hash2(i, 3) * 0.7], true);
+    const gorse = new T.IcosahedronGeometry(0.7, 1); gorse.translate(0, 0.45, 0);
+    scatter(gorse, null, '#56662a', '#000', 70, (i) => [-16 - hash2(i, 1) * 90, (hash2(i, 2) - 0.5) * 300, 0.6 + hash2(i, 3) * 0.7]);
   }
 
   // road
