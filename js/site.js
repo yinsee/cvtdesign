@@ -767,18 +767,20 @@ function buildWorld(T, renderer) {
     const ax = Math.abs(x);
     let h = 0;
     if (x < 0) h = Math.max(0, (ax - 28) / 60) * 7 * fbm(x * 0.012 + 3, z * 0.012, 4) * Math.min(1, Math.max(0, (ax - 28) / 40));
-    else { const lochEdge = Math.min(1, Math.max(0, (x - 9) / 6)); h = -0.9 * lochEdge + Math.max(0, (x - 190) / 60) * 26 * fbm(x * 0.01, z * 0.01 + 7, 4); }
+    else { const lochEdge = Math.min(1, Math.max(0, (x - 9) / 7)); h = -0.9 * lochEdge + Math.min(1, Math.max(0, (x - 112) / 30)) * (1.2 + 34 * fbm(x * 0.011, z * 0.011 + 7, 4) * Math.min(1, (x - 112) / 90 + 0.25)); }
     if (ax < 8) h *= 0; return h;
   };
   const gGeo = new T.PlaneGeometry(1000, 1000, 200, 200); gGeo.rotateX(-Math.PI / 2);
   const pos = gGeo.attributes.position, cols = [], col = new T.Color();
-  const grassA = new T.Color('#4c6634'), grassB = new T.Color('#6f7a3c'), heather = new T.Color('#6f5446'), verge = new T.Color('#7e7a5e'), rock = new T.Color('#7b7a74');
+  const grassA = new T.Color('#4c6634'), grassB = new T.Color('#6f7a3c'), heather = new T.Color('#6f5446'), verge = new T.Color('#7e7a5e'), rock = new T.Color('#7b7a74'), beach = new T.Color('#8f8878');
   for (let i = 0; i < pos.count; i++) {
     const x = pos.getX(i), z = pos.getZ(i), h = heightAt(x, z); pos.setY(i, h);
     const n = fbm(x * 0.05, z * 0.05, 3), m = fbm(x * 0.008 + 11, z * 0.008, 3);
     col.copy(grassA).lerp(grassB, n).lerp(heather, Math.max(0, m - 0.45) * 1.6);
     if (h > 9) col.lerp(rock, Math.min(1, (h - 9) / 10));
     if (Math.abs(x) < 6.5) col.lerp(verge, 0.55);
+    if (x > 8.5 && x < 17) col.lerp(beach, Math.min(1, (x - 8.5) / 2) * 0.85);
+    if (x > 112 && x < 120) col.lerp(beach, 0.7 * (1 - Math.abs(x - 116) / 4));
     cols.push(col.r, col.g, col.b);
   }
   gGeo.setAttribute('color', new T.Float32BufferAttribute(cols, 3)); gGeo.computeVertexNormals();
@@ -786,8 +788,21 @@ function buildWorld(T, renderer) {
   const ground = new T.Mesh(gGeo, groundMat); ground.receiveShadow = true; world.add(ground); disposables.push(gGeo, groundMat);
 
   // loch
-  const waterMat = new T.MeshStandardMaterial({ color: '#1f3a4c', roughness: 0.28, metalness: 0.0, envMapIntensity: 0.45 });
-  const water = new T.Mesh(new T.PlaneGeometry(400, 1000), waterMat); water.rotation.x = -Math.PI / 2; water.position.set(14 + 200, -0.25, 0); world.add(water); disposables.push(water.geometry, waterMat);
+  const waveTex = (() => {
+    const N = 256, d = new Uint8Array(N * N * 4), hgt = (x, y) => Math.sin((x * 6 + y * 2) * Math.PI * 2 / N * 4) * 0.5 + Math.sin((x * -3 + y * 7) * Math.PI * 2 / N * 3) * 0.35 + (fbm(x / N * 16, y / N * 16, 3) - 0.5) * 1.6;
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+      const dx = hgt(x + 1, y) - hgt(x - 1, y), dy = hgt(x, y + 1) - hgt(x, y - 1), nz = 1 / Math.sqrt(dx * dx + dy * dy + 1), i = (y * N + x) * 4;
+      d[i] = (-dx * nz * 0.5 + 0.5) * 255; d[i + 1] = (-dy * nz * 0.5 + 0.5) * 255; d[i + 2] = (nz * 0.5 + 0.5) * 255; d[i + 3] = 255;
+    }
+    const t = new T.DataTexture(d, N, N); t.wrapS = t.wrapT = T.RepeatWrapping; t.repeat.set(60, 150);
+    t.magFilter = T.LinearFilter; t.minFilter = T.LinearMipmapLinearFilter; t.generateMipmaps = true; t.needsUpdate = true; return t;
+  })();
+  const waterMat = new T.MeshStandardMaterial({ color: '#1d3a4b', roughness: 0.14, metalness: 0.0, envMapIntensity: 0.75, normalMap: waveTex, normalScale: new T.Vector2(0.45, 0.45) });
+  const water = new T.Mesh(new T.PlaneGeometry(130, 1000), waterMat); water.rotation.x = -Math.PI / 2; water.position.set(12 + 65, -0.22, 0); water.receiveShadow = true; world.add(water); disposables.push(water.geometry, waterMat, waveTex);
+  const pebG = new T.DodecahedronGeometry(0.12, 0), pebM = new T.MeshStandardMaterial({ color: '#8a8478', roughness: 1, flatShading: true });
+  const pebN = 260, peb = new T.InstancedMesh(pebG, pebM, pebN), pm4 = new T.Matrix4(), pq = new T.Quaternion(), ps = new T.Vector3(), pv = new T.Vector3();
+  for (let i = 0; i < pebN; i++) { const x = 10.5 + hash2(i, 21) * 3.5, z = (hash2(i, 22) - 0.5) * 120, sc0 = 0.5 + hash2(i, 23) * 1.4; pv.set(x, heightAt(x, z) + 0.03, z); pq.setFromEuler(new T.Euler(hash2(i, 24) * 3, hash2(i, 25) * 3, 0)); ps.set(sc0, sc0 * 0.6, sc0); pm4.compose(pv, pq, ps); peb.setMatrixAt(i, pm4); }
+  peb.receiveShadow = true; world.add(peb); disposables.push(pebG, pebM);
 
   // mountain ridges
   const ridge = (radius, base, amp, seed, cA, cB, snow) => {
@@ -817,7 +832,8 @@ function buildWorld(T, renderer) {
   const N = 420, cones = new T.InstancedMesh(coneG, pineM, N), trunks = new T.InstancedMesh(trunkG, trunkM, N), mtx = new T.Matrix4(), q = new T.Quaternion(), sc = new T.Vector3(), pp = new T.Vector3();
   for (let i = 0; i < N; i++) {
     let x, z, tries = 0;
-    do { x = -60 - Math.pow(hash2(i, 1), 1.3) * 240; z = (hash2(i, 2) - 0.5) * 700; tries++; } while (fbm(x * 0.02, z * 0.02, 2) < 0.42 && tries < 6);
+    const far = i % 3 === 0;
+    do { x = far ? 122 + Math.pow(hash2(i, 1), 1.2) * 150 : -60 - Math.pow(hash2(i, 1), 1.3) * 240; z = (hash2(i, 2) - 0.5) * 700; tries++; } while (fbm(x * 0.02, z * 0.02, 2) < 0.42 && tries < 6);
     const s = 0.55 + hash2(i, 3) * 0.7; sc.set(s, s * (0.9 + hash2(i, 4) * 0.4), s); pp.set(x, heightAt(x, z), z);
     q.setFromAxisAngle(new T.Vector3(0, 1, 0), hash2(i, 5) * 6.28); mtx.compose(pp, q, sc); cones.setMatrixAt(i, mtx); trunks.setMatrixAt(i, mtx);
   }
@@ -839,7 +855,7 @@ function buildWorld(T, renderer) {
   disposables.push(asphalt, roadMat, road.geometry, lineMat, dashG, postG, postM, refG, refM);
 
   disposables.push(envSky.geometry, { dispose: () => pm.dispose() });
-  return { world, env, bakeSky, stars, skyMat, roadGroup, dashes, posts, sunDir, disposables, fogColor: SKY.horizon };
+  return { world, env, bakeSky, stars, skyMat, roadGroup, waveTex, dashes, posts, sunDir, disposables, fogColor: SKY.horizon };
 }
 
 // ---------- evening camp beside the van: awning, string lights, chairs, rug, campfire
@@ -877,6 +893,12 @@ function buildCamp(T, van) {
   eGeo.setAttribute('position', new T.BufferAttribute(ePos, 3));
   const eMat = new T.PointsMaterial({ color: '#ffb35c', size: 0.045, transparent: true, opacity: 0.9, blending: T.AdditiveBlending, depthWrite: false });
   const embers = new T.Points(eGeo, eMat); g.add(embers); disp.push(eGeo, eMat);
+  const smokeTex = dataTex(T, 64, (uu, vv) => { const dx = uu - 0.5, dy = vv - 0.5, r = Math.sqrt(dx * dx + dy * dy) * 2, a = Math.max(0, 1 - r); return [255, 255, 255, Math.round(a * a * 255)]; }, 1, 1); smokeTex.colorSpace = T.NoColorSpace; disp.push(smokeTex);
+  const sN = 28, sGeo = new T.BufferGeometry(), sPos = new Float32Array(sN * 3), sSeed = [];
+  for (let i = 0; i < sN; i++) { sSeed.push(Math.random()); sPos[i * 3] = fx; sPos[i * 3 + 1] = 0.2 + Math.random() * 2.6; sPos[i * 3 + 2] = fz; }
+  sGeo.setAttribute('position', new T.BufferAttribute(sPos, 3));
+  const sMat = new T.PointsMaterial({ color: '#c9c6c0', size: 0.9, map: smokeTex, transparent: true, opacity: 0, depthWrite: false, sizeAttenuation: true });
+  const smoke = new T.Points(sGeo, sMat); g.add(smoke); disp.push(sGeo, sMat);
   // chairs facing the fire
   const chairM = M({ color: '#2f4a3a', roughness: 1, sheen: 0.4, sheenColor: '#6f9a80' }), legM = M({ color: '#2a2a2a', metalness: 0.6, roughness: 0.4 }, true);
   [[-2.4, 1.25], [-0.9, 1.3]].forEach(([an, r]) => {
@@ -895,7 +917,7 @@ function buildCamp(T, van) {
   // two enamel mugs on the table
   [[-0.12, 0.05], [0.12, -0.06]].forEach(([mx, mz]) => add(new T.CylinderGeometry(0.04, 0.04, 0.09, 14), M({ color: '#f2f2ef', roughness: 0.35 }, true), tx + mx + 0.0, 0.545, tz + mz));
   g.visible = false;
-  return { group: g, bulbM, lanternM, flames, fireLight, embers, ePos, eSeed, fx, fz, center: new T.Vector3(ax + 1.6, 0.9, fz), disp };
+  return { group: g, bulbM, lanternM, flames, fireLight, embers, smoke, sPos, sSeed, ePos, eSeed, fx, fz, center: new T.Vector3(ax + 1.6, 0.9, fz), disp };
 }
 
 class Component extends DCLogic {
@@ -1158,8 +1180,11 @@ class Component extends DCLogic {
       const c = v.camp; c.group.visible = v.mode === 'camp' && ck > 0.02;
       if (c.group.visible) {
         c.bulbM.emissiveIntensity = 0.15 + 3.2 * dark; c.lanternM.emissiveIntensity = 0.3 + 2.6 * dark;
-        c.flames.forEach((fm, i) => { fm.scale.set(1 + 0.08 * Math.sin(t0 * 17 + i), 0.85 + 0.25 * Math.sin(t0 * (11 + i * 3)) + 0.1 * Math.sin(t0 * 29 + i), 1 + 0.08 * Math.cos(t0 * 15 + i)); fm.rotation.y = t0 * (0.8 + i * 0.4); fm.material.opacity = (0.65 + 0.12 * i) * Math.min(1, ck * 1.5) * (0.45 + 0.55 * dark); });
-        c.fireLight.intensity = ck * (0.6 + 3 * dark) * (1 + 0.22 * Math.sin(t0 * 13) + 0.12 * Math.sin(t0 * 31));
+        // the fire burns from late afternoon through the night; by morning it is out and only smoking
+        const tt = v.tod, lit = tt >= 17 ? Math.min(1, (tt - 17) / 0.8) : tt < 6.2 ? 1 : tt < 7.2 ? 1 - (tt - 6.2) : 0;
+        c.flames.forEach((fm) => { fm.visible = lit > 0.02; });
+        c.flames.forEach((fm, i) => { fm.scale.set(1 + 0.08 * Math.sin(t0 * 17 + i), 0.85 + 0.25 * Math.sin(t0 * (11 + i * 3)) + 0.1 * Math.sin(t0 * 29 + i), 1 + 0.08 * Math.cos(t0 * 15 + i)); fm.rotation.y = t0 * (0.8 + i * 0.4); fm.material.opacity = (0.65 + 0.12 * i) * Math.min(1, ck * 1.5) * (0.45 + 0.55 * dark) * lit; fm.scale.multiplyScalar(0.35 + 0.65 * lit); });
+        c.fireLight.intensity = ck * lit * (0.6 + 3 * dark) * (1 + 0.22 * Math.sin(t0 * 13) + 0.12 * Math.sin(t0 * 31));
         const ep = c.ePos;
         for (let i = 0; i < c.eSeed.length; i++) {
           const s0 = c.eSeed[i]; ep[i * 3 + 1] += dt * (0.5 + s0 * 0.7);
@@ -1167,9 +1192,22 @@ class Component extends DCLogic {
           if (ep[i * 3 + 1] > 1.6 + s0 * 1.4) ep[i * 3 + 1] = 0.25;
         }
         c.embers.geometry.attributes.position.needsUpdate = true;
-        c.embers.material.opacity = 0.3 + 0.6 * dark;
+        c.embers.material.opacity = (0.3 + 0.6 * dark) * lit; c.embers.visible = lit > 0.02;
+        const smokeAmt = ck * (1 - lit) * (tt >= 6 && tt < 12 ? 1 : 0.45);
+        c.smoke.visible = smokeAmt > 0.01; c.smoke.material.opacity = 0.42 * smokeAmt;
+        if (c.smoke.visible) {
+          const sp2 = c.sPos;
+          for (let i = 0; i < c.sSeed.length; i++) {
+            const s0 = c.sSeed[i]; sp2[i * 3 + 1] += dt * (0.22 + s0 * 0.18);
+            const hgt = sp2[i * 3 + 1];
+            sp2[i * 3] = c.fx + Math.sin(t0 * 0.6 + i) * 0.08 * hgt + hgt * 0.18; sp2[i * 3 + 2] = c.fz + Math.cos(t0 * 0.5 + i * 1.7) * 0.08 * hgt;
+            if (hgt > 2.6 + s0 * 1.2) sp2[i * 3 + 1] = 0.2;
+          }
+          c.smoke.geometry.attributes.position.needsUpdate = true;
+        }
       }
     }
+    v.worldParts.waveTex.offset.set((t0 * 0.004) % 1, (t0 * 0.0025) % 1);
     const want = (v.mode === 'bed' || v.mode === 'camp') ? 1 : 0;
     v.doorT += (want - v.doorT) * (1 - Math.exp(-dt * 3));
     v.van.doors.forEach((d) => { d.pivot.rotation[d.axis] = d.open * v.doorT; });
