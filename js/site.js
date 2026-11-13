@@ -299,24 +299,17 @@ return Component;
 DC["Van3D"] = (function () {
 
 const VAN_SPECS = {
-  'man-lwb-auto':   { name: 'MAN TGE LWB Luxury · Automatic', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#4a4c51', layout: 'northsouth', bath: true, rearAxle: 1.75, doors: 'barn' },
-  'man-lwb-manual': { name: 'MAN TGE LWB Luxury · Manual', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#3e4044', layout: 'transverse', bedDepth: 1.5, bath: true, rearAxle: 1.75, doors: 'barn' },
-  'man-mwb':        { name: 'MAN TGE MWB · 2 berth', L: 5.99, W: 2.04, H: 2.6, kind: 'high', paint: '#55575c', layout: 'transverse', bedDepth: 1.6, bath: true, rearAxle: 1.15, doors: 'barn' },
-  'crafter-auto':   { name: 'VW Crafter LWB · Automatic', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#f2f2f0', layout: 'transverse', bedDepth: 1.4, bath: true, dinette: true, rearAxle: 1.75, doors: 'barn' },
-  'crafter-manual': { name: 'VW Crafter LWB · Manual', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#c9cbce', layout: 'transverse', bedDepth: 1.4, bath: true, dinette: true, rearAxle: 1.75, doors: 'barn' },
-  'toleno':         { name: 'Toleno R · 4 berth', L: 6.36, W: 2.05, H: 2.62, kind: 'high', paint: '#f7f7f5', stripes: true, layout: 'transverse', bedDepth: 1.45, bath: true, dinette: true, rearAxle: 1.5, doors: 'barn' },
-  't5-spacious':    { name: 'VW T5 Spacious · Pop-top', L: 4.9, W: 1.9, H: 1.97, kind: 'pop', paint: '#5b6067', layout: 'rockroll', bath: false, rearAxle: 1.0, doors: 'tailgate' },
-  't5-widebed':     { name: 'VW T5 Wide Bed · Pop-top', L: 4.9, W: 1.9, H: 1.97, kind: 'pop', paint: '#b9bcc1', layout: 'rockroll', wideBed: true, bath: false, rearAxle: 1.0, doors: 'tailgate' },
-  't5-compact':     { name: 'VW T5 Compact · Pop-top', L: 4.9, W: 1.9, H: 1.97, kind: 'pop', paint: '#f1f1ef', layout: 'rockroll', bath: false, rearAxle: 1.0, doors: 'tailgate' }
+  'man-lwb-auto':   { name: 'MAN TGE LWB Luxury · Automatic', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#3d4046', layout: 'northsouth', bath: true, rearAxle: 1.75, doors: 'barn' },
+  'man-lwb-manual': { name: 'MAN TGE LWB Luxury · Manual', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#34373c', layout: 'transverse', bedDepth: 1.5, bath: true, rearAxle: 1.75, doors: 'barn' },
+  'man-mwb':        { name: 'MAN TGE MWB · 2 berth', L: 5.99, W: 2.04, H: 2.6, kind: 'high', paint: '#4a4d53', layout: 'transverse', bedDepth: 1.6, bath: true, rearAxle: 1.15, doors: 'barn' },
+  'crafter-auto':   { name: 'VW Crafter LWB · Automatic', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#eeeeec', layout: 'transverse', bedDepth: 1.4, bath: true, dinette: true, rearAxle: 1.75, doors: 'barn' },
+  'crafter-manual': { name: 'VW Crafter LWB · Manual', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#bfc2c6', layout: 'transverse', bedDepth: 1.4, bath: true, dinette: true, rearAxle: 1.75, doors: 'barn' },
+  'toleno':         { name: 'Toleno R · 4 berth', L: 6.36, W: 2.05, H: 2.62, kind: 'high', paint: '#f4f4f2', stripes: true, layout: 'transverse', bedDepth: 1.45, bath: true, dinette: true, rearAxle: 1.5, doors: 'barn' },
+  't5-spacious':    { name: 'VW T5 Spacious · Pop-top', L: 4.9, W: 1.9, H: 1.97, kind: 'pop', paint: '#4f545b', layout: 'rockroll', bath: false, rearAxle: 1.0, doors: 'tailgate' },
+  't5-widebed':     { name: 'VW T5 Wide Bed · Pop-top', L: 4.9, W: 1.9, H: 1.97, kind: 'pop', paint: '#b3b7bd', layout: 'rockroll', wideBed: true, bath: false, rearAxle: 1.0, doors: 'tailgate' },
+  't5-compact':     { name: 'VW T5 Compact · Pop-top', L: 4.9, W: 1.9, H: 1.97, kind: 'pop', paint: '#efefed', layout: 'rockroll', bath: false, rearAxle: 1.0, doors: 'tailgate' }
 };
 const VAN_ORDER = ['man-lwb-auto', 'man-lwb-manual', 'man-mwb', 'crafter-auto', 'crafter-manual', 'toleno', 't5-spacious', 't5-widebed', 't5-compact'];
-const SCENERY = {
-  highlands: { label: 'Highlands', img: 'assets/nc500.jpg', ground: '#55603f', sky: '#8f9aa6', road: true },
-  lakes:     { label: 'Lake District', img: 'assets/lakes.jpg', ground: '#4f5a3a', sky: '#d79a6a', road: true },
-  beach:     { label: 'Hebridean beach', img: 'assets/hebrides.jpg', ground: '#d9cba6', sky: '#aab6c2', road: false },
-  cotswolds: { label: 'Cotswolds', img: 'assets/cotswolds.jpg', ground: '#6a7040', sky: '#c9c4b4', road: true },
-  bruges:    { label: 'Bruges', img: 'assets/bruges.jpg', ground: '#5e5a56', sky: '#24324f', road: true }
-};
 const VIEWS = [
   ['outside', 'Walk around'],
   ['drive', 'On the road'],
@@ -325,56 +318,113 @@ const VIEWS = [
   ['living', 'Living area'],
   ['bed', 'Lying in bed']
 ];
+const SKY = { top: '#4f79ad', horizon: '#f0d7b8', bottom: '#b9ad97', sun: [0.62, 0.32, -0.25] };
 
+// ---------- small procedural helpers (no images needed)
+function hash2(x, y) { const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return s - Math.floor(s); }
+function vnoise(x, y) {
+  const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi;
+  const u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf);
+  const a = hash2(xi, yi), b = hash2(xi + 1, yi), c = hash2(xi, yi + 1), d = hash2(xi + 1, yi + 1);
+  return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
+}
+function fbm(x, y, o) { let s = 0, a = 0.5, f = 1; for (let i = 0; i < (o || 4); i++) { s += a * vnoise(x * f, y * f); f *= 2; a *= 0.5; } return s; }
+function dataTex(T, size, fn, rx, ry) {
+  const d = new Uint8Array(size * size * 4);
+  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+    const c = fn(x / size, y / size), i = (y * size + x) * 4;
+    d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2]; d[i + 3] = c.length > 3 ? c[3] : 255;
+  }
+  const t = new T.DataTexture(d, size, size);
+  t.wrapS = t.wrapT = T.RepeatWrapping; t.repeat.set(rx || 1, ry || 1);
+  t.magFilter = T.LinearFilter; t.minFilter = T.LinearMipmapLinearFilter; t.generateMipmaps = true;
+  t.colorSpace = T.SRGBColorSpace; t.anisotropy = 8; t.needsUpdate = true;
+  return t;
+}
+function rboxGeo(T, w, h, d, r) {
+  r = Math.max(0.002, Math.min(r, w / 2 - 0.002, h / 2 - 0.002, d / 2 - 0.002));
+  const iw = w - 2 * r, ih = h - 2 * r, c = Math.min(iw, ih) * 0.25;
+  const s = new T.Shape(), x = -iw / 2, y = -ih / 2;
+  s.moveTo(x + c, y); s.lineTo(x + iw - c, y); s.quadraticCurveTo(x + iw, y, x + iw, y + c); s.lineTo(x + iw, y + ih - c);
+  s.quadraticCurveTo(x + iw, y + ih, x + iw - c, y + ih); s.lineTo(x + c, y + ih); s.quadraticCurveTo(x, y + ih, x, y + ih - c); s.lineTo(x, y + c); s.quadraticCurveTo(x, y, x + c, y);
+  const g = new T.ExtrudeGeometry(s, { depth: Math.max(0.001, d - 2 * r), bevelEnabled: true, bevelThickness: r, bevelSize: r, bevelSegments: 3, curveSegments: 4 });
+  g.translate(0, 0, -(d - 2 * r) / 2);
+  return g;
+}
+
+// ---------- the van
 function buildVan(T, c) {
   const g = new T.Group();
-  const mats = [];
-  const M = (color, o) => { const m = new T.MeshStandardMaterial(Object.assign({ color, roughness: 0.6, metalness: 0 }, o || {})); mats.push(m); return m; };
-  const paint = M(c.paint, { roughness: 0.32, metalness: 0.35 });
-  const lining = M('#dcd8d0', { roughness: 0.95 });
-  const ceiling = M('#eeebe5', { roughness: 0.95 });
-  const trim = M('#1d1d21', { roughness: 0.55 });
-  const tyre = M('#151517', { roughness: 0.9 });
-  const hubM = M('#b9bcc2', { roughness: 0.3, metalness: 0.8 });
-  const vinyl = M('#4a4541', { roughness: 0.85 });
-  const wood = M('#cba983', { roughness: 0.7 });
-  const worktop = M('#2c2c30', { roughness: 0.35 });
-  const fabric = M('#3a3e47', { roughness: 0.95 });
-  const sheet = M('#f4f2ed', { roughness: 1 });
-  const duvet = M('#2f4f8f', { roughness: 1 });
-  const throwM = M('#b8324a', { roughness: 1 });
-  const white = M('#f6f6f4', { roughness: 0.45 });
-  const steel = M('#c8ccd2', { roughness: 0.25, metalness: 0.85 });
-  const canvasM = M('#6d6963', { roughness: 1, side: T.DoubleSide });
-  const lampM = M('#fff6e0', { emissive: '#fff1cf', emissiveIntensity: 1.4 });
-  const headM = M('#ffffff', { emissive: '#e8f1ff', emissiveIntensity: 1.2 });
-  const tailM = M('#c0182f', { emissive: '#7a0a18', emissiveIntensity: 0.8 });
-  const stripeA = M('#b5233a', { roughness: 0.4 });
-  const stripeB = M('#2b2d33', { roughness: 0.4 });
-  const glass = new T.MeshPhysicalMaterial({ color: '#9fb6c6', transparent: true, opacity: 0.18, roughness: 0.05, metalness: 0, side: T.DoubleSide, depthWrite: false });
-  mats.push(glass);
+  const mats = [], texs = [];
+  const P = (o) => { const m = new T.MeshPhysicalMaterial(o); mats.push(m); return m; };
+  const S = (o) => { const m = new T.MeshStandardMaterial(o); mats.push(m); return m; };
+  const woodTex = dataTex(T, 256, (u, v) => {
+    const n = fbm(u * 4, v * 40, 3), grain = 0.5 + 0.5 * Math.sin((v * 90 + n * 9));
+    const k = 0.84 + 0.12 * grain + 0.06 * (n - 0.5);
+    return [Math.min(255, 214 * k), Math.min(255, 178 * k), Math.min(255, 136 * k)];
+  }, 1, 1); texs.push(woodTex);
+  const floorTex = dataTex(T, 256, (u, v) => {
+    const plank = Math.floor(u * 4), seam = (u * 4 - plank) < 0.02 ? 0.6 : 1;
+    const n = fbm(u * 6 + plank * 3.1, v * 30, 3), k = (0.78 + 0.2 * n) * seam * (0.92 + 0.08 * hash2(plank, 2));
+    return [150 * k, 122 * k, 96 * k];
+  }, 1, 3); texs.push(floorTex);
+
+  const paint = P({ color: c.paint, metalness: 0.45, roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.05 });
+  const plastic = S({ color: '#1b1c1f', roughness: 0.78 });
+  const satin = S({ color: '#2a2c30', roughness: 0.45, metalness: 0.2 });
+  const chrome = S({ color: '#dfe3e8', roughness: 0.15, metalness: 1 });
+  const tyreM = S({ color: '#141416', roughness: 0.92 });
+  const rimM = S({ color: '#c5c9cf', roughness: 0.25, metalness: 0.95 });
+  const glassSide = P({ color: '#0f151b', metalness: 0.1, roughness: 0.04, transparent: true, opacity: 0.6, side: T.DoubleSide, depthWrite: false, envMapIntensity: 1.6 });
+  const glassFront = P({ color: '#30404c', metalness: 0.05, roughness: 0.03, transparent: true, opacity: 0.22, side: T.DoubleSide, depthWrite: false, envMapIntensity: 1.4 });
+  const headM = P({ color: '#e8eef4', roughness: 0.05, metalness: 0.2, clearcoat: 1, emissive: '#d8e8ff', emissiveIntensity: 0.55 });
+  const drlM = S({ color: '#ffffff', emissive: '#ffffff', emissiveIntensity: 2.5 });
+  const tailM = P({ color: '#9c1022', roughness: 0.1, clearcoat: 1, emissive: '#6a0a16', emissiveIntensity: 0.9 });
+  const plateM = S({ color: '#f2f2ee', roughness: 0.5 });
+  const lining = S({ color: '#d9d4ca', roughness: 0.95 });
+  const ceiling = S({ color: '#efebe4', roughness: 0.9 });
+  const wood = S({ color: '#ffffff', map: woodTex, roughness: 0.55 });
+  const floorM = S({ color: '#ffffff', map: floorTex, roughness: 0.65 });
+  const worktop = S({ color: '#26272b', roughness: 0.22, metalness: 0.15 });
+  const fabric = P({ color: '#3a3f49', roughness: 1, sheen: 0.6, sheenColor: '#8c94a3', sheenRoughness: 0.8 });
+  const sheet = P({ color: '#f2efe9', roughness: 1, sheen: 0.4, sheenColor: '#ffffff' });
+  const duvet = P({ color: '#2d4b84', roughness: 1, sheen: 0.7, sheenColor: '#7f9bd0' });
+  const throwM = P({ color: '#b02e46', roughness: 1, sheen: 0.6, sheenColor: '#e07a8c' });
+  const white = S({ color: '#f5f5f3', roughness: 0.4 });
+  const steel = S({ color: '#cfd3d8', roughness: 0.22, metalness: 0.9 });
+  const canvasM = P({ color: '#5f5a54', roughness: 1, sheen: 0.4, sheenColor: '#9a948c', side: T.DoubleSide });
+  const lampM = S({ color: '#fff4dd', emissive: '#ffe9c4', emissiveIntensity: 3 });
+  const ledM = S({ color: '#ffe2b0', emissive: '#ffcf8a', emissiveIntensity: 2.2 });
+  const screenM = S({ color: '#0b1220', emissive: '#1d3d66', emissiveIntensity: 0.9, roughness: 0.2 });
+  const solarM = P({ color: '#15213b', metalness: 0.4, roughness: 0.15, clearcoat: 1 });
+  const awningM = S({ color: '#a7acb2', roughness: 0.35, metalness: 0.6 });
+  const stripeA = P({ color: '#b5233a', roughness: 0.3, clearcoat: 1 });
+  const stripeB = P({ color: '#2b2d33', roughness: 0.3, clearcoat: 1 });
 
   const add = (geo, mat, x, y, z, parent) => { const m = new T.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true; (parent || g).add(m); return m; };
   const box = (w, h, d, mat, x, y, z, parent) => add(new T.BoxGeometry(w, h, d), mat, x, y, z, parent);
+  const rbox = (w, h, d, r, mat, x, y, z, parent) => add(rboxGeo(T, w, h, d, r), mat, x, y, z, parent);
+  const noShadow = (m) => { m.castShadow = false; return m; };
 
   const L = c.L, W = c.W, H = c.H, half = L / 2, rearZ = -half;
   const pop = c.kind === 'pop';
-  const sillY = 0.34, floorY = 0.56, wheelR = pop ? 0.33 : 0.36;
-  const bonnetLen = pop ? 0.62 : 0.78, bonnetH = pop ? 1.05 : 1.12;
+  const rr = pop ? 0.1 : 0.17;
+  const sillY = 0.34, floorY = 0.56, wheelR = pop ? 0.34 : 0.37;
+  const bonnetLen = pop ? 0.66 : 0.82, bonnetH = pop ? 1.04 : 1.12;
   const wsBaseZ = half - bonnetLen;
-  const wsTopY = pop ? H - 0.1 : 2.02;
-  const wsRun = pop ? 0.62 : 0.78;
+  const wsTopY = pop ? H - 0.1 : 2.04;
+  const wsRun = pop ? 0.66 : 0.8;
   const wsTopZ = wsBaseZ - wsRun;
-  const capRun = H - wsTopY > 0.2 ? 0.42 : 0.04;
+  const capRun = pop ? 0.04 : 0.46;
   const roofFrontZ = wsTopZ - capRun;
-  const fAx = half - (pop ? 0.8 : 0.9);
+  const fAx = half - (pop ? 0.82 : 0.92);
   const rAx = rearZ + c.rearAxle;
-  const archR = wheelR + 0.08;
-  const archY = sillY + 0.02;
-  const cabDoorRear = wsBaseZ - (pop ? 0.95 : 1.0);
+  const archR = wheelR + 0.07, archY = sillY + 0.02;
+  const cabDoorRear = wsBaseZ - (pop ? 0.95 : 1.02);
+  const topY = H - rr;
   const lerp2 = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
 
-  // ---- side profile with wheel arches
+  // --- side profile with wheel arches
   const outline = () => {
     const s = new T.Shape();
     s.moveTo(rearZ, archY);
@@ -382,24 +432,25 @@ function buildVan(T, c) {
     s.absarc(rAx, archY, archR, Math.PI, 0, true);
     s.lineTo(fAx - archR, archY);
     s.absarc(fAx, archY, archR, Math.PI, 0, true);
-    s.lineTo(half, archY);
-    s.lineTo(half, bonnetH - 0.16);
-    s.quadraticCurveTo(half, bonnetH, half - 0.18, bonnetH);
+    s.lineTo(half - 0.05, archY);
+    s.lineTo(half, bonnetH - 0.2);
+    s.quadraticCurveTo(half, bonnetH - 0.02, half - 0.24, bonnetH);
     s.lineTo(wsBaseZ, bonnetH);
-    s.lineTo(wsTopZ, wsTopY);
-    if (capRun > 0.1) s.quadraticCurveTo(wsTopZ - 0.06, H, roofFrontZ, H); else s.lineTo(roofFrontZ, H);
-    s.lineTo(rearZ + 0.08, H);
-    s.quadraticCurveTo(rearZ, H, rearZ, H - 0.08);
+    s.lineTo(wsTopZ, Math.min(wsTopY, topY));
+    if (!pop) s.quadraticCurveTo(wsTopZ - 0.08, topY, roofFrontZ, topY); else s.lineTo(roofFrontZ, topY);
+    s.lineTo(rearZ + 0.06, topY);
+    s.quadraticCurveTo(rearZ, topY, rearZ, topY - 0.06);
     s.lineTo(rearZ, archY);
     return s;
   };
   const rect = (z0, z1, y0, y1) => [[z0, y0], [z1, y0], [z1, y1], [z0, y1]];
   const cabWin = () => {
-    const a = [wsBaseZ, bonnetH], b = [wsTopZ, wsTopY];
-    const p1 = lerp2(a, b, 0.14), p2 = lerp2(a, b, 0.86);
-    return [[cabDoorRear + 0.08, bonnetH + 0.14], [p1[0] - 0.1, bonnetH + 0.14], [p2[0] - 0.1, Math.min(p2[1], wsTopY - 0.12)], [cabDoorRear + 0.08, Math.min(p2[1], wsTopY - 0.12)]];
+    const a = [wsBaseZ, bonnetH], b = [wsTopZ, Math.min(wsTopY, topY)];
+    const p1 = lerp2(a, b, 0.16), p2 = lerp2(a, b, 0.84);
+    const top = Math.min(p2[1], topY - 0.1);
+    return [[cabDoorRear + 0.08, bonnetH + 0.15], [p1[0] - 0.11, bonnetH + 0.15], [p2[0] - 0.11, top], [cabDoorRear + 0.08, top]];
   };
-  const winY0 = pop ? 1.12 : 1.3, winY1 = pop ? 1.62 : 1.82;
+  const winY0 = pop ? 1.12 : 1.3, winY1 = pop ? 1.6 : 1.84;
   const livingWins = (side) => {
     const w = [];
     if (pop) { w.push(rect(rearZ + 0.45, cabDoorRear - 0.12, winY0, winY1)); return w; }
@@ -409,10 +460,11 @@ function buildVan(T, c) {
     if (c.stripes && side < 0) w.push(rect(mid - 0.35, mid + 0.35, winY0, winY1));
     return w;
   };
-  const toPath = (pts, Ctor) => { const p = new Ctor(); p.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) p.lineTo(pts[i][0], pts[i][1]); p.closePath ? p.closePath() : null; return p; };
-
-  const sideMesh = (shape, depth, mat, x) => {
-    const geo = new T.ExtrudeGeometry(shape, { depth, bevelEnabled: false, curveSegments: 18 });
+  const toPath = (pts, Ctor) => { const p = new Ctor(); p.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) p.lineTo(pts[i][0], pts[i][1]); p.closePath(); return p; };
+  const sideMesh = (shape, depth, mat, x, bevel) => {
+    const geo = new T.ExtrudeGeometry(shape, bevel
+      ? { depth, bevelEnabled: true, bevelThickness: 0.008, bevelSize: 0.012, bevelSegments: 2, curveSegments: 24 }
+      : { depth, bevelEnabled: false, curveSegments: 24 });
     geo.rotateY(-Math.PI / 2);
     return add(geo, mat, x, 0, 0);
   };
@@ -420,157 +472,189 @@ function buildVan(T, c) {
     const holes = [cabWin()].concat(livingWins(side));
     const s = outline();
     holes.forEach((h) => s.holes.push(toPath(h, T.Path)));
-    sideMesh(s, 0.035, paint, side > 0 ? W / 2 : -W / 2 + 0.035);
-    // interior lining behind the cab
-    const lin = toPath(rect(rearZ + 0.03, cabDoorRear, floorY, H - 0.05), T.Shape);
+    sideMesh(s, 0.025, paint, side > 0 ? W / 2 - 0.012 : -W / 2 + 0.037, true);
+    const lin = toPath(rect(rearZ + 0.04, cabDoorRear, floorY, topY - 0.02), T.Shape);
     livingWins(side).forEach((h) => lin.holes.push(toPath(h, T.Path)));
-    sideMesh(lin, 0.015, lining, side > 0 ? W / 2 - 0.04 : -W / 2 + 0.055);
-    // glass
-    holes.forEach((h) => { const sg = new T.ShapeGeometry(toPath(h, T.Shape)); sg.rotateY(-Math.PI / 2); const m = add(sg, glass, side > 0 ? W / 2 - 0.017 : -W / 2 + 0.017, 0, 0); m.castShadow = false; });
+    sideMesh(lin, 0.015, lining, side > 0 ? W / 2 - 0.05 : -W / 2 + 0.065, false);
+    holes.forEach((h, i) => { const sg = new T.ShapeGeometry(toPath(h, T.Shape)); sg.rotateY(-Math.PI / 2); noShadow(add(sg, i === 0 ? glassFront : glassSide, side > 0 ? W / 2 - 0.022 : -W / 2 + 0.022, 0, 0)); });
+    // arch flares
+    [fAx, rAx].forEach((z) => { const f = add(new T.TorusGeometry(archR + 0.012, 0.035, 10, 32, Math.PI), plastic, side * (W / 2 + 0.004), archY, z); f.rotation.y = Math.PI / 2; });
+    // sill + rubbing strip
+    rbox(0.05, 0.1, (fAx - archR) - (rAx + archR) - 0.04, 0.02, plastic, side * (W / 2 + 0.01), sillY + 0.07, (fAx + rAx) / 2);
     // mirror
-    box(0.07, 0.24, 0.16, trim, side * (W / 2 + 0.13), bonnetH + 0.33, wsBaseZ - 0.12);
-    box(0.16, 0.04, 0.05, trim, side * (W / 2 + 0.06), bonnetH + 0.25, wsBaseZ - 0.12);
-    // side rubbing strip
-    box(0.02, 0.07, L - 1.4, trim, side * (W / 2 + 0.005), sillY + 0.16, -0.25);
+    rbox(0.09, 0.26, 0.18, 0.03, plastic, side * (W / 2 + 0.17), bonnetH + 0.36, wsBaseZ - 0.14);
+    noShadow(rbox(0.012, 0.2, 0.14, 0.004, glassSide, side * (W / 2 + 0.17) + 0.0, bonnetH + 0.36, wsBaseZ - 0.235));
+    rbox(0.2, 0.04, 0.06, 0.015, plastic, side * (W / 2 + 0.08), bonnetH + 0.27, wsBaseZ - 0.14);
+    // door seams and handles
+    const seam = (z, y0, y1) => box(0.006, y1 - y0, 0.006, plastic, side * (W / 2 + 0.006), (y0 + y1) / 2, z);
+    seam(cabDoorRear, sillY + 0.12, Math.min(wsTopY, topY) - 0.12);
+    rbox(0.03, 0.035, 0.16, 0.012, satin, side * (W / 2 + 0.012), bonnetH + 0.02, cabDoorRear + 0.18);
+    if (!pop && side > 0) { seam(cabDoorRear - 1.25, sillY + 0.12, topY - 0.15); rbox(0.03, 0.035, 0.18, 0.012, satin, W / 2 + 0.012, bonnetH + 0.02, cabDoorRear - 1.12); box(0.01, 0.025, cabDoorRear - 1.25 - rearZ - 0.2, plastic, W / 2 + 0.008, winY1 + 0.08, (rearZ + 0.2 + cabDoorRear - 1.25) / 2); }
     if (c.stripes) {
-      box(0.012, 0.09, L - bonnetLen - 0.6, stripeA, side * (W / 2 + 0.006), 1.02, -bonnetLen / 2 + 0.05);
-      box(0.012, 0.04, L - bonnetLen - 0.9, stripeB, side * (W / 2 + 0.006), 1.12, -bonnetLen / 2 - 0.1);
+      noShadow(box(0.008, 0.09, L - bonnetLen - 0.6, stripeA, side * (W / 2 + 0.003), 1.02, -bonnetLen / 2 + 0.05));
+      noShadow(box(0.008, 0.035, L - bonnetLen - 0.9, stripeB, side * (W / 2 + 0.003), 1.12, -bonnetLen / 2 - 0.1));
     }
   });
 
-  // ---- roof, bonnet, nose, floor, bumpers, lights
-  const popRear = rearZ + 0.38, popFront = roofFrontZ - 0.06;
+  // --- rounded roof
+  const roofGeo = (len) => {
+    const th = 0.045, s = new T.Shape(), w = W / 2;
+    s.moveTo(-w, -rr); s.quadraticCurveTo(-w, 0, -w + rr, 0); s.lineTo(w - rr, 0); s.quadraticCurveTo(w, 0, w, -rr);
+    s.lineTo(w - th, -rr); s.quadraticCurveTo(w - th, -th, w - rr, -th); s.lineTo(-w + rr, -th); s.quadraticCurveTo(-w + th, -th, -w + th, -rr); s.closePath();
+    return new T.ExtrudeGeometry(s, { depth: len, bevelEnabled: false, curveSegments: 10 });
+  };
+  add(roofGeo(roofFrontZ - rearZ), paint, 0, H, rearZ);
+  if (!pop) {
+    const dy = H - wsTopY, ln = Math.hypot(dy, capRun);
+    const cap = add(roofGeo(ln + 0.02), paint, 0, H, roofFrontZ - 0.01); cap.rotation.x = Math.atan2(dy, capRun);
+    rbox(0.95, 0.035, 1.55, 0.02, solarM, 0, H + 0.03, rearZ + 1.35);
+    rbox(0.5, 0.09, 0.5, 0.04, white, 0, H + 0.04, cabDoorRear - 1.6);
+    rbox(0.13, 0.12, L - bonnetLen - 1.4, 0.04, awningM, W / 2 + 0.07, topY - 0.02, (rearZ + 0.25 + cabDoorRear - 0.3) / 2 - 0.1);
+  }
+  box(W - 0.12, 0.02, roofFrontZ - rearZ - 0.06, ceiling, 0, topY - 0.03, (rearZ + roofFrontZ) / 2);
   if (pop) {
-    box(W, 0.05, popRear - rearZ, paint, 0, H - 0.025, (rearZ + popRear) / 2);
-    box(W, 0.05, roofFrontZ - popFront + 0.02, paint, 0, H - 0.025, (popFront + roofFrontZ) / 2);
-    box(0.08, 0.05, popFront - popRear, paint, W / 2 - 0.04, H - 0.025, (popRear + popFront) / 2);
-    box(0.08, 0.05, popFront - popRear, paint, -W / 2 + 0.04, H - 0.025, (popRear + popFront) / 2);
-    // raised wedge
-    const rise = 0.62, len = popFront - popRear;
-    const lid = box(W - 0.06, 0.05, Math.hypot(len, rise), paint, 0, H + rise / 2 + 0.02, (popRear + popFront) / 2);
+    const popRear = rearZ + 0.4, popFront = roofFrontZ - 0.08, rise = 0.6, len = popFront - popRear;
+    const lid = rbox(W - 0.04, 0.07, Math.hypot(len, rise) + 0.04, 0.03, paint, 0, H + rise / 2 + 0.03, (popRear + popFront) / 2);
     lid.rotation.x = -Math.atan2(rise, len);
     [-1, 1].forEach((side) => {
-      const tri = new T.BufferGeometry();
-      const x = side * (W / 2 - 0.06);
+      const tri = new T.BufferGeometry(), x = side * (W / 2 - 0.08);
       tri.setAttribute('position', new T.Float32BufferAttribute([x, H, popRear, x, H, popFront, x, H + rise, popFront], 3));
-      tri.computeVertexNormals();
-      add(tri, canvasM, 0, 0, 0);
-      const win = box(0.01, 0.22, 0.6, glass, x + side * 0.003, H + 0.25, popFront - 0.45); win.castShadow = false;
+      tri.computeVertexNormals(); add(tri, canvasM, 0, 0, 0);
+      noShadow(rbox(0.01, 0.22, 0.62, 0.004, glassSide, x + side * 0.004, H + 0.26, popFront - 0.46));
     });
-    box(W - 0.12, rise, 0.01, canvasM, 0, H + rise / 2, popFront);
-    box(W - 0.1, 0.02, popFront - popRear - 0.1, ceiling, 0, H + rise * 0.5, (popRear + popFront) / 2 + 0.05).rotation.x = -Math.atan2(rise, len);
-  } else {
-    box(W, 0.05, roofFrontZ - rearZ, paint, 0, H - 0.025, (rearZ + roofFrontZ) / 2);
-    if (capRun > 0.1) {
-      const dy = H - wsTopY, dz = -capRun, ln = Math.hypot(dy, dz);
-      const cap = box(W, 0.05, ln, paint, 0, (H + wsTopY) / 2, (wsTopZ + roofFrontZ) / 2);
-      cap.rotation.x = Math.atan2(dy, capRun);
-    }
-    box(W - 0.1, 0.02, roofFrontZ - rearZ - 0.06, ceiling, 0, H - 0.07, (rearZ + roofFrontZ) / 2);
-    // roof light
-    box(0.5, 0.06, 0.5, trim, 0, H + 0.02, rearZ + 1.3);
+    box(W - 0.16, rise, 0.01, canvasM, 0, H + rise / 2, popFront);
   }
-  // windscreen
+
+  // --- windscreen, A-pillars
   {
-    const dy = wsTopY - bonnetH, len = Math.hypot(dy, wsRun);
-    const ws = add(new T.PlaneGeometry(W - 0.14, len), glass, 0, (bonnetH + wsTopY) / 2, (wsBaseZ + wsTopZ) / 2);
+    const top = Math.min(wsTopY, topY), dy = top - bonnetH, len = Math.hypot(dy, wsRun);
+    const ws = noShadow(add(new T.PlaneGeometry(W - 0.16, len), glassFront, 0, (bonnetH + top) / 2, (wsBaseZ + wsTopZ) / 2));
     ws.rotation.x = -Math.atan2(wsRun, dy);
-    ws.castShadow = false;
-    [-1, 1].forEach((side) => { const p = box(0.07, len, 0.07, paint, side * (W / 2 - 0.035), (bonnetH + wsTopY) / 2, (wsBaseZ + wsTopZ) / 2); p.rotation.x = -Math.atan2(wsRun, dy); });
-    box(W, 0.07, 0.07, paint, 0, wsTopY, wsTopZ);
+    [-1, 1].forEach((side) => { const p = rbox(0.08, len, 0.07, 0.025, paint, side * (W / 2 - 0.04), (bonnetH + top) / 2, (wsBaseZ + wsTopZ) / 2); p.rotation.x = -Math.atan2(wsRun, dy); });
+    rbox(W - 0.04, 0.07, 0.08, 0.025, paint, 0, top, wsTopZ);
+    noShadow(box(W - 0.3, 0.06, 0.02, plastic, 0, bonnetH + 0.02, wsBaseZ - 0.02));
   }
-  box(W, 0.05, bonnetLen - 0.16, paint, 0, bonnetH - 0.02, wsBaseZ + (bonnetLen - 0.16) / 2);
-  box(W, 0.05, 0.24, paint, 0, bonnetH - 0.08, half - 0.08).rotation.x = Math.PI / 4;
-  box(W, bonnetH - sillY - 0.15, 0.06, paint, 0, (bonnetH + sillY) / 2 - 0.08, half - 0.03);
-  box(W - 0.5, 0.2, 0.03, trim, 0, bonnetH - 0.33, half + 0.005);
-  [-1, 1].forEach((side) => { box(0.3, 0.11, 0.03, headM, side * (W / 2 - 0.24), bonnetH - 0.26, half + 0.008); box(0.07, 0.42, 0.04, tailM, side * (W / 2 - 0.05), sillY + 0.62, rearZ - 0.01); });
-  box(W + 0.03, 0.24, 0.16, trim, 0, sillY + 0.08, half - 0.02);
-  box(W + 0.03, 0.22, 0.16, trim, 0, sillY + 0.08, rearZ + 0.04);
-  box(0.52, 0.11, 0.02, white, 0, sillY + 0.1, half + 0.065);
-  box(W - 0.06, 0.04, L - bonnetLen - 0.04, vinyl, 0, floorY - 0.02, rearZ + (L - bonnetLen) / 2);
-  box(W - 0.6, floorY - sillY + 0.1, L - 0.4, trim, 0, (floorY + sillY) / 2 - 0.05, 0);
-  // wheels
+  // --- rounded nose (bonnet + front)
+  {
+    const s = new T.Shape();
+    s.moveTo(wsBaseZ, sillY + 0.1); s.lineTo(half - 0.08, sillY + 0.1); s.lineTo(half - 0.02, sillY + 0.3);
+    s.lineTo(half - 0.01, bonnetH - 0.22); s.quadraticCurveTo(half, bonnetH - 0.03, half - 0.26, bonnetH - 0.005); s.lineTo(wsBaseZ, bonnetH + 0.005); s.closePath();
+    const bev = 0.045, depth = W - 0.06 - 2 * bev;
+    const geo = new T.ExtrudeGeometry(s, { depth, bevelEnabled: true, bevelThickness: bev, bevelSize: 0.02, bevelSegments: 4, curveSegments: 20 });
+    geo.rotateY(-Math.PI / 2);
+    add(geo, paint, depth / 2, 0, 0);
+  }
+  // grille, lights, bumpers, plate (generic design)
+  rbox(W * 0.6, 0.3, 0.06, 0.04, plastic, 0, bonnetH - 0.33, half - 0.005);
+  [0, 1, 2].forEach((i) => noShadow(rbox(W * 0.55, 0.022, 0.03, 0.008, i === 0 ? chrome : satin, 0, bonnetH - 0.24 - i * 0.075, half + 0.025)));
+  [-1, 1].forEach((side) => {
+    const sh = new T.Shape();
+    sh.moveTo(0, 0); sh.lineTo(0.4, 0.035); sh.quadraticCurveTo(0.44, 0.08, 0.42, 0.16); sh.lineTo(0.05, 0.13); sh.quadraticCurveTo(0, 0.08, 0, 0);
+    const hg = new T.ExtrudeGeometry(sh, { depth: 0.035, bevelEnabled: true, bevelThickness: 0.01, bevelSize: 0.01, bevelSegments: 2 });
+    const hl = add(hg, headM, side * (W * 0.3 + 0.02), bonnetH - 0.4, half - 0.035);
+    if (side < 0) hl.scale.x = -1;
+    noShadow(box(0.34, 0.012, 0.012, drlM, side * (W * 0.3 + 0.21), bonnetH - 0.385, half + 0.012));
+    rbox(0.09, 0.5, 0.06, 0.025, tailM, side * (W / 2 - 0.06), sillY + 0.75, rearZ - 0.005);
+    rbox(0.12, 0.2, 0.05, 0.02, plastic, side * (W / 2 - 0.12), sillY - 0.02, fAx - archR - 0.06);
+  });
+  rbox(W * 0.48, 0.12, 0.05, 0.03, plastic, 0, sillY + 0.3, half - 0.04);
+  rbox(W + 0.06, 0.24, 0.3, 0.08, plastic, 0, sillY + 0.1, half - 0.1);
+  rbox(W + 0.04, 0.22, 0.22, 0.06, plastic, 0, sillY + 0.09, rearZ + 0.06);
+  noShadow(rbox(0.52, 0.11, 0.02, 0.012, plateM, 0, sillY + 0.15, half + 0.055));
+  noShadow(rbox(0.52, 0.11, 0.02, 0.012, plateM, 0, sillY + 0.55, rearZ - 0.03));
+  box(W - 0.08, 0.04, L - bonnetLen - 0.06, floorM, 0, floorY - 0.02, rearZ + (L - bonnetLen) / 2);
+  box(W - 0.6, 0.3, L - 0.6, plastic, 0, sillY - 0.02, 0);
+
+  // --- wheels: tyre (lathe), alloy rim, spokes
   const wheels = [];
+  const tyreGeo = (() => {
+    const pts = [], r0 = wheelR * 0.68, wdt = 0.125;
+    pts.push(new T.Vector2(r0, -wdt)); pts.push(new T.Vector2(wheelR - 0.04, -wdt)); pts.push(new T.Vector2(wheelR - 0.005, -wdt + 0.03));
+    pts.push(new T.Vector2(wheelR, 0)); pts.push(new T.Vector2(wheelR - 0.005, wdt - 0.03)); pts.push(new T.Vector2(wheelR - 0.04, wdt)); pts.push(new T.Vector2(r0, wdt));
+    return new T.LatheGeometry(pts, 48);
+  })();
   [fAx, rAx].forEach((z) => [-1, 1].forEach((side) => {
-    const wg = new T.Group(); wg.position.set(side * (W / 2 - 0.15), wheelR, z); g.add(wg); wheels.push(wg);
-    const t = add(new T.CylinderGeometry(wheelR, wheelR, 0.25, 32), tyre, 0, 0, 0, wg); t.rotation.z = Math.PI / 2;
-    const h = add(new T.CylinderGeometry(wheelR * 0.58, wheelR * 0.58, 0.27, 24), hubM, 0, 0, 0, wg); h.rotation.z = Math.PI / 2;
-    for (let k = 0; k < 5; k++) { const sp = box(0.03, wheelR * 1.0, 0.07, trim, side * 0.14, 0, 0, wg); sp.rotation.x = (k / 5) * Math.PI * 2; sp.geometry.translate(0, wheelR * 0.25, 0); }
-    add(new T.CylinderGeometry(0.06, 0.06, 0.29, 12), trim, 0, 0, 0, wg).rotation.z = Math.PI / 2;
+    const wg = new T.Group(); wg.position.set(side * (W / 2 - 0.14), wheelR, z); g.add(wg); wheels.push(wg);
+    const t = add(tyreGeo, tyreM, 0, 0, 0, wg); t.rotation.z = Math.PI / 2;
+    const rim = add(new T.CylinderGeometry(wheelR * 0.68, wheelR * 0.68, 0.2, 40), satin, 0, 0, 0, wg); rim.rotation.z = Math.PI / 2;
+    const lip = add(new T.TorusGeometry(wheelR * 0.66, 0.012, 8, 40), rimM, side * 0.1, 0, 0, wg); lip.rotation.y = Math.PI / 2;
+    for (let k = 0; k < 5; k++) {
+      const sg = new T.BoxGeometry(0.03, wheelR * 0.6, 0.06); sg.translate(0, wheelR * 0.3, 0);
+      const sp = add(sg, rimM, side * 0.095, 0, 0, wg); sp.rotation.x = (k / 5) * Math.PI * 2;
+    }
+    const hub = add(new T.CylinderGeometry(0.07, 0.07, 0.04, 24), rimM, side * 0.1, 0, 0, wg); hub.rotation.z = Math.PI / 2;
   }));
 
-  // ---- rear doors
+  // --- rear doors / tailgate
   const doors = [];
-  const doorY0 = sillY + 0.2, doorY1 = H - 0.05;
+  const doorY0 = sillY + 0.2, doorY1 = topY - 0.02;
   if (c.doors === 'barn') {
     [-1, 1].forEach((side) => {
       const pivot = new T.Group(); pivot.position.set(side * W / 2, 0, rearZ); g.add(pivot);
-      const dw = W / 2 - 0.01, dir = -side;
-      const wy0 = H - 0.95, wy1 = H - 0.35;
-      box(dw, wy0 - doorY0, 0.04, paint, dir * dw / 2, (doorY0 + wy0) / 2, 0, pivot);
-      box(dw, doorY1 - wy1, 0.04, paint, dir * dw / 2, (wy1 + doorY1) / 2, 0, pivot);
-      box(0.12, wy1 - wy0, 0.04, paint, dir * 0.06, (wy0 + wy1) / 2, 0, pivot);
-      box(0.12, wy1 - wy0, 0.04, paint, dir * (dw - 0.06), (wy0 + wy1) / 2, 0, pivot);
-      const gl = box(dw - 0.24, wy1 - wy0, 0.01, glass, dir * dw / 2, (wy0 + wy1) / 2, 0, pivot); gl.castShadow = false;
-      box(0.03, 0.18, 0.04, trim, dir * (dw - 0.1), 1.2, -0.04, pivot);
+      const dw = W / 2 - 0.012, dir = -side, wy0 = doorY1 - 0.85, wy1 = doorY1 - 0.18;
+      rbox(dw, wy0 - doorY0, 0.045, 0.012, paint, dir * dw / 2, (doorY0 + wy0) / 2, 0, pivot);
+      rbox(dw, doorY1 - wy1, 0.045, 0.012, paint, dir * dw / 2, (wy1 + doorY1) / 2, 0, pivot);
+      rbox(0.12, wy1 - wy0, 0.045, 0.012, paint, dir * 0.06, (wy0 + wy1) / 2, 0, pivot);
+      rbox(0.12, wy1 - wy0, 0.045, 0.012, paint, dir * (dw - 0.06), (wy0 + wy1) / 2, 0, pivot);
+      noShadow(box(dw - 0.22, wy1 - wy0, 0.01, glassSide, dir * dw / 2, (wy0 + wy1) / 2, 0, pivot));
+      rbox(0.035, 0.18, 0.04, 0.012, satin, dir * (dw - 0.1), 1.2, -0.04, pivot);
       doors.push({ pivot, axis: 'y', open: side < 0 ? 1.75 : -1.75 });
     });
   } else {
-    const pivot = new T.Group(); pivot.position.set(0, H - 0.02, rearZ); g.add(pivot);
-    const dh = H - 0.02 - doorY0, wy0 = -0.6 * dh, wy1 = -0.12;
-    box(W - 0.02, 0.4 * dh, 0.05, paint, 0, -0.8 * dh, 0, pivot);
-    box(W - 0.02, 0.12, 0.05, paint, 0, -0.06, 0, pivot);
-    const gl = box(W - 0.3, wy1 - wy0, 0.01, glass, 0, (wy0 + wy1) / 2, 0, pivot); gl.castShadow = false;
-    box(0.13, wy1 - wy0, 0.05, paint, W / 2 - 0.08, (wy0 + wy1) / 2, 0, pivot);
-    box(0.13, wy1 - wy0, 0.05, paint, -W / 2 + 0.08, (wy0 + wy1) / 2, 0, pivot);
+    const pivot = new T.Group(); pivot.position.set(0, topY, rearZ); g.add(pivot);
+    const dh = topY - doorY0, wy0 = -0.6 * dh, wy1 = -0.1;
+    rbox(W - 0.02, 0.4 * dh, 0.05, 0.015, paint, 0, -0.8 * dh, 0, pivot);
+    rbox(W - 0.02, 0.1, 0.05, 0.015, paint, 0, -0.05, 0, pivot);
+    noShadow(box(W - 0.3, wy1 - wy0, 0.01, glassSide, 0, (wy0 + wy1) / 2, 0, pivot));
+    rbox(0.13, wy1 - wy0, 0.05, 0.015, paint, W / 2 - 0.075, (wy0 + wy1) / 2, 0, pivot);
+    rbox(0.13, wy1 - wy0, 0.05, 0.015, paint, -W / 2 + 0.075, (wy0 + wy1) / 2, 0, pivot);
     doors.push({ pivot, axis: 'x', open: 1.35 });
   }
 
-  // ---- cab interior
-  const Wi = W - 0.14;
+  // --- cab interior
+  const Wi = W - 0.16;
   const seatZ = wsBaseZ - (pop ? 0.82 : 0.95);
-  box(Wi, 0.28, 0.55, trim, 0, bonnetH + 0.06, wsBaseZ - 0.22);
-  box(0.42, 0.02, 0.2, M('#0e1626', { emissive: '#22406a', emissiveIntensity: 0.6 }), 0.15, bonnetH + 0.22, wsBaseZ - 0.42).rotation.x = -0.9;
-  const wheel = add(new T.TorusGeometry(0.19, 0.025, 12, 40), trim, -0.45, bonnetH + 0.1, wsBaseZ - 0.6);
-  wheel.rotation.x = -0.45;
-  const col = box(0.06, 0.06, 0.35, trim, -0.45, bonnetH + 0.02, wsBaseZ - 0.44); col.rotation.x = 0.45;
-  const seat = (x, z, rot) => {
-    const s = new T.Group(); s.position.set(x, 0, z); s.rotation.y = rot; g.add(s);
-    box(0.36, 0.34, 0.36, trim, 0, floorY + 0.17, 0, s);
-    box(0.52, 0.14, 0.52, fabric, 0, floorY + 0.42, 0.02, s);
-    const back = box(0.52, 0.72, 0.12, fabric, 0, floorY + 0.85, -0.24, s); back.rotation.x = -0.14;
-    box(0.3, 0.2, 0.1, fabric, 0, floorY + 1.3, -0.3, s);
+  rbox(Wi, 0.3, 0.6, 0.08, satin, 0, bonnetH + 0.04, wsBaseZ - 0.24);
+  const scr = rbox(0.36, 0.22, 0.03, 0.015, screenM, 0.12, bonnetH + 0.27, wsBaseZ - 0.5); scr.rotation.x = -0.35;
+  const wheel = add(new T.TorusGeometry(0.19, 0.022, 14, 48), plastic, -0.45, bonnetH + 0.1, wsBaseZ - 0.62); wheel.rotation.x = -0.45;
+  rbox(0.12, 0.1, 0.05, 0.03, satin, -0.45, bonnetH + 0.1, wsBaseZ - 0.61).rotation.x = -0.45;
+  const col = box(0.06, 0.06, 0.35, plastic, -0.45, bonnetH + 0.02, wsBaseZ - 0.44); col.rotation.x = 0.45;
+  const seat = (x, z) => {
+    const s = new T.Group(); s.position.set(x, 0, z); g.add(s);
+    box(0.36, 0.34, 0.36, plastic, 0, floorY + 0.17, 0, s);
+    rbox(0.54, 0.15, 0.54, 0.06, fabric, 0, floorY + 0.42, 0.02, s);
+    const back = rbox(0.54, 0.74, 0.14, 0.06, fabric, 0, floorY + 0.86, -0.24, s); back.rotation.x = -0.14;
+    rbox(0.3, 0.2, 0.12, 0.05, fabric, 0, floorY + 1.32, -0.3, s);
   };
-  const swivel = false;
-  seat(-0.45, seatZ, swivel ? Math.PI : 0);
-  seat(0.45, seatZ, swivel ? Math.PI : 0);
+  seat(-0.45, seatZ); seat(0.45, seatZ);
 
-  // ---- living area
+  // --- living area
   const livingFront = seatZ - 0.42;
   const res = { floorY, H, W, L, seatZ, rearZ, livingFront, pop };
-  const lockers = (z0, z1, side) => box(0.36, 0.38, z1 - z0, wood, side * (Wi / 2 - 0.18), H - 0.3, (z0 + z1) / 2);
-  const lamp = (x, z) => { const m = add(new T.CylinderGeometry(0.06, 0.06, 0.015, 16), lampM, x, (pop ? H : H) - 0.085, z); m.castShadow = false; };
-  const pillows = (positions) => positions.forEach((p) => { const m = box(p[3] || 0.55, 0.12, p[4] || 0.38, sheet, p[0], p[1], p[2]); m.rotation.z = 0.02; });
+  const lockers = (z0, z1, side) => {
+    rbox(0.36, 0.38, z1 - z0, 0.02, wood, side * (Wi / 2 - 0.18), topY - 0.24, (z0 + z1) / 2);
+    noShadow(box(0.02, 0.012, z1 - z0 - 0.1, ledM, side * (Wi / 2 - 0.37), topY - 0.43, (z0 + z1) / 2));
+  };
+  const lamp = (x, z) => noShadow(add(new T.CylinderGeometry(0.06, 0.06, 0.012, 20), lampM, x, topY - 0.045, z));
+  const pillows = (list) => list.forEach((p) => rbox(p[3] || 0.55, 0.13, p[4] || 0.38, 0.06, sheet, p[0], p[1], p[2]));
 
   if (c.layout === 'rockroll') {
     const bedW = c.wideBed ? 1.45 : 1.22, bedTop = floorY + 0.46;
-    const z0 = rearZ + 0.12, z1 = rearZ + 1.95;
-    const bx = -Wi / 2 + bedW / 2;
-    box(bedW, bedTop - floorY - 0.14, z1 - z0, fabric, bx, floorY + (bedTop - floorY - 0.14) / 2, (z0 + z1) / 2);
-    box(bedW, 0.14, z1 - z0, sheet, bx, bedTop - 0.07, (z0 + z1) / 2);
-    box(bedW - 0.06, 0.07, (z1 - z0) * 0.62, duvet, bx, bedTop + 0.02, z0 + (z1 - z0) * 0.31);
-    box(bedW - 0.1, 0.04, 0.3, throwM, bx, bedTop + 0.07, z0 + 0.3);
-    pillows([[bx - bedW / 4, bedTop + 0.05, z1 - 0.28, 0.5, 0.34], [bx + bedW / 4, bedTop + 0.05, z1 - 0.28, 0.5, 0.34]]);
-    // side kitchen on the kerb (left, +x)
+    const z0 = rearZ + 0.12, z1 = rearZ + 1.95, bx = -Wi / 2 + bedW / 2;
+    rbox(bedW, bedTop - floorY - 0.14, z1 - z0, 0.03, fabric, bx, floorY + (bedTop - floorY - 0.14) / 2, (z0 + z1) / 2);
+    rbox(bedW, 0.15, z1 - z0, 0.06, sheet, bx, bedTop - 0.075, (z0 + z1) / 2);
+    rbox(bedW - 0.04, 0.08, (z1 - z0) * 0.62, 0.04, duvet, bx, bedTop + 0.02, z0 + (z1 - z0) * 0.31);
+    rbox(bedW - 0.08, 0.05, 0.32, 0.025, throwM, bx, bedTop + 0.075, z0 + 0.3);
+    pillows([[bx - bedW / 4, bedTop + 0.06, z1 - 0.28, 0.5, 0.34], [bx + bedW / 4, bedTop + 0.06, z1 - 0.28, 0.5, 0.34]]);
     const kx = Wi / 2 - 0.22, kz0 = Math.max(livingFront - 1.35, z1 + 0.02), kz1 = livingFront;
-    box(0.44, 0.84, kz1 - kz0, wood, kx, floorY + 0.42, (kz0 + kz1) / 2);
-    box(0.46, 0.03, kz1 - kz0 + 0.02, worktop, kx, floorY + 0.855, (kz0 + kz1) / 2);
-    box(0.3, 0.02, 0.36, steel, kx, floorY + 0.875, kz0 + 0.35);
-    [0, 1].forEach((i) => add(new T.CylinderGeometry(0.08, 0.08, 0.015, 20), trim, kx, floorY + 0.88, kz1 - 0.25 - i * 0.24));
-    box(0.32, 0.3, kz1 - kz0, wood, Wi / 2 - 0.16, H - 0.25, (kz0 + kz1) / 2);
+    rbox(0.44, 0.84, kz1 - kz0, 0.015, wood, kx, floorY + 0.42, (kz0 + kz1) / 2);
+    rbox(0.46, 0.03, kz1 - kz0 + 0.02, 0.008, worktop, kx, floorY + 0.855, (kz0 + kz1) / 2);
+    rbox(0.3, 0.02, 0.36, 0.008, steel, kx, floorY + 0.875, kz0 + 0.35);
+    [0, 1].forEach((i) => add(new T.CylinderGeometry(0.08, 0.08, 0.012, 24), plastic, kx, floorY + 0.878, kz1 - 0.25 - i * 0.24));
+    rbox(0.32, 0.3, kz1 - kz0, 0.02, wood, Wi / 2 - 0.16, topY - 0.22, (kz0 + kz1) / 2);
     Object.assign(res, {
-      bed: { pos: [bx, bedTop + 0.38, z1 - 0.35], yaw: Math.PI },
-      living: { pos: [-0.25, floorY + 1.45, livingFront - 0.25], yaw: Math.PI * 0.82, pitch: -0.22 }
+      bed: { pos: [bx, bedTop + 0.38, z1 - 0.35], yaw: Math.PI, pitch: -0.1 },
+      living: { pos: [-0.2, floorY + 1.22, livingFront - 0.2], yaw: Math.PI * 0.82, pitch: -0.2 }
     });
   } else {
     const garage = c.layout === 'northsouth' ? 0.72 : 0.92;
@@ -578,58 +662,154 @@ function buildVan(T, c) {
     let bedFront, bedPos;
     if (c.layout === 'northsouth') {
       const bw = 1.38, bl = 1.95, bx = Wi / 2 - bw / 2, z0 = rearZ + 0.08, z1 = z0 + bl;
-      box(bw, garage, bl, wood, bx, floorY + garage / 2, (z0 + z1) / 2);
-      box(bw, 0.18, bl, sheet, bx, bedTop - 0.09, (z0 + z1) / 2);
-      box(bw - 0.06, 0.08, bl * 0.66, duvet, bx, bedTop + 0.03, z0 + bl * 0.33);
-      box(bw - 0.1, 0.04, 0.32, throwM, bx, bedTop + 0.08, z0 + 0.35);
-      pillows([[bx - 0.32, bedTop + 0.05, z1 - 0.25], [bx + 0.32, bedTop + 0.05, z1 - 0.25]]);
-      box(0.45, 0.72, 0.55, wood, -Wi / 2 + 0.23, floorY + 0.36, z0 + 0.3);
+      rbox(bw, garage, bl, 0.015, wood, bx, floorY + garage / 2, (z0 + z1) / 2);
+      rbox(bw, 0.19, bl, 0.07, sheet, bx, bedTop - 0.09, (z0 + z1) / 2);
+      rbox(bw - 0.04, 0.09, bl * 0.66, 0.045, duvet, bx, bedTop + 0.03, z0 + bl * 0.33);
+      rbox(bw - 0.08, 0.05, 0.34, 0.025, throwM, bx, bedTop + 0.085, z0 + 0.35);
+      pillows([[bx - 0.32, bedTop + 0.06, z1 - 0.25], [bx + 0.32, bedTop + 0.06, z1 - 0.25]]);
+      rbox(0.45, 0.72, 0.55, 0.015, wood, -Wi / 2 + 0.23, floorY + 0.36, z0 + 0.3);
       bedFront = z1; bedPos = { pos: [bx, bedTop + 0.42, z1 - 0.3], yaw: Math.PI, pitch: -0.12 };
     } else {
       const d = c.bedDepth || 1.4, z0 = rearZ + 0.08, z1 = z0 + d;
-      box(Wi, garage, d, wood, 0, floorY + garage / 2, (z0 + z1) / 2);
-      box(Wi, 0.18, d, sheet, 0, bedTop - 0.09, (z0 + z1) / 2);
-      box(Wi - 0.6, 0.08, d - 0.08, duvet, 0.27, bedTop + 0.03, (z0 + z1) / 2);
-      box(0.3, 0.04, d - 0.1, throwM, Wi / 2 - 0.25, bedTop + 0.08, (z0 + z1) / 2);
+      rbox(Wi, garage, d, 0.015, wood, 0, floorY + garage / 2, (z0 + z1) / 2);
+      rbox(Wi, 0.19, d, 0.07, sheet, 0, bedTop - 0.09, (z0 + z1) / 2);
+      rbox(Wi - 0.6, 0.09, d - 0.06, 0.045, duvet, 0.27, bedTop + 0.03, (z0 + z1) / 2);
+      rbox(0.32, 0.05, d - 0.1, 0.025, throwM, Wi / 2 - 0.25, bedTop + 0.085, (z0 + z1) / 2);
       const px = -Wi / 2 + 0.3;
-      pillows([[px, bedTop + 0.05, z0 + d * 0.28, 0.38, 0.55], [px, bedTop + 0.05, z0 + d * 0.72, 0.38, 0.55]]);
+      pillows([[px, bedTop + 0.06, z0 + d * 0.28, 0.38, 0.55], [px, bedTop + 0.06, z0 + d * 0.72, 0.38, 0.55]]);
       bedFront = z1; bedPos = { pos: [-0.35, bedTop + 0.4, z1 - 0.1], yaw: Math.PI * 0.94, pitch: -0.14 };
     }
-    // kitchen and bathroom just ahead of the bed
     const kSide = c.layout === 'northsouth' ? -1 : 1;
-    const kz0 = bedFront + 0.04, kz1 = Math.min(kz0 + 1.25, livingFront - (c.dinette ? 0.9 : 0.1));
+    const kz0 = bedFront + 0.04, kz1 = Math.min(kz0 + 1.25, livingFront - (c.dinette ? 1.25 : 0.1));
     const kx = kSide * (Wi / 2 - 0.28);
-    box(0.56, 0.9, kz1 - kz0, wood, kx, floorY + 0.45, (kz0 + kz1) / 2);
-    box(0.58, 0.035, kz1 - kz0 + 0.02, worktop, kx, floorY + 0.915, (kz0 + kz1) / 2);
-    box(0.34, 0.02, 0.4, steel, kx, floorY + 0.94, kz0 + 0.3);
-    add(new T.CylinderGeometry(0.015, 0.015, 0.28, 8), steel, kx + kSide * 0.18, floorY + 1.06, kz0 + 0.3);
-    [0, 1].forEach((i) => add(new T.CylinderGeometry(0.085, 0.085, 0.015, 20), trim, kx, floorY + 0.94, kz1 - 0.24 - i * 0.26));
-    box(0.02, 0.5, 0.48, M('#9aa0a8', { roughness: 0.3, metalness: 0.5 }), kx - kSide * 0.29, floorY + 0.3, (kz0 + kz1) / 2);
+    rbox(0.56, 0.9, kz1 - kz0, 0.015, wood, kx, floorY + 0.45, (kz0 + kz1) / 2);
+    rbox(0.58, 0.035, kz1 - kz0 + 0.02, 0.01, worktop, kx, floorY + 0.915, (kz0 + kz1) / 2);
+    rbox(0.34, 0.02, 0.4, 0.008, steel, kx, floorY + 0.94, kz0 + 0.3);
+    const tap = add(new T.TorusGeometry(0.1, 0.012, 8, 24, Math.PI), steel, kx + kSide * 0.18, floorY + 0.94, kz0 + 0.3); tap.rotation.y = Math.PI / 2;
+    [0, 1].forEach((i) => add(new T.CylinderGeometry(0.085, 0.085, 0.012, 24), plastic, kx, floorY + 0.94, kz1 - 0.24 - i * 0.26));
+    rbox(0.02, 0.5, 0.48, 0.008, steel, kx - kSide * 0.29, floorY + 0.3, (kz0 + kz1) / 2);
     if (c.bath) {
-      const bs = -kSide, bz0 = kz0, bz1 = kz0 + 0.9, bh = H - floorY - 0.1, bx = bs * (Wi / 2 - 0.42);
-      box(0.84, bh, bz1 - bz0, white, bx, floorY + bh / 2, (bz0 + bz1) / 2);
-      box(0.012, bh - 0.25, 0.62, M('#e7e5e0', { roughness: 0.6 }), bx - bs * 0.425, floorY + (bh - 0.25) / 2 + 0.08, (bz0 + bz1) / 2);
-      box(0.03, 0.14, 0.03, steel, bx - bs * 0.44, floorY + 1.0, bz0 + 0.18);
+      const bs = -kSide, bz0 = kz0, bz1 = kz0 + 0.9, bh = topY - floorY - 0.06, bx = bs * (Wi / 2 - 0.42);
+      rbox(0.84, bh, bz1 - bz0, 0.02, white, bx, floorY + bh / 2, (bz0 + bz1) / 2);
+      noShadow(rbox(0.012, bh - 0.25, 0.62, 0.006, S({ color: '#e7e3dc', roughness: 0.5 }), bx - bs * 0.425, floorY + (bh - 0.25) / 2 + 0.08, (bz0 + bz1) / 2));
+      rbox(0.03, 0.14, 0.03, 0.01, steel, bx - bs * 0.44, floorY + 1.0, bz0 + 0.18);
     }
     if (c.dinette) {
       const tz = livingFront - 0.5;
-      box(0.62, 0.035, 0.75, wood, 0.42, floorY + 0.72, tz);
-      box(0.06, 0.7, 0.06, steel, 0.42, floorY + 0.36, tz);
-      box(0.9, 0.42, 0.45, fabric, 0.45, floorY + 0.21, tz - 0.62);
-      const bb = box(0.9, 0.55, 0.12, fabric, 0.45, floorY + 0.68, tz - 0.8); bb.rotation.x = 0.1;
+      rbox(0.62, 0.035, 0.75, 0.012, wood, 0.42, floorY + 0.72, tz);
+      add(new T.CylinderGeometry(0.03, 0.03, 0.7, 12), steel, 0.42, floorY + 0.36, tz);
+      rbox(0.9, 0.42, 0.45, 0.05, fabric, 0.45, floorY + 0.21, tz - 0.62);
+      const bb = rbox(0.9, 0.55, 0.12, 0.05, fabric, 0.45, floorY + 0.68, tz - 0.8); bb.rotation.x = 0.1;
     }
     lockers(rearZ + 0.1, kz1, 1); lockers(rearZ + 0.1, kz1, -1);
     lamp(0, rearZ + 0.9); lamp(0, (kz0 + kz1) / 2); lamp(0, livingFront - 0.4);
-    Object.assign(res, {
-      bed: bedPos,
-      living: { pos: [-0.05, floorY + 1.6, livingFront - 0.15], yaw: Math.PI, pitch: -0.2 }
-    });
+    Object.assign(res, { bed: bedPos, living: { pos: [-0.05, floorY + 1.6, livingFront - 0.15], yaw: Math.PI, pitch: -0.2 } });
   }
   res.driver = { pos: [-0.45, floorY + 1.16, seatZ - 0.24], yaw: 0, pitch: -0.06 };
   res.passenger = { pos: [0.45, floorY + 1.16, seatZ - 0.24], yaw: 0.35, pitch: -0.06 };
-  res.lights = [[0, H - 0.25, rearZ + 1.0], [0, H - 0.25, livingFront - 0.6]];
-  res.group = g; res.doors = doors; res.mats = mats; res.wheels = wheels;
+  res.lights = [[0, topY - 0.25, rearZ + 1.0], [0, topY - 0.25, livingFront - 0.6]];
+  res.group = g; res.doors = doors; res.mats = mats; res.texs = texs; res.wheels = wheels;
   return res;
+}
+
+// ---------- the world: sky, mountains, loch, hills, road
+function buildWorld(T, renderer) {
+  const world = new T.Group(), disposables = [];
+  const sunDir = new T.Vector3(SKY.sun[0], SKY.sun[1], SKY.sun[2]).normalize();
+  const skyMat = new T.ShaderMaterial({
+    side: T.BackSide, depthWrite: false, fog: false,
+    uniforms: { top: { value: new T.Color(SKY.top) }, horizon: { value: new T.Color(SKY.horizon) }, bottom: { value: new T.Color(SKY.bottom) }, sunDir: { value: sunDir } },
+    vertexShader: 'varying vec3 vDir; void main(){ vDir = normalize(position); vec4 p = modelViewMatrix * vec4(position,1.0); gl_Position = projectionMatrix * p; }',
+    fragmentShader: 'uniform vec3 top; uniform vec3 horizon; uniform vec3 bottom; uniform vec3 sunDir; varying vec3 vDir;' +
+      'void main(){ float h = vDir.y; vec3 c = h > 0.0 ? mix(horizon, top, pow(clamp(h,0.0,1.0), 0.55)) : mix(horizon, bottom, pow(clamp(-h,0.0,1.0), 0.4));' +
+      'float s = max(dot(normalize(vDir), sunDir), 0.0); c += vec3(1.0,0.86,0.62) * (pow(s, 900.0) * 6.0 + pow(s, 24.0) * 0.35 + pow(s, 4.0) * 0.08);' +
+      'float cl = 0.0; vec2 q = vDir.xz / max(h, 0.06) * 0.6; cl = smoothstep(0.55, 0.85, 0.5 + 0.5 * sin(q.x * 2.1 + sin(q.y * 1.3)) * sin(q.y * 1.7 + sin(q.x * 0.9)));' +
+      'c = mix(c, vec3(1.0,0.97,0.93), cl * 0.35 * smoothstep(0.02, 0.25, h));' +
+      'gl_FragColor = vec4(c, 1.0);\n#include <tonemapping_fragment>\n#include <colorspace_fragment>\n}'
+  });
+  const sky = new T.Mesh(new T.SphereGeometry(900, 48, 24), skyMat); world.add(sky); disposables.push(sky.geometry, skyMat);
+
+  // environment lighting from the sky
+  const pm = new T.PMREMGenerator(renderer);
+  const envScene = new T.Scene(); const envSky = new T.Mesh(new T.SphereGeometry(100, 32, 16), skyMat); envScene.add(envSky);
+  const env = pm.fromScene(envScene, 0.035).texture; pm.dispose(); envSky.geometry.dispose();
+
+  // terrain height
+  const heightAt = (x, z) => {
+    const ax = Math.abs(x);
+    let h = 0;
+    if (x < 0) h = Math.max(0, (ax - 9) / 40) * 6 * fbm(x * 0.012 + 3, z * 0.012, 4) * Math.min(1, (ax - 9) / 30 + 0.2);
+    else { const lochEdge = Math.min(1, Math.max(0, (x - 9) / 6)); h = -0.9 * lochEdge + Math.max(0, (x - 190) / 60) * 26 * fbm(x * 0.01, z * 0.01 + 7, 4); }
+    if (ax < 8) h *= 0; return h;
+  };
+  const gGeo = new T.PlaneGeometry(1000, 1000, 200, 200); gGeo.rotateX(-Math.PI / 2);
+  const pos = gGeo.attributes.position, cols = [], col = new T.Color();
+  const grassA = new T.Color('#4c6634'), grassB = new T.Color('#6f7a3c'), heather = new T.Color('#6f5446'), verge = new T.Color('#7e7a5e'), rock = new T.Color('#7b7a74');
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i), z = pos.getZ(i), h = heightAt(x, z); pos.setY(i, h);
+    const n = fbm(x * 0.05, z * 0.05, 3), m = fbm(x * 0.008 + 11, z * 0.008, 3);
+    col.copy(grassA).lerp(grassB, n).lerp(heather, Math.max(0, m - 0.45) * 1.6);
+    if (h > 9) col.lerp(rock, Math.min(1, (h - 9) / 10));
+    if (Math.abs(x) < 6.5) col.lerp(verge, 0.55);
+    cols.push(col.r, col.g, col.b);
+  }
+  gGeo.setAttribute('color', new T.Float32BufferAttribute(cols, 3)); gGeo.computeVertexNormals();
+  const groundMat = new T.MeshStandardMaterial({ vertexColors: true, roughness: 1 });
+  const ground = new T.Mesh(gGeo, groundMat); ground.receiveShadow = true; world.add(ground); disposables.push(gGeo, groundMat);
+
+  // loch
+  const waterMat = new T.MeshPhysicalMaterial({ color: '#27455a', roughness: 0.06, metalness: 0.1, clearcoat: 1, clearcoatRoughness: 0.1, envMapIntensity: 1.3 });
+  const water = new T.Mesh(new T.PlaneGeometry(400, 1000), waterMat); water.rotation.x = -Math.PI / 2; water.position.set(14 + 200, -0.25, 0); world.add(water); disposables.push(water.geometry, waterMat);
+
+  // mountain ridges
+  const ridge = (radius, base, amp, seed, cA, cB, snow) => {
+    const segs = 360, p = [], cl = [], idx = [], ca = new T.Color(cA), cb = new T.Color(cB), sn = new T.Color('#eef0f3'), tmp = new T.Color();
+    for (let i = 0; i <= segs; i++) {
+      const a = (i / segs) * Math.PI * 2;
+      let n = 0; [2, 3, 5, 7, 11, 17, 29].forEach((f, k) => { n += Math.sin(a * f + seed * (k + 1)) / (k * 0.9 + 1); });
+      const hgt = base + amp * (0.5 + 0.35 * n) * (0.75 + 0.25 * Math.sin(a * 1 + seed));
+      const x = Math.cos(a) * radius, z = Math.sin(a) * radius;
+      p.push(x, -10, z, x, Math.max(base * 0.4, hgt), z);
+      cl.push(ca.r, ca.g, ca.b);
+      tmp.copy(cb); if (snow && hgt > base + amp * 0.85) tmp.lerp(sn, 0.7); cl.push(tmp.r, tmp.g, tmp.b);
+      if (i < segs) { const j = i * 2; idx.push(j, j + 1, j + 2, j + 1, j + 3, j + 2); }
+    }
+    const geo = new T.BufferGeometry(); geo.setAttribute('position', new T.Float32BufferAttribute(p, 3)); geo.setAttribute('color', new T.Float32BufferAttribute(cl, 3)); geo.setIndex(idx); geo.computeVertexNormals();
+    const mat = new T.MeshStandardMaterial({ vertexColors: true, roughness: 1, side: T.DoubleSide, flatShading: true });
+    const m = new T.Mesh(geo, mat); world.add(m); disposables.push(geo, mat);
+  };
+  ridge(330, 30, 70, 1.3, '#2f3b2e', '#4a5446', false);
+  ridge(460, 50, 110, 4.1, '#4b5468', '#6c7488', true);
+  ridge(600, 70, 150, 7.7, '#7d86a0', '#a3aac0', true);
+
+  // pines
+  const coneG = new T.ConeGeometry(1.4, 5.5, 7), trunkG = new T.CylinderGeometry(0.18, 0.22, 1.4, 6);
+  coneG.translate(0, 4, 0); trunkG.translate(0, 0.7, 0);
+  const pineM = new T.MeshStandardMaterial({ color: '#2b3d2a', roughness: 1, flatShading: true }), trunkM = new T.MeshStandardMaterial({ color: '#4a3a2c', roughness: 1 });
+  const N = 420, cones = new T.InstancedMesh(coneG, pineM, N), trunks = new T.InstancedMesh(trunkG, trunkM, N), mtx = new T.Matrix4(), q = new T.Quaternion(), sc = new T.Vector3(), pp = new T.Vector3();
+  for (let i = 0; i < N; i++) {
+    let x, z, tries = 0;
+    do { x = -18 - Math.pow(hash2(i, 1), 1.6) * 220; z = (hash2(i, 2) - 0.5) * 700; tries++; } while (fbm(x * 0.02, z * 0.02, 2) < 0.42 && tries < 6);
+    const s = 0.7 + hash2(i, 3) * 0.9; sc.set(s, s * (0.9 + hash2(i, 4) * 0.4), s); pp.set(x, heightAt(x, z), z);
+    q.setFromAxisAngle(new T.Vector3(0, 1, 0), hash2(i, 5) * 6.28); mtx.compose(pp, q, sc); cones.setMatrixAt(i, mtx); trunks.setMatrixAt(i, mtx);
+  }
+  cones.castShadow = false; world.add(cones, trunks); disposables.push(coneG, trunkG, pineM, trunkM);
+
+  // road
+  const asphalt = dataTex(T, 256, (u, v) => { const n = fbm(u * 40, v * 40, 3), sp = hash2(Math.floor(u * 256), Math.floor(v * 256)) > 0.93 ? 18 : 0; const k = 58 + n * 22 + sp; return [k, k, k + 3]; }, 3, 140);
+  const roadMat = new T.MeshStandardMaterial({ color: '#ffffff', map: asphalt, roughness: 0.9 });
+  const road = new T.Mesh(new T.PlaneGeometry(6.6, 1000), roadMat); road.rotation.x = -Math.PI / 2; road.position.y = 0.012; road.receiveShadow = true; world.add(road);
+  const lineMat = new T.MeshStandardMaterial({ color: '#efece2', roughness: 0.6 });
+  [-1, 1].forEach((s) => { const l = new T.Mesh(new T.PlaneGeometry(0.12, 1000), lineMat); l.rotation.x = -Math.PI / 2; l.position.set(s * 3.05, 0.016, 0); l.receiveShadow = true; world.add(l); });
+  const dashes = new T.Group(); world.add(dashes);
+  const dashG = new T.PlaneGeometry(0.12, 3);
+  for (let z = -300; z <= 300; z += 9) { const d = new T.Mesh(dashG, lineMat); d.rotation.x = -Math.PI / 2; d.position.set(0, 0.017, z); d.receiveShadow = true; dashes.add(d); }
+  const posts = new T.Group(); world.add(posts);
+  const postG = new T.BoxGeometry(0.1, 1.0, 0.1), postM = new T.MeshStandardMaterial({ color: '#f1efe8', roughness: 0.6 }), refG = new T.BoxGeometry(0.105, 0.12, 0.105), refM = new T.MeshStandardMaterial({ color: '#c41e30', emissive: '#5a0010', emissiveIntensity: 0.6 });
+  for (let z = -300; z <= 300; z += 24) [-1, 1].forEach((s) => { const pz = z + (s > 0 ? 12 : 0); const p = new T.Mesh(postG, postM); p.position.set(s * 4.4, 0.5, pz); p.castShadow = true; posts.add(p); const r = new T.Mesh(refG, refM); r.position.set(s * 4.4, 0.85, pz); posts.add(r); });
+  disposables.push(asphalt, roadMat, road.geometry, lineMat, dashG, postG, postM, refG, refM);
+
+  return { world, env, dashes, posts, sunDir, disposables, fogColor: SKY.horizon };
 }
 
 class Component extends DCLogic {
@@ -637,15 +817,15 @@ class Component extends DCLogic {
     super(props);
     const hero = props.hero === 'true' || props.hero === true;
     this.hero = hero;
-    this.state = { van: props.van || 'man-lwb-auto', view: hero ? 'drive' : 'outside', scenery: 'highlands', noGL: false };
+    this.state = { van: props.van || 'man-lwb-auto', view: hero ? 'drive' : 'outside', noGL: false };
     this.canvasRef = (el) => this.mount(el);
+    this.sectionRef = (el) => { if (el) this.sectionEl = el; };
     this.v = null;
   }
   componentDidUpdate(prevProps, prevState) {
     if (this.props.van && this.props.van !== prevProps.van && this.props.van !== this.state.van) this.setState({ van: this.props.van });
     if (!this.v) return;
     if (prevState.van !== this.state.van) this.loadVan(this.state.van);
-    if (prevState.scenery !== this.state.scenery) this.loadScenery(this.state.scenery);
     if (prevState.view !== this.state.view) this.setView(this.state.view);
   }
   componentWillUnmount() { this.destroy(); }
@@ -655,50 +835,42 @@ class Component extends DCLogic {
     const T = window.THREE;
     if (!T) { this.setState({ noGL: true }); return; }
     let renderer;
-    try { renderer = new T.WebGLRenderer({ canvas: el, antialias: true }); } catch (e) { this.setState({ noGL: true }); return; }
+    try { renderer = new T.WebGLRenderer({ canvas: el, antialias: true, powerPreference: 'high-performance' }); } catch (e) { this.setState({ noGL: true }); return; }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    renderer.useLegacyLights = true;
     renderer.outputColorSpace = T.SRGBColorSpace;
     renderer.toneMapping = T.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.05;
+    renderer.toneMappingExposure = 0.95;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = T.PCFSoftShadowMap;
 
     const scene = new T.Scene();
-    const camera = new T.PerspectiveCamera(45, 16 / 9, 0.03, 400);
-    scene.add(new T.HemisphereLight(0xffffff, 0x5a5440, 0.95));
-    scene.add(new T.AmbientLight(0xffffff, 0.12));
-    const sun = new T.DirectionalLight(0xfff0dc, 1.25);
-    sun.position.set(7, 12, 9); sun.castShadow = true;
+    const camera = new T.PerspectiveCamera(45, 16 / 9, 0.03, 2000);
+    const W = buildWorld(T, renderer);
+    scene.add(W.world);
+    scene.environment = W.env;
+    scene.fog = new T.Fog(W.fogColor, 120, 900);
+    scene.background = new T.Color(W.fogColor);
+    scene.add(new T.HemisphereLight(0xdfe8ff, 0x5d5638, 0.6));
+    const sun = new T.DirectionalLight(0xffe2bf, 3.2);
+    sun.position.copy(W.sunDir).multiplyScalar(30); sun.castShadow = true;
     sun.shadow.mapSize.set(2048, 2048);
-    Object.assign(sun.shadow.camera, { left: -7, right: 7, top: 7, bottom: -7, near: 1, far: 40 });
-    sun.shadow.bias = -0.0004;
+    Object.assign(sun.shadow.camera, { left: -8, right: 8, top: 8, bottom: -8, near: 5, far: 70 });
+    sun.shadow.bias = -0.0003; sun.shadow.normalBias = 0.02; sun.shadow.radius = 4;
     scene.add(sun);
-    const inner = [new T.PointLight(0xffe6c4, 0.75, 4.5, 1), new T.PointLight(0xffe6c4, 0.75, 4.5, 1)];
+    const inner = [new T.PointLight(0xffd9a8, 2.2, 5, 2), new T.PointLight(0xffd9a8, 2.2, 5, 2)];
     inner.forEach((l) => scene.add(l));
-
-    const R = 58, PH = 44;
-    const panoMat = new T.MeshBasicMaterial({ side: T.BackSide, color: 0xffffff });
-    const pano = new T.Mesh(new T.CylinderGeometry(R, R, PH, 96, 1, true), panoMat);
-    pano.position.y = PH / 2 - 3.5; scene.add(pano);
-    const groundMat = new T.MeshStandardMaterial({ color: '#55603f', roughness: 1 });
-    const ground = new T.Mesh(new T.CircleGeometry(R + 1, 64), groundMat);
-    ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
-    const road = new T.Group();
-    const roadMat = new T.MeshStandardMaterial({ color: '#3a3b3f', roughness: 0.95 });
-    const r = new T.Mesh(new T.PlaneGeometry(4.2, 2 * R), roadMat); r.rotation.x = -Math.PI / 2; r.position.y = 0.004; r.receiveShadow = true; road.add(r);
-    const dashMat = new T.MeshStandardMaterial({ color: '#e9e6dc', roughness: 0.8 });
-    const dashes = new T.Group(); road.add(dashes);
-    for (let z = -R + 2; z < R; z += 5) { const d = new T.Mesh(new T.PlaneGeometry(0.12, 2), dashMat); d.rotation.x = -Math.PI / 2; d.position.set(0, 0.006, z); dashes.add(d); }
-    scene.add(road);
+    // soft contact shadow under the van
+    const csTex = dataTex(T, 128, (u, v) => { const dx = (u - 0.5) * 2, dy = (v - 0.5) * 2, r = Math.sqrt(dx * dx * 0.9 + dy * dy * 0.9); const a = Math.pow(Math.max(0, 1 - r), 1.6) * 0.75; return [0, 0, 0, Math.round(a * 255)]; }, 1, 1);
+    csTex.colorSpace = T.NoColorSpace;
+    const cs = new T.Mesh(new T.PlaneGeometry(1, 1), new T.MeshBasicMaterial({ map: csTex, transparent: true, depthWrite: false }));
+    cs.rotation.x = -Math.PI / 2; cs.position.y = 0.02; cs.renderOrder = 1; scene.add(cs);
 
     this.v = {
-      T, canvas: el, renderer, scene, camera, sun, inner, panoMat, groundMat, road, dashes, van: null, textures: {}, offX: 0, offY: 0,
+      T, canvas: el, renderer, scene, camera, sun, inner, worldParts: W, contact: cs, van: null, offX: 0, offY: 0,
       mode: 'outside', theta: 0.85, phi: 1.22, radius: 11, yaw: 0, pitch: 0, fov: 45,
       look: new T.Vector3(0, 1.2, 0), lastInteract: 0, doorT: 0, running: true, raf: 0, last: performance.now(), pointers: new Map()
     };
     this.bindInput(el);
-    this.loadScenery(this.state.scenery);
     this.loadVan(this.state.van);
     this.setView(this.state.view, true);
     this.resize();
@@ -713,7 +885,8 @@ class Component extends DCLogic {
     cancelAnimationFrame(v.raf); v.running = false;
     if (this.ro) this.ro.disconnect(); if (this.io) this.io.disconnect();
     this.disposeVan();
-    Object.values(v.textures).forEach((t) => t.dispose());
+    v.worldParts.disposables.forEach((d) => d.dispose && d.dispose());
+    if (v.worldParts.env) v.worldParts.env.dispose();
     v.renderer.dispose();
     this.v = null;
   }
@@ -723,6 +896,7 @@ class Component extends DCLogic {
     v.scene.remove(v.van.group);
     v.van.group.traverse((o) => { if (o.geometry) o.geometry.dispose(); });
     v.van.mats.forEach((m) => m.dispose());
+    v.van.texs.forEach((t) => t.dispose());
     v.van = null;
   }
 
@@ -732,38 +906,17 @@ class Component extends DCLogic {
     v.van = buildVan(v.T, VAN_SPECS[id] || VAN_SPECS['man-lwb-auto']);
     v.scene.add(v.van.group);
     v.van.lights.forEach((p, i) => v.inner[i].position.set(p[0], p[1], p[2]));
+    v.contact.scale.set(v.van.W + 1.1, v.van.L + 1.6, 1);
     v.doorT = 0;
     this.setView(this.state.view, true);
-  }
-
-  loadScenery(key) {
-    const v = this.v; if (!v) return;
-    const s = SCENERY[key] || SCENERY.highlands, T = v.T;
-    v.groundMat.color.set(s.ground);
-    v.scene.background = new T.Color(s.sky);
-    v.road.visible = !!s.road;
-    const apply = (tex) => { v.panoMat.map = tex; v.panoMat.needsUpdate = true; };
-    if (v.textures[key]) { apply(v.textures[key]); return; }
-    new T.TextureLoader().load(s.img, (tex) => {
-      tex.colorSpace = T.SRGBColorSpace; tex.wrapS = T.MirroredRepeatWrapping; tex.repeat.set(4, 1);
-      tex.anisotropy = Math.min(8, v.renderer.capabilities.getMaxAnisotropy());
-      if (!this.v) { tex.dispose(); return; }
-      v.textures[key] = tex;
-      if (this.state.scenery === key) apply(tex);
-    });
   }
 
   setView(mode, snap) {
     const v = this.v; if (!v || !v.van) return;
     v.mode = mode;
-    if (mode === 'outside') {
-      v.radius = v.van.L * 1.25 + 3; v.phi = 1.25; v.fov = 42;
-    } else if (mode === 'drive') {
-      v.fov = 30;
-    } else {
-      const p = v.van[mode]; if (!p) return;
-      v.yaw = p.yaw || 0; v.pitch = p.pitch || 0; v.fov = 72;
-    }
+    if (mode === 'outside') { v.radius = v.van.L * 1.25 + 3; v.phi = 1.3; v.fov = 40; }
+    else if (mode === 'drive') { v.fov = 26; }
+    else { const p = v.van[mode]; if (!p) return; v.yaw = p.yaw || 0; v.pitch = p.pitch || 0; v.fov = 72; }
     if (snap) { const t = this.target(); v.camera.position.copy(t.pos); v.look.copy(t.look); v.camera.fov = v.fov; const o = this.offsetTarget(); v.offX = o[0]; v.offY = o[1]; v.camera.updateProjectionMatrix(); }
   }
 
@@ -772,11 +925,11 @@ class Component extends DCLogic {
     if (v.mode === 'outside') {
       const c = new T.Vector3(0, v.van.H * 0.45, 0);
       const pos = new T.Vector3(c.x + v.radius * Math.sin(v.phi) * Math.sin(v.theta), c.y + v.radius * Math.cos(v.phi), c.z + v.radius * Math.sin(v.phi) * Math.cos(v.theta));
-      if (pos.y < 0.4) pos.y = 0.4;
+      if (pos.y < 0.5) pos.y = 0.5;
       return { pos, look: c };
     }
     if (v.mode === 'drive') {
-      const c = new T.Vector3(0, v.van.H * 0.42, 0.2), th = 0.92, el = 0.1, d = v.van.L * 1.55 + 4.5;
+      const c = new T.Vector3(0, v.van.H * 0.4, 0.15), th = 0.9, el = 0.075, d = v.van.L * 1.9 + 6;
       return { pos: new T.Vector3(c.x + d * Math.sin(th) * Math.cos(el), c.y + d * Math.sin(el), c.z + d * Math.cos(th) * Math.cos(el)), look: c };
     }
     const p = v.van[v.mode].pos;
@@ -789,7 +942,7 @@ class Component extends DCLogic {
     const v = this.v;
     if (!v || v.mode !== 'drive' || !this.hero) return [0, 0];
     const w = v.canvas.clientWidth || 800, h = v.canvas.clientHeight || 450;
-    return w / h > 1.15 ? [-0.2, 0.04] : [0, 0.2];
+    return w / h > 1.15 ? [-0.2, 0.05] : [0, 0.2];
   }
 
   bindInput(el) {
@@ -839,27 +992,26 @@ class Component extends DCLogic {
     v.raf = requestAnimationFrame(() => this.tick());
     const now = performance.now(), dt = Math.min(0.05, (now - v.last) / 1000); v.last = now;
     if (!v.van) return;
-    const t0 = now / 1000, driving = v.mode === 'drive';
-    const ease = 1 - Math.exp(-dt * 4);
-    const g = v.van.group;
+    const t0 = now / 1000, driving = v.mode === 'drive', ease = 1 - Math.exp(-dt * 4), g = v.van.group;
     if (driving) {
-      g.position.y = 0.014 * Math.sin(t0 * 8.3) + 0.007 * Math.sin(t0 * 13.7 + 1.3);
-      g.rotation.x = 0.0045 * Math.sin(t0 * 6.1);
-      g.rotation.z = 0.003 * Math.sin(t0 * 4.7 + 0.5);
-      v.van.wheels.forEach((w) => { w.rotation.x += dt * 9; });
-      v.dashes.position.z = -((t0 * 8) % 5);
+      g.position.y = 0.012 * Math.sin(t0 * 8.3) + 0.006 * Math.sin(t0 * 13.7 + 1.3);
+      g.rotation.x = 0.004 * Math.sin(t0 * 6.1);
+      g.rotation.z = 0.0028 * Math.sin(t0 * 4.7 + 0.5);
+      v.van.wheels.forEach((w) => { w.rotation.x += dt * 24; });
+      v.worldParts.dashes.position.z = -((t0 * 9) % 9);
+      v.worldParts.posts.position.z = -((t0 * 9) % 24);
     } else {
       g.position.y += (0 - g.position.y) * ease; g.rotation.x += (0 - g.rotation.x) * ease; g.rotation.z += (0 - g.rotation.z) * ease;
     }
+    const tg = this.target(), k = 1 - Math.exp(-dt * 4.5);
+    v.camera.position.lerp(tg.pos, k);
+    v.look.lerp(tg.look, k);
+    v.camera.lookAt(v.look);
+    if (Math.abs(v.camera.fov - v.fov) > 0.05) { v.camera.fov += (v.fov - v.camera.fov) * k; v.camera.updateProjectionMatrix(); }
     const ot = this.offsetTarget();
     v.offX += (ot[0] - v.offX) * ease; v.offY += (ot[1] - v.offY) * ease;
     const cw = v.canvas.clientWidth || 800, chh = v.canvas.clientHeight || 450;
     if (Math.abs(v.offX) > 0.001 || Math.abs(v.offY) > 0.001) v.camera.setViewOffset(cw, chh, v.offX * cw, v.offY * chh, cw, chh); else v.camera.clearViewOffset();
-    const t = this.target(), k = 1 - Math.exp(-dt * 5);
-    v.camera.position.lerp(t.pos, k);
-    v.look.lerp(t.look, k);
-    v.camera.lookAt(v.look);
-    if (Math.abs(v.camera.fov - v.fov) > 0.05) { v.camera.fov += (v.fov - v.camera.fov) * k; v.camera.updateProjectionMatrix(); }
     const want = v.mode === 'bed' ? 1 : 0;
     v.doorT += (want - v.doorT) * (1 - Math.exp(-dt * 3));
     v.van.doors.forEach((d) => { d.pivot.rotation[d.axis] = d.open * v.doorT; });
@@ -885,8 +1037,20 @@ class Component extends DCLogic {
       title: this.props.title || spec.name,
       eyebrow: this.props.eyebrow || '',
       intro: this.props.intro || '',
-      enterInside: () => this.setState({ view: 'driver' }),
-      exitInside: () => this.setState({ view: 'drive' }),
+      sectionRef: this.sectionRef,
+      heroCls: inside ? 'fixed inset-0 z-[100] isolate overflow-hidden bg-plum-deep' : 'relative isolate overflow-hidden bg-plum-deep',
+      innerCls: inside
+        ? 'pointer-events-none mx-auto flex h-full max-w-[1400px] flex-col justify-end px-5 pb-6 pt-24 md:px-10 md:pb-10'
+        : 'pointer-events-none mx-auto flex min-h-[580px] max-w-[1400px] flex-col justify-end px-5 pb-12 pt-32 md:px-10 lg:min-h-[720px] lg:pb-20',
+      enterInside: () => {
+        this.setState({ view: 'driver' });
+        const el = this.sectionEl;
+        try { if (el && el.requestFullscreen && !document.fullscreenElement) { const p = el.requestFullscreen(); if (p && p.catch) p.catch(() => {}); } } catch (e) {}
+      },
+      exitInside: () => {
+        try { if (document.fullscreenElement && document.exitFullscreen) { const p = document.exitFullscreen(); if (p && p.catch) p.catch(() => {}); } } catch (e) {}
+        this.setState({ view: 'drive' });
+      },
       canvasRef: this.canvasRef,
       noGL: s.noGL,
       showPicker: this.props.picker !== 'false',
@@ -894,13 +1058,14 @@ class Component extends DCLogic {
       vanName: spec.name,
       viewLabel,
       hint: s.view === 'outside' ? 'Drag to walk around · scroll or pinch to zoom' : 'Drag to look around · scroll or pinch to zoom',
-      ariaLabel: '3D model of the ' + spec.name + ', ' + viewLabel.toLowerCase() + ' view, in the Scottish Highlands',
+      ariaLabel: '3D model of the ' + spec.name + ', ' + viewLabel.toLowerCase() + ' view, on a Highland road beside a loch',
       vanOptions: VAN_ORDER.map((id) => ({ id, name: VAN_SPECS[id].name })),
       pickVan: (e) => this.setState({ van: e.target.value }),
       views: VIEWS.filter((x) => viewIds.includes(x[0])).map(([id, label]) => ({ label, pressed: s.view === id ? 'true' : 'false', cls: s.view === id ? (hero ? hOn : on) : (hero ? hOff : off), pick: () => this.setState({ view: id }) }))
     };
   }
 }
+
 
 return Component;
 })();

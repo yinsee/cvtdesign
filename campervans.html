@@ -8,9 +8,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&amp;family=Lato:wght@400;700;900&amp;display=swap">
-<link rel="stylesheet" href="assets/site.css?v=4">
+<link rel="stylesheet" href="assets/site.css?v=6">
 <script defer src="js/three.min.js?v=158b"></script>
-<script defer src="js/site.js?v=4"></script>
+<script defer src="js/site.js?v=6"></script>
 <script defer src="js/alpine.min.js"></script>
 <style>body{margin:0}[x-cloak]{display:none}</style>
 </head>
@@ -131,14 +131,14 @@
 
 <div class="font-sans text-ink" style="font-family: Lato, system-ui, sans-serif; color: #1C1424">
 <template x-if="V.isHero"><span style="display:contents">
-<section aria-labelledby="page-h" class="relative isolate overflow-hidden bg-plum-deep">
+<section x-init="(V.sectionRef)($el)" aria-labelledby="page-h" :class="V.heroCls">
   <canvas x-init="(V.canvasRef)($el)" :class="V.canvasCls" role="img" :aria-label="V.ariaLabel"></canvas>
   <template x-if="V.noGL"><span style="display:contents"><img src="assets/hero-man.jpg" alt="" class="absolute inset-0 -z-20 h-full w-full object-cover"></span></template>
   <template x-if="V.outsideMode"><span style="display:contents">
     <div class="pointer-events-none absolute inset-0 -z-10 scrim-b"></div>
     <div class="pointer-events-none absolute inset-0 -z-10 hidden scrim-l lg:block"></div>
   </span></template>
-  <div class="pointer-events-none mx-auto flex min-h-[580px] max-w-[1400px] flex-col justify-end px-5 pb-12 pt-32 md:px-10 lg:min-h-[720px] lg:pb-20">
+  <div :class="V.innerCls">
     <template x-if="V.outsideMode"><span style="display:contents">
       <nav aria-label="Breadcrumb" class="pointer-events-auto mb-4 text-[15px] text-white/80"><a href="index.html" class="underline hover:text-white">Home</a> <span aria-hidden="true">/</span> <a href="campervans.html" class="underline hover:text-white">Campervans</a> <span aria-hidden="true">/</span> <span x-text="V.title"></span></nav>
       <p class="m-0 inline-flex w-fit items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-[15px] font-bold text-white backdrop-blur"><span class="h-2 w-2 rounded-full bg-brand"></span><span x-text="V.eyebrow"></span></p>
@@ -163,6 +163,7 @@
     </span></template>
   </div>
 </section>
+<template x-if="V.insideMode"><span style="display:contents"><div aria-hidden="true" class="min-h-[580px] bg-plum-deep lg:min-h-[720px]"></div></span></template>
 </span></template>
 
 <template x-if="V.isTour"><span style="display:contents">
