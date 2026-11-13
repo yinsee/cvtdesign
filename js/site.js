@@ -1048,6 +1048,7 @@ function buildVan(T, c) {
 }
 
 // ---------- environments: each van page gets its own setting
+const PARK_X = 5.0; // where the van pulls in, off the road on the camp side
 const ENVS = {
   loch:   { label: 'Highland loch', sky: ['#1a5fc6', '#86bdf0', '#b9ad97'], fog: [120, 900], grass: ['#4c6634', '#6f7a3c'], accent: '#6f5446', water: { x0: 12, x1: 142, y: -0.22, color: '#1d3a4b' }, shore: true, trees: 'pine', ridges: [['#2f3b2e', '#4a5446', 0], ['#4b5468', '#6c7488', 1], ['#7d86a0', '#a3aac0', 1]] },
   lakes:  { label: 'Lake District', sky: ['#1d63c8', '#8dc1ef', '#b8b09a'], fog: [100, 800], grass: ['#4f6e36', '#7a8547'], accent: '#7a6a50', water: { x0: 12, x1: 72, y: -0.22, color: '#20404f' }, shore: true, trees: 'mixed', ridges: [['#3a4a34', '#56664a', 0], ['#5a6474', '#7a8496', 0], ['#8a93a8', '#aab1c4', 1]] },
@@ -1267,6 +1268,7 @@ function buildWorld(T, renderer, E) {
       if (x < 0) h = fellsL ? cl01((ax - 16) / 25) * (4 + 28 * fbm(x * 0.008, z * 0.008, 4)) : Math.max(0, (ax - 28) / 60) * 7 * fbm(x * 0.012 + 3, z * 0.012, 4) * cl01((ax - 28) / 40);
       else { const edge = cl01((x - shoreOff(z) - 9) / 7), far = W0.x1 - 30; h = -0.9 * edge + cl01((x - far) / 30) * (1.2 + (fellsL ? 44 : 34) * fbm(x * 0.011, z * 0.011 + 7, 4) * Math.min(1, (x - far) / 90 + 0.25)); }
     }
+    if (xw > 0) h *= cl01((xw - 13) / 7);
     return h;
   };
   const gGeo = new T.PlaneGeometry(1000, 1000, 200, 200); gGeo.rotateX(-Math.PI / 2);
@@ -1342,7 +1344,7 @@ function buildWorld(T, renderer, E) {
   const scatter = (geoTop, geoTrunk, cTop, cTrunk, N, place, flat) => {
     const mt = new T.MeshStandardMaterial({ color: cTop, roughness: 1, flatShading: flat !== false }), mk = new T.MeshStandardMaterial({ color: cTrunk, roughness: 1 });
     const A = new T.InstancedMesh(geoTop, mt, N), B = geoTrunk ? new T.InstancedMesh(geoTrunk, mk, N) : null;
-    for (let i = 0; i < N; i++) { const r = place(i); r[0] *= MS; if ((r[0] - 17) * (r[0] - 17) + (r[1] - 12) * (r[1] - 12) < 160 || (r[0] > 7 && r[0] < 30 && r[1] > -2 && r[1] < 26)) r[0] += r[0] > 0 ? 30 : -30; pp.set(r[0], heightAt(r[0], r[1]), r[1]); const s = blocked(r[0], r[1]) ? 0.0001 : r[2]; sc.set(s, s * (0.9 + hash2(i, 4) * 0.4), s); q.setFromAxisAngle(up, hash2(i, 5) * 6.28); mtx.compose(pp, q, sc); A.setMatrixAt(i, mtx); if (B) B.setMatrixAt(i, mtx); }
+    for (let i = 0; i < N; i++) { const r = place(i); r[0] *= MS; if ((r[0] - 17) * (r[0] - 17) + (r[1] - 12) * (r[1] - 12) < 160 || (r[0] > 7 && r[0] < 30 && r[1] > -2 && r[1] < 26)) r[0] += r[0] > 0 ? 30 : -30; if (r[0] > -6 && r[0] < 17) r[0] = r[0] > 4 ? r[0] + 13 : r[0] - 10; pp.set(r[0], heightAt(r[0], r[1]), r[1]); const s = blocked(r[0], r[1]) ? 0.0001 : r[2]; sc.set(s, s * (0.9 + hash2(i, 4) * 0.4), s); q.setFromAxisAngle(up, hash2(i, 5) * 6.28); mtx.compose(pp, q, sc); A.setMatrixAt(i, mtx); if (B) B.setMatrixAt(i, mtx); }
     world.add(A); if (B) world.add(B); disposables.push(geoTop, mt, mk); if (geoTrunk) disposables.push(geoTrunk);
   };
   const pineG = () => { const g = new T.ConeGeometry(1.4, 5.5, 7); g.translate(0, 4, 0); return g; };
@@ -1374,62 +1376,56 @@ function buildWorld(T, renderer, E) {
   }
 
 
-  // undergrowth around the camp: grass clumps, wildflowers, bushes and reeds at the water's edge
-  const bandL = new T.Group(), bandR = new T.Group(), campU = { value: 0 }, growU = { value: 0 }, camU = { value: new T.Vector3(15, 2, 12) }; world.add(bandR);
-  const folGroup = new T.Group(); world.add(folGroup);
-  const foliageHook = (m, cut) => { m.onBeforeCompile = (sh) => {
-    sh.uniforms.uCamp = campU; sh.uniforms.uGrow = growU; sh.uniforms.uCam = camU;
-    sh.vertexShader = 'uniform float uCamp; uniform float uGrow; uniform vec3 uCam;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n#ifdef USE_INSTANCING\nvec4 io = modelMatrix * instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0);\nfloat dC = max(max(io.x - 7.6, 0.4 - io.x), max(io.z - 6.8, -6.8 - io.z));\nfloat ph = fract(sin(dot(io.xz, vec2(12.9898, 78.233))) * 43758.5453) * 0.45;\nfloat gk = clamp((uGrow * 1.45 - ph) / 1.0, 0.0, 1.0); gk = gk * gk * (3.0 - 2.0 * gk);\nfloat ck = ' + (cut ? '1.0 - uCamp * (1.0 - smoothstep(-0.9, 0.5, dC))' : '1.0') + ';\nfloat nk = smoothstep(3.5, 7.5, distance(io.xz, uCam.xz));\ntransformed *= gk * ck * nk;\n#endif');
-  }; m.customProgramCacheKey = () => 'foliage' + (cut ? 1 : 0); };
+  // foliage. The scenery's own scatter is fixed and never moves. The campsite brings its own patch of grass and flowers,
+  // which glides in with the pitch as the van pulls up (the van is the thing that moves; the patch is placed relative to it).
+  const patch = new T.Group(); patch.visible = false; world.add(patch);
   {
     const dry = E.alpine ? '#7a9a4a' : E.sea ? '#a7a35e' : E.fields ? '#7c9a44' : '#5f7a3a';
+    const gCols = ['#ffffff', '#e8eccd', '#d2d9b0', '#f1e6c2'];
+    const fCols = E.alpine ? ['#f4f1ff', '#8f7ad8', '#f2d24a', '#e05a7a'] : E.sea ? ['#f2d24a', '#f6f3ea', '#e6a3c4'] : ['#f2d24a', '#f6f3ea', '#b48fd6', '#e05a7a', '#f2a03c'];
+    const bCols = E.sea ? ['#5b6b2c', '#6a7a30', '#4e5d2a'] : E.alpine ? ['#4e6a34', '#5d7a3c', '#6b6a3a'] : ['#3f5a2c', '#4c6a32', '#6b6a34', '#7a6232'];
     const sightline = (x, z) => { const d = Math.hypot(x, z), along = (x * 0.78 + z * 0.62); return along > 0 && d < 40 && Math.abs(x * 0.62 - z * 0.78) < along * 0.5 + 3; };
-    const free = (x, z, tall) => { if (x > -10.5 && x < 8.6) return false; if (sightline(x, z)) return false; if (Math.hypot(x - 13, z - 10.5) < 9) return false; if (blocked(x, z)) return false; const h = heightAt(x, z); return h > (W0 ? W0.y + 0.12 : E.sea ? -0.55 : -9); };
-    const pick = (i, near, far, tall) => { for (let t = 0; t < 12; t++) { const a = hash2(i, 31 + t) * Math.PI * 2, r = near + Math.pow(hash2(i, 47 + t), 1.6) * far, x = Math.cos(a) * r, z = Math.sin(a) * r; if (free(x, z, tall)) return [x, z]; } return null; };
-    const inst = (geo, matO, N, near, far, tall, scl, colors) => {
-      const m = new T.MeshStandardMaterial(Object.assign({ roughness: 1 }, matO)), im = new T.InstancedMesh(geo, m, N), c = new T.Color(); foliageHook(m, false);
-      for (let i = 0; i < N; i++) { const p0 = pick(i * 7 + N, near, far, tall); const s0 = p0 ? scl[0] + hash2(i, 61) * scl[1] : 0.0001; const px = p0 ? p0[0] : 0, pz = p0 ? p0[1] : -500; pp.set(px, heightAt(px, pz) - 0.02, pz); sc.set(s0, s0 * (0.8 + hash2(i, 62) * 0.5), s0); q.setFromAxisAngle(up, hash2(i, 63) * 6.28); mtx.compose(pp, q, sc); im.setMatrixAt(i, mtx); if (colors) im.setColorAt(i, c.set(colors[Math.floor(hash2(i, 64) * colors.length)])); }
-      im.receiveShadow = true; im.frustumCulled = false; folGroup.add(im); disposables.push(geo, m); return im;
-    };
+    const wet = (x, z) => heightAt(x, z) < (W0 ? W0.y + 0.12 : E.sea ? -0.55 : -9);
+    const freeStatic = (x, z, tall) => !(x > -4.6 && x < PARK_X + 11) && !(tall && sightline(x, z)) && !blocked(x, z) && !wet(x, z);
     // grass clumps: a few crossed blades
     const blade = new T.ConeGeometry(0.05, 0.5, 3); blade.translate(0, 0.25, 0);
     const parts = []; for (let k = 0; k < 5; k++) { const b = blade.clone(); b.rotateZ((hash2(k, 1) - 0.5) * 0.7); b.rotateY(k * 1.3); b.translate((hash2(k, 2) - 0.5) * 0.18, 0, (hash2(k, 3) - 0.5) * 0.18); parts.push(b); }
     const clump = mergeGeos(T, parts); blade.dispose(); parts.forEach((b) => b.dispose());
-    inst(clump, { color: dry, flatShading: true }, E.trees === 'dense' ? 1600 : 2600, 2, 60, false, [0.7, 0.9], ['#ffffff', '#e8eccd', '#d2d9b0', '#f1e6c2']);
-    // wildflowers
     const fl = new T.IcosahedronGeometry(0.06, 0); fl.translate(0, 0.32, 0);
-    inst(fl, { roughness: 0.7 }, E.alpine ? 900 : 600, 3, 40, false, [0.8, 0.8], E.alpine ? ['#f4f1ff', '#8f7ad8', '#f2d24a', '#e05a7a'] : E.sea ? ['#f2d24a', '#f6f3ea', '#e6a3c4'] : ['#f2d24a', '#f6f3ea', '#b48fd6', '#e05a7a', '#f2a03c']);
-    // bushes: lumpy shrubs, gorse on the coast, bracken elsewhere
     const bush = new T.IcosahedronGeometry(0.55, 1); { const ps = bush.attributes.position; for (let i = 0; i < ps.count; i++) { const k = 0.82 + fbm(ps.getX(i) * 3 + 2, ps.getZ(i) * 3 + ps.getY(i) * 2, 2) * 0.5; ps.setXYZ(i, ps.getX(i) * k, ps.getY(i) * k * 0.8, ps.getZ(i) * k); } bush.translate(0, 0.35, 0); bush.computeVertexNormals(); }
-    // roadside verges: tiles of grass and flowers that scroll with the road, so they stream past and slow to a stop with the van
-    const P = 24, CP = [-4, -3, -2, -1, 0, 1, 2, 3, 4];
-    const band = (parent, x0, x1, geo, matO, per, scl, colors, cut, seed) => {
-      const m = new T.MeshStandardMaterial(Object.assign({ roughness: 1 }, matO));
-      foliageHook(m, cut);
-      const im = new T.InstancedMesh(geo, m, per * CP.length), c = new T.Color(); let k = 0;
-      for (let i = 0; i < per; i++) {
-        const x = x0 + hash2(i, seed) * (x1 - x0), z = hash2(i, seed + 1) * P, s0 = scl[0] + hash2(i, seed + 2) * scl[1], col = colors ? colors[Math.floor(hash2(i, seed + 3) * colors.length)] : null;
-        q.setFromAxisAngle(up, hash2(i, seed + 4) * 6.28); sc.set(s0, s0 * (0.8 + hash2(i, seed + 5) * 0.5), s0);
-        CP.forEach((cp) => { pp.set(x, -0.02, z + cp * P); mtx.compose(pp, q, sc); im.setMatrixAt(k, mtx); if (col) im.setColorAt(k, c.set(col)); k++; });
+    disposables.push(clump, fl, bush);
+    const mats = {};
+    const matFor = (key, o) => { if (!mats[key]) { mats[key] = new T.MeshStandardMaterial(Object.assign({ roughness: 1 }, o)); disposables.push(mats[key]); } return mats[key]; };
+    // N instances placed by place(i) -> [x, z] or null; ground height follows the terrain when onTerrain is set
+    const scatterInst = (parent, geo, mat, N, place, scl, colors, onTerrain, seed) => {
+      const im = new T.InstancedMesh(geo, mat, N), c = new T.Color(); let k = 0;
+      for (let i = 0; i < N * 6 && k < N; i++) {
+        const r = place(i); if (!r) continue;
+        const s0 = scl[0] + hash2(i, seed + 2) * scl[1];
+        pp.set(r[0], onTerrain ? heightAt(r[0], r[1]) - 0.02 : -0.02, r[1]); sc.set(s0, s0 * (0.8 + hash2(i, seed + 3) * 0.5), s0); q.setFromAxisAngle(up, hash2(i, seed + 4) * 6.28);
+        mtx.compose(pp, q, sc); im.setMatrixAt(k, mtx); if (colors) im.setColorAt(k, c.set(colors[Math.floor(hash2(i, seed + 5) * colors.length)])); k++;
       }
-      im.receiveShadow = true; im.frustumCulled = false; parent.add(im); disposables.push(m); return im;
+      im.count = k; im.receiveShadow = true; parent.add(im); return im;
     };
-    const gCols = ['#ffffff', '#e8eccd', '#d2d9b0', '#f1e6c2'], fCols = E.alpine ? ['#f4f1ff', '#8f7ad8', '#f2d24a', '#e05a7a'] : E.sea ? ['#f2d24a', '#f6f3ea', '#e6a3c4'] : ['#f2d24a', '#f6f3ea', '#b48fd6', '#e05a7a', '#f2a03c'];
-    band(bandR, 3.9, 8.3, clump, { color: dry, flatShading: true }, 110, [0.55, 0.6], gCols, true, 101);
-    band(bandR, 4.2, 8.3, fl, { roughness: 0.7 }, 34, [0.7, 0.6], fCols, true, 111);
-    band(bandL, -7.6, -3.9, clump, { color: dry, flatShading: true }, 95, [0.6, 0.7], gCols, false, 121);
-    band(bandL, -7.6, -4.3, fl, { roughness: 0.7 }, 26, [0.7, 0.6], fCols, false, 131);
-    inst(bush, { color: '#ffffff', flatShading: true }, E.trees === 'dense' ? 380 : 260, 6, 70, true, [0.7, 1.1], E.sea ? ['#5b6b2c', '#6a7a30', '#4e5d2a'] : E.alpine ? ['#4e6a34', '#5d7a3c', '#6b6a3a'] : ['#3f5a2c', '#4c6a32', '#6b6a34', '#7a6232']);
-    // reeds along the water's edge
+    const ring = (near, far, tall, seed) => (i) => { const a = hash2(i, seed) * Math.PI * 2, r = near + Math.pow(hash2(i, seed + 1), 1.5) * far, x = Math.cos(a) * r, z = Math.sin(a) * r; return freeStatic(x, z, tall) ? [x, z] : null; };
+    // the scenery: moderate and fixed
+    scatterInst(world, clump, matFor('g', { color: dry, flatShading: true }), E.trees === 'dense' ? 1000 : 1500, ring(5, 75, false, 201), [0.7, 0.9], gCols, true, 211);
+    scatterInst(world, fl, matFor('f', { roughness: 0.7 }), E.alpine ? 500 : 380, ring(5, 50, false, 221), [0.8, 0.8], fCols, true, 231);
+    scatterInst(world, bush, matFor('b', { flatShading: true }), E.trees === 'dense' ? 220 : 170, ring(8, 80, true, 241), [0.7, 1.1], bCols, true, 251);
+    // the camp's own patch, in van-relative coordinates, round the pitch but not on it, and not right in front of the camp camera
+    const onPitch = (x, z) => x > 0.4 && x < 8.0 && z > -7.4 && z < 7.4;
+    const pRect = (x0, x1, z0, z1, avoidCam, seed) => (i) => { const x = x0 + hash2(i, seed) * (x1 - x0), z = z0 + hash2(i, seed + 1) * (z1 - z0); if (onPitch(x, z)) return null; if (avoidCam && Math.hypot(x - 8.9, z - 9) < 3.8) return null; return [x, z]; };
+    scatterInst(patch, clump, matFor('g', { color: dry, flatShading: true }), 170, pRect(1.2, 10, -14, 14, true, 301), [0.6, 0.7], gCols, false, 311);
+    scatterInst(patch, fl, matFor('f', { roughness: 0.7 }), 60, pRect(1.4, 10, -13, 13, true, 321), [0.8, 0.7], fCols, false, 331);
+    scatterInst(patch, bush, matFor('b', { flatShading: true }), 9, (i) => { const r = pRect(8.2, 10.5, -14, 14, true, 341)(i); return r && (r[0] > 8.1 || Math.abs(r[1]) > 9) && !(Math.hypot(r[0] - 8.9, r[1] - 9) < 5) ? r : null; }, [0.7, 0.8], bCols, false, 351);
+    // reeds and boulders along the true waterline
     if (W0) {
+      const shoreX = (z) => { for (let x = 9; x < 40; x += 0.4) if (heightAt(x * MS, z) < W0.y + 0.02) return x; return 40; };
       const reed = new T.ConeGeometry(0.025, 1.3, 3); reed.translate(0, 0.65, 0); const rp = []; for (let k = 0; k < 7; k++) { const b = reed.clone(); b.rotateZ((hash2(k, 5) - 0.5) * 0.35); b.translate((hash2(k, 6) - 0.5) * 0.35, 0, (hash2(k, 7) - 0.5) * 0.35); rp.push(b); }
-      const reeds = mergeGeos(T, rp); reed.dispose(); rp.forEach((b) => b.dispose());
-      const rm = new T.MeshStandardMaterial({ color: '#7b7a45', roughness: 1, flatShading: true }); foliageHook(rm, false); const RN = 420, ri = new T.InstancedMesh(reeds, rm, RN);
-      for (let i = 0; i < RN; i++) { const z = (hash2(i, 71) - 0.5) * 220; let xs = 10.3 + shoreOff(z) + (hash2(i, 72) - 0.4) * 1.6; let ok = Math.abs(z) > 8 || xs > 11.5; if (!(xs * 0.62 - z * 0.78 < -6 || xs * 0.62 - z * 0.78 > 4) && Math.hypot(xs, z) < 34) ok = ok && hash2(i, 74) > 0.6; const x = xs * MS, s0 = ok ? 0.7 + hash2(i, 73) * 0.7 : 0.0001; pp.set(x, Math.max(heightAt(x, z), W0.y - 0.15), z); sc.set(s0, s0, s0); q.setFromAxisAngle(up, hash2(i, 75) * 6.28); mtx.compose(pp, q, sc); ri.setMatrixAt(i, mtx); }
-      ri.frustumCulled = false; folGroup.add(ri); disposables.push(reeds, rm);
-      // a few boulders breaking the waterline
-      const bg = new T.DodecahedronGeometry(1, 1), bm = new T.MeshStandardMaterial({ color: '#77736b', roughness: 0.95, flatShading: true }), BN = 26, bi = new T.InstancedMesh(bg, bm, BN);
-      for (let i = 0; i < BN; i++) { const z = (hash2(i, 81) - 0.5) * 160, sd = Math.abs(z) < 10 ? 4 : 0, xs = 11 + sd + shoreOff(z) + hash2(i, 82) * 6, x = xs * MS, s0 = 0.4 + hash2(i, 83) * 1.1; pp.set(x, Math.min(heightAt(x, z), W0.y) - s0 * 0.35, z); sc.set(s0 * 1.3, s0 * 0.7, s0); q.setFromEuler(new T.Euler(hash2(i, 84), hash2(i, 85) * 6, 0)); mtx.compose(pp, q, sc); bi.setMatrixAt(i, mtx); }
+      const reeds = mergeGeos(T, rp); reed.dispose(); rp.forEach((b) => b.dispose()); disposables.push(reeds);
+      scatterInst(world, reeds, matFor('r', { color: '#7b7a45', flatShading: true }), 300, (i) => { const z = (hash2(i, 71) - 0.5) * 220, x = (shoreX(z) + (hash2(i, 72) - 0.45) * 1.4) * MS; if (Math.abs(z) < 16 && hash2(i, 74) < 0.65) return null; return [x, z]; }, [0.7, 0.7], null, true, 371);
+      const bg = new T.DodecahedronGeometry(1, 1), bm = new T.MeshStandardMaterial({ color: '#77736b', roughness: 0.95, flatShading: true }), BN = 22, bi = new T.InstancedMesh(bg, bm, BN);
+      for (let i = 0; i < BN; i++) { const z = (hash2(i, 81) - 0.5) * 160, xs = shoreX(z) + 0.5 + hash2(i, 82) * 6, x = xs * MS, s0 = 0.4 + hash2(i, 83) * 1.1; pp.set(x, Math.min(heightAt(x, z), W0.y) - s0 * 0.35, z); sc.set(s0 * 1.3, s0 * 0.7, s0); q.setFromEuler(new T.Euler(hash2(i, 84), hash2(i, 85) * 6, 0)); mtx.compose(pp, q, sc); bi.setMatrixAt(i, mtx); }
       bi.receiveShadow = true; world.add(bi); disposables.push(bg, bm);
     }
   }
@@ -1437,7 +1433,7 @@ function buildWorld(T, renderer, E) {
   // road
   const asphalt = dataTex(T, 256, (u, v) => { const n = fbm(u * 40, v * 40, 3), spk = hash2(Math.floor(u * 256), Math.floor(v * 256)) > 0.93 ? 18 : 0; const k = 58 + n * 22 + spk; return [k, k, k + 3]; }, 3, 140);
   const roadMat = new T.MeshStandardMaterial({ color: '#ffffff', map: asphalt, roughness: 0.9 });
-  const roadGroup = new T.Group(); world.add(roadGroup); roadGroup.add(bandL);
+  const roadGroup = new T.Group(); world.add(roadGroup);
   const road = new T.Mesh(new T.PlaneGeometry(6.6, 1000), roadMat); road.rotation.x = -Math.PI / 2; road.position.y = 0.012; road.receiveShadow = true; roadGroup.add(road);
   const lineMat = new T.MeshStandardMaterial({ color: '#efece2', roughness: 0.6 });
   [-1, 1].forEach((s) => { const l = new T.Mesh(new T.PlaneGeometry(0.12, 1000), lineMat); l.rotation.x = -Math.PI / 2; l.position.set(s * 3.05, 0.016, 0); l.receiveShadow = true; roadGroup.add(l); });
@@ -1446,10 +1442,10 @@ function buildWorld(T, renderer, E) {
   for (let z = -300; z <= 300; z += 9) { const d = new T.Mesh(dashG, lineMat); d.rotation.x = -Math.PI / 2; d.position.set(0, 0.017, z); d.receiveShadow = true; dashes.add(d); }
   const posts = new T.Group(); roadGroup.add(posts);
   const postG = new T.BoxGeometry(0.1, 1.0, 0.1), postM = new T.MeshStandardMaterial({ color: '#f1efe8', roughness: 0.6 }), refG = new T.BoxGeometry(0.105, 0.12, 0.105), refM = new T.MeshStandardMaterial({ color: '#c41e30', emissive: '#5a0010', emissiveIntensity: 0.6 });
-  for (let z = -300; z <= 300; z += 24) [-1, 1].forEach((s) => { const pz = z + (s > 0 ? 12 : 0); const p = new T.Mesh(postG, postM); p.position.set(s * 4.4, 0.5, pz); p.castShadow = true; p.userData = { right: s > 0, y: 0.5 }; posts.add(p); const r = new T.Mesh(refG, refM); r.position.set(s * 4.4, 0.85, pz); r.userData = { right: s > 0, y: 0.85 }; posts.add(r); });
+  for (let z = -300; z <= 300; z += 24) [-1].forEach((s) => { const pz = z + (s > 0 ? 12 : 0); const p = new T.Mesh(postG, postM); p.position.set(s * 4.4, 0.5, pz); p.castShadow = true; p.userData = { right: s > 0, y: 0.5 }; posts.add(p); const r = new T.Mesh(refG, refM); r.position.set(s * 4.4, 0.85, pz); r.userData = { right: s > 0, y: 0.85 }; posts.add(r); });
   disposables.push(asphalt, roadMat, road.geometry, lineMat, dashG, postG, postM, refG, refM, envSky.geometry, { dispose: () => pm.dispose() });
 
-  return { world, arch, bandL, bandR, folGroup, campU, growU, camU, env, bakeSky, stars, skyMat, roadGroup, waveTex, dashes, posts, sunDir, disposables, fogColor: E.sky[1], E };
+  return { world, arch, patch, env, bakeSky, stars, skyMat, roadGroup, waveTex, dashes, posts, sunDir, disposables, fogColor: E.sky[1], E };
 }
 
 // ---------- evening camp beside the van: awning, string lights, chairs, rug, campfire
@@ -1652,17 +1648,17 @@ class Component extends DCLogic {
   target() {
     const v = this.v, T = v.T;
     if (v.mode === 'outside' || v.mode === 'camp') {
-      const c = v.mode === 'camp' && v.camp ? v.camp.center.clone() : new T.Vector3(0, v.van.H * 0.45, 0);
+      const c = v.mode === 'camp' && v.camp ? v.camp.center.clone().add(new T.Vector3(PARK_X, 0, 0)) : new T.Vector3(v.vx || 0, v.van.H * 0.45, 0);
       const pos = new T.Vector3(c.x + v.radius * Math.sin(v.phi) * Math.sin(v.theta), c.y + v.radius * Math.cos(v.phi), c.z + v.radius * Math.sin(v.phi) * Math.cos(v.theta));
       if (pos.y < 0.5) pos.y = 0.5;
       return { pos, look: c };
     }
     if (v.mode === 'drive') {
-      const c = new T.Vector3(0, v.van.H * 0.42, 0.15), th = 0.9, el = 0.05, d = v.van.L * 1.9 + 6;
+      const c = new T.Vector3(v.vx || 0, v.van.H * 0.42, 0.15), th = 0.9, el = 0.05, d = v.van.L * 1.9 + 6;
       return { pos: new T.Vector3(c.x + d * Math.sin(th) * Math.cos(el), c.y + d * Math.sin(el), c.z + d * Math.cos(th) * Math.cos(el)), look: c };
     }
     const p = v.van[v.mode].pos;
-    const pos = new T.Vector3(p[0], p[1], p[2]);
+    const pos = new T.Vector3(p[0] + (v.vx || 0), p[1], p[2]);
     const dir = new T.Vector3(Math.sin(v.yaw) * Math.cos(v.pitch), Math.sin(v.pitch), Math.cos(v.yaw) * Math.cos(v.pitch));
     return { pos, look: pos.clone().add(dir) };
   }
@@ -1725,45 +1721,43 @@ class Component extends DCLogic {
     // every look-inside view is parked up at camp: only the hero's driving shot is on the road
     const atCamp = v.mode !== 'drive' && v.mode !== 'outside';
     if (v.park === undefined) v.park = atCamp ? 1 : 0;
-    const PARK = 5.0, VMAX = 9, ACC = 3.4, BR = 4.6, smp = (p) => p * p * (3 - 2 * p);
+    const PARK = PARK_X, VMAX = 9, ACC = 3.4, BR = 4.6, KP = 3.4, smp = (p) => p * p * (3 - 2 * p);
     // the van brakes, steers onto the verge and stops in about two seconds; on the way out it packs up first, then pulls away
     if (v.speed === undefined) v.speed = driving ? 1 : 0;
     if (v.setupT === undefined) v.setupT = atCamp && v.park >= 1 ? 1 : 0;
+    if (v.pOff === undefined) v.pOff = atCamp ? 0 : -999;
     let vel = v.speed * VMAX;
     const dist0 = v.dist || 0, lat0 = PARK * smp(v.park);
     if (atCamp) {
       if (v.stopAt == null) { v.p0 = v.park; v.pR0 = Math.max((1 - v.park) * 11, vel * vel / (2 * BR)); v.stopAt = dist0 + v.pR0; }
       const Rm = Math.max(0, v.stopAt - dist0);
       vel = Math.min(vel + ACC * dt, Math.sqrt(2 * BR * Rm), VMAX);
-      const step = Math.min(Rm, vel * dt), Rn = Rm - step; v.dist = dist0 + step; v.fol = Rn;
+      const step = Math.min(Rm, vel * dt), Rn = Rm - step; v.dist = dist0 + step;
+      // the campsite starts out of sight behind the camera and closes in as the van slows, arriving exactly as it stops
+      v.pOff = Rn * KP;
       v.park = v.pR0 > 1e-4 ? v.p0 + (1 - v.p0) * (1 - Rn / v.pR0) : 1;
-      if (Rn < 1e-3) { vel = 0; v.park = 1; }
+      if (Rn < 1e-3) { vel = 0; v.park = 1; v.pOff = 0; }
     } else {
       v.stopAt = null;
       const go = driving && v.setupT < 0.02;
       vel = go ? Math.min(VMAX, vel + ACC * 0.75 * dt) : Math.max(0, vel - BR * dt);
       v.dist = dist0 + vel * dt;
-      v.fol = (v.fol || 0) - vel * dt;
+      if (v.pOff > -999) v.pOff -= vel * dt * KP; if (v.pOff < -90) v.pOff = -999;
       v.park = Math.max(0, v.park - (v.dist - dist0) / 13);
     }
     v.speed = vel / VMAX;
     const sp = v.speed, dd = v.dist - dist0, lat = PARK * smp(v.park);
     const yawT = dd > 1e-5 ? Math.atan2(lat - lat0, dd) : 0;
     v.yawV = (v.yawV || 0) + (yawT - (v.yawV || 0)) * (1 - Math.exp(-dt * 7));
-    g.rotation.y = v.yawV;
-    v.worldParts.roadGroup.position.x = -lat;
-    v.worldParts.posts.children.forEach((o) => { if (o.userData.right) o.position.y = o.userData.y - 1.3 * Math.min(1, Math.max(0, (lat - 0.15) / 1.6)); });
+    g.rotation.y = v.yawV; g.position.x = lat; v.vx = lat;
+    v.contact.position.x = lat;
+    v.van.lights.forEach((p, i) => v.inner[i].position.set(p[0] + lat, p[1], p[2]));
     // the camp is set out once the van has stopped, and packed away before it leaves
     const setWant = atCamp && v.park >= 1 && vel < 0.05;
     v.setupT = setWant ? Math.min(1, v.setupT + dt * 0.42) : Math.max(0, v.setupT - dt * 1.3);
-    v.worldParts.campU.value = smp(v.setupT);
-    const growWant = atCamp ? 1 : 0;
-    v.growT = growWant ? Math.min(1, (v.growT || 0) + dt * 0.75) : (v.setupT > 0.02 ? v.growT : Math.max(0, (v.growT || 0) - dt * 1.2));
-    v.worldParts.folGroup.position.z = v.fol || 0;
-    if (v.camp) v.camp.group.position.z = v.fol || 0;
-    v.worldParts.growU.value = v.growT;
-    v.worldParts.camU.value.copy(v.camera.position);
-    v.worldParts.bandL.position.z = v.worldParts.bandR.position.z = -(v.dist % 24);
+    const pv = v.pOff > -999;
+    v.worldParts.patch.visible = pv; v.worldParts.patch.position.set(PARK, 0, pv ? v.pOff : 0);
+    if (v.camp) { v.camp.group.position.set(PARK, 0, pv ? v.pOff : 0); v.camp.group.visible = pv; }
     g.position.y = sp * (0.012 * Math.sin(t0 * 8.3) + 0.006 * Math.sin(t0 * 13.7 + 1.3));
     g.rotation.x = sp * 0.004 * Math.sin(t0 * 6.1) + (driving ? 0 : 0.006 * (sp * (1 - sp)) * 4);
     g.rotation.z = sp * 0.0028 * Math.sin(t0 * 4.7 + 0.5);
@@ -1821,11 +1815,11 @@ class Component extends DCLogic {
     const A = WP.arch; A.winM.emissiveIntensity = 0.05 + 2.4 * dark * ck; A.lampM.emissiveIntensity = 0.4 + 4 * dark * ck;
     if (A.beam) { A.beam.rotation.y = t0 * 0.9; A.beam.userData.m.uniforms.uOp.value = 0.55 * dark * ck; A.beam.visible = dark * ck > 0.05; A.glow.material.opacity = 0.25 + 0.75 * dark * ck; }
     if (v.camp) {
-      const c = v.camp; c.group.visible = v.setupT > 0.001 || (atCamp && (v.growT || 0) > 0.001) || (v.growT || 0) > 0.001;
+      const c = v.camp;
       if (c.group.visible) {
         // 1) the pitch has glided in with the stop; 2) the awning rolls out and its legs drop; 3) the fire is lit; 4) the lights come on
         const S = v.setupT, ax0 = c.ax, ph = (x, a0, a1) => { const t = Math.min(1, Math.max(0, (x - a0) / (a1 - a0))); return t * t * (3 - 2 * t); };
-        const G = v.growT || 0, gk = ph(G, 0, 0.8), awnK = ph(S, 0.0, 0.4), legK = ph(S, 0.3, 0.48), fireK = ph(S, 0.5, 0.75), lightK = ph(S, 0.78, 0.95);
+        const gk = 1, awnK = ph(S, 0.0, 0.4), legK = ph(S, 0.3, 0.48), fireK = ph(S, 0.5, 0.75), lightK = ph(S, 0.78, 0.95);
         c.items.forEach((it) => {
           const o = it.o;
           if (it.kind === 'awn') { o.visible = awnK > 0.002; o.scale.set(it.s.x * Math.max(awnK, 0.001), it.s.y, it.s.z); o.position.set(ax0 + (it.p.x - ax0) * awnK, it.p.y, it.p.z); }
@@ -1833,7 +1827,7 @@ class Component extends DCLogic {
             o.visible = awnK > 0.02; o.position.x = it.p.x + (awnK - 1) * c.reach;
             if (it.pole) { const top = it.p.y + it.h / 2, k = Math.max(legK, 0.001); o.scale.y = it.s.y * k; o.position.y = top - (top - it.p.y) * k; o.visible = legK > 0.002; }
           } else if (it.kind === 'flame') { o.userData.k = fireK * gk; }
-          else { o.visible = gk > 0.002; o.scale.copy(it.s).multiplyScalar(Math.max(gk, 0.001)); }
+          else { o.visible = true; }
         });
         c.fireK = fireK; c.lightK = lightK;
         c.halos.material.opacity = 0.9 * dark * lightK;
