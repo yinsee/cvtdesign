@@ -7,9 +7,9 @@
 <meta name="description" content="Self-contained campervan hire from Cambridge for touring the UK and Europe.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&amp;family=Lato:wght@400;700;900&amp;display=swap">
-<link rel="stylesheet" href="assets/site.css?v=21">
-<script defer src="js/site.js?v=21"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&amp;family=Lato:wght@400;700;900&amp;family=Lora:ital,wght@0,400;0,600;1,400&amp;display=swap">
+<link rel="stylesheet" href="assets/site.css?v=3">
+<script defer src="js/site.js?v=3"></script>
 <script defer src="js/alpine.min.js"></script>
 <style>body{margin:0}[x-cloak]{display:none}</style>
 </head>
@@ -89,7 +89,7 @@
     <p class="m-0 text-[15px] font-bold uppercase tracking-[0.16em] text-brand">Route of the month</p>
     <h2 id="feat-h" class="m-0 mt-3 font-display text-[44px] font-extrabold leading-[0.95] tracking-[-0.03em] text-plum lg:text-[68px]">Scotland's North Coast 500 &amp; Orkney</h2>
     <p class="m-0 mt-5 text-[19px] text-ink/75">Single-track mountain roads, white beaches and ocean views at every bend, with a ferry hop to Orkney. Allow [number] days.</p>
-    <a href="contact.html" class="mt-8 inline-flex min-h-[56px] items-center rounded-full bg-brand px-8 text-[18px] font-bold text-white hover:bg-brand-dark">Plan this route with us</a>
+    <div class="mt-8 flex flex-col gap-3 sm:flex-row"><a href="route-nc500.html" class="inline-flex min-h-[56px] items-center justify-center rounded-full bg-brand px-8 text-[18px] font-bold text-white hover:bg-brand-dark">Read the story</a><a href="contact.html" class="inline-flex min-h-[56px] items-center justify-center rounded-full border-2 border-plum px-8 text-[18px] font-bold text-plum hover:bg-plum hover:text-white">Plan this route with us</a></div>
   </div>
   <div class="grid grid-cols-2 gap-3 lg:col-span-7">
     <img src="assets/nc500.jpg" alt="Kylesku Bridge across a Highland loch" class="col-span-2 aspect-[16/9] w-full rounded-[28px] object-cover">
@@ -111,7 +111,7 @@
     </div>
     <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       <template x-for="r in V.routes">
-        <a href="contact.html" class="group relative block aspect-[4/5] overflow-hidden rounded-[28px] sm:aspect-[3/4]">
+        <a :href="r.href" class="group relative block aspect-[4/5] overflow-hidden rounded-[28px] sm:aspect-[3/4]">
           <img :src="r.img" :alt="r.alt" class="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105">
           <div class="scrim-b absolute inset-0"></div>
           <span class="absolute left-5 top-5 rounded-full bg-white/90 px-3 py-1 text-[14px] font-bold text-plum" x-text="r.region"></span>

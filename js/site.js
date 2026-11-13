@@ -42,12 +42,12 @@ class Component extends DCLogic {
       { href: 'van-man-mwb.html', name: 'MAN TGE MWB', tag: 'Extra-wide bed', spec: 'Automatic · Bathroom · 2 berth', img: 'assets/v-man-mwb.jpg', alt: 'Grey MAN TGE campervan parked in farmland' }
     ];
     const routes = [
-      { name: 'North Coast 500', region: 'Scotland', line: 'Mountain roads and wild coastline', img: 'assets/nc500.jpg', alt: 'Kylesku Bridge over a Highland loch' },
-      { name: 'Snowdonia & Castles', region: 'Wales', line: 'Mountains, waterfalls, great castles', img: 'assets/wales.jpg', alt: 'Caernarfon Castle lit at sunset' },
-      { name: 'York & the Moors', region: 'Yorkshire', line: 'Abbeys, moorland and coast', img: 'assets/whitby.jpg', alt: 'Whitby Abbey ruins under a blue sky' },
-      { name: 'Cornwall', region: 'South West', line: 'Fishing villages and rocky coves', img: 'assets/cornwall.jpg', alt: 'Red hot pokers above a Cornish cove' },
-      { name: 'Causeway Coast', region: 'Northern Ireland', line: 'Natural wonders and castles', img: 'assets/causeway.jpg', alt: 'Basalt columns of the Giant’s Causeway' },
-      { name: 'Edinburgh & Loch Ness', region: 'Scotland', line: 'Castles, lochs and Highlands', img: 'assets/edinburgh.jpg', alt: 'Edinburgh skyline from Calton Hill' }
+      { href: 'route-nc500.html', name: 'North Coast 500', region: 'Scotland', line: 'Mountain roads and wild coastline', img: 'assets/nc500.jpg', alt: 'Kylesku Bridge over a Highland loch' },
+      { href: 'route-wales.html', name: 'Snowdonia & Castles', region: 'Wales', line: 'Mountains, waterfalls, great castles', img: 'assets/wales.jpg', alt: 'Caernarfon Castle lit at sunset' },
+      { href: 'route-york.html', name: 'York & the Moors', region: 'Yorkshire', line: 'Abbeys, moorland and coast', img: 'assets/whitby.jpg', alt: 'Whitby Abbey ruins under a blue sky' },
+      { href: 'route-cornwall.html', name: 'Cornwall', region: 'South West', line: 'Fishing villages and rocky coves', img: 'assets/cornwall.jpg', alt: 'Red hot pokers above a Cornish cove' },
+      { href: 'route-causeway.html', name: 'Causeway Coast', region: 'Northern Ireland', line: 'Natural wonders and castles', img: 'assets/causeway.jpg', alt: 'Basalt columns of the Giant’s Causeway' },
+      { href: 'route-edinburgh.html', name: 'Edinburgh & Loch Ness', region: 'Scotland', line: 'Castles, lochs and Highlands', img: 'assets/edinburgh.jpg', alt: 'Edinburgh skyline from Calton Hill' }
     ];
     return {
       heroRef: setup,
@@ -115,17 +115,17 @@ class Component extends DCLogic {
   constructor(props) { super(props); this.state = { region: 'all' }; }
   renderVals() {
     const ROUTES = [
-      { name: 'North Coast 500 & Orkney', r: 'scotland', region: 'Scotland', line: 'Mountain roads, dramatic coast, ocean views.', img: 'assets/nc500.jpg', alt: 'Kylesku Bridge over a Highland loch' },
-      { name: 'Hebridean Island Hopping', r: 'scotland', region: 'Scotland', line: 'Wild islands, history and whisky.', img: 'assets/hebrides.jpg', alt: 'Hebridean beach with dune grass' },
-      { name: 'Edinburgh, Loch Ness & the Highlands', r: 'scotland', region: 'Scotland', line: 'Lochs, castles and waterfalls.', img: 'assets/edinburgh.jpg', alt: 'Edinburgh at sunrise' },
-      { name: 'North Wales, Snowdonia, Castles & Coast', r: 'wales', region: 'Wales', line: 'Mountains, waterfalls and great castles.', img: 'assets/wales.jpg', alt: 'Caernarfon Castle lit at dusk' },
-      { name: 'The Lake District Meres & Mountains', r: 'england', region: 'England', line: 'Lakes, hidden valleys, stone villages.', img: 'assets/lakes.jpg', alt: 'Windermere jetty at sunset' },
-      { name: 'York & the North York Moors', r: 'england', region: 'England', line: 'Moorland, abbeys and coastline.', img: 'assets/whitby.jpg', alt: 'Whitby Abbey' },
-      { name: 'The Cotswolds Villages & Gardens', r: 'england', region: 'England', line: 'Honey-stone villages and gardens.', img: 'assets/cotswolds.jpg', alt: 'Cotswold cottages by a stream' },
-      { name: 'Cornwall', r: 'england', region: 'England', line: 'Fishing villages and rocky coves.', img: 'assets/cornwall.jpg', alt: 'Flowers above a Cornish cove' },
-      { name: 'Dorset & the Jurassic Coast', r: 'england', region: 'England', line: 'Prehistoric sites and coastal walks.', img: 'assets/durdle.jpg', alt: 'Durdle Door' },
-      { name: 'Northern Ireland: Coast & Castles', r: 'ireland', region: 'Northern Ireland', line: 'Natural wonders and emerald hills.', img: 'assets/causeway.jpg', alt: 'Giant’s Causeway' },
-      { name: 'Belgium: Medieval Towns & the Great War', r: 'europe', region: 'Europe', line: 'Canals, battlefields, Belgian beer.', img: 'assets/bruges.jpg', alt: 'Bruges market square at dusk' }
+      { href: 'route-nc500.html', name: 'North Coast 500 & Orkney', r: 'scotland', region: 'Scotland', line: 'Mountain roads, dramatic coast, ocean views.', img: 'assets/nc500.jpg', alt: 'Kylesku Bridge over a Highland loch' },
+      { href: 'route-hebrides.html', name: 'Hebridean Island Hopping', r: 'scotland', region: 'Scotland', line: 'Wild islands, history and whisky.', img: 'assets/hebrides.jpg', alt: 'Hebridean beach with dune grass' },
+      { href: 'route-edinburgh.html', name: 'Edinburgh, Loch Ness & the Highlands', r: 'scotland', region: 'Scotland', line: 'Lochs, castles and waterfalls.', img: 'assets/edinburgh.jpg', alt: 'Edinburgh at sunrise' },
+      { href: 'route-wales.html', name: 'North Wales, Snowdonia, Castles & Coast', r: 'wales', region: 'Wales', line: 'Mountains, waterfalls and great castles.', img: 'assets/wales.jpg', alt: 'Caernarfon Castle lit at dusk' },
+      { href: 'route-lakes.html', name: 'The Lake District Meres & Mountains', r: 'england', region: 'England', line: 'Lakes, hidden valleys, stone villages.', img: 'assets/lakes.jpg', alt: 'Windermere jetty at sunset' },
+      { href: 'route-york.html', name: 'York & the North York Moors', r: 'england', region: 'England', line: 'Moorland, abbeys and coastline.', img: 'assets/whitby.jpg', alt: 'Whitby Abbey' },
+      { href: 'route-cotswolds.html', name: 'The Cotswolds Villages & Gardens', r: 'england', region: 'England', line: 'Honey-stone villages and gardens.', img: 'assets/cotswolds.jpg', alt: 'Cotswold cottages by a stream' },
+      { href: 'route-cornwall.html', name: 'Cornwall', r: 'england', region: 'England', line: 'Fishing villages and rocky coves.', img: 'assets/cornwall.jpg', alt: 'Flowers above a Cornish cove' },
+      { href: 'route-dorset.html', name: 'Dorset & the Jurassic Coast', r: 'england', region: 'England', line: 'Prehistoric sites and coastal walks.', img: 'assets/durdle.jpg', alt: 'Durdle Door' },
+      { href: 'route-causeway.html', name: 'Northern Ireland: Coast & Castles', r: 'ireland', region: 'Northern Ireland', line: 'Natural wonders and emerald hills.', img: 'assets/causeway.jpg', alt: 'Giant’s Causeway' },
+      { href: 'route-belgium.html', name: 'Belgium: Medieval Towns & the Great War', r: 'europe', region: 'Europe', line: 'Canals, battlefields, Belgian beer.', img: 'assets/bruges.jpg', alt: 'Bruges market square at dusk' }
     ];
     const MORE = [
       ['The Road to the Isles', 'Scotland'], ["Scotland's West Coast", 'Scotland'], ['Scottish Borders', 'Scotland'],
@@ -473,6 +473,105 @@ class Component extends DCLogic {
       toggleVideo: () => { const next = !this.state.playing; try { next ? this.video.play() : this.video.pause(); } catch (e) {} this.setState({ playing: next }); }
     };
   }
+}
+
+return Component;
+})();
+
+DC["Route-nc500"] = (function () {
+
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+
+return Component;
+})();
+
+DC["Route-hebrides"] = (function () {
+
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+
+return Component;
+})();
+
+DC["Route-edinburgh"] = (function () {
+
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+
+return Component;
+})();
+
+DC["Route-wales"] = (function () {
+
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+
+return Component;
+})();
+
+DC["Route-lakes"] = (function () {
+
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+
+return Component;
+})();
+
+DC["Route-york"] = (function () {
+
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+
+return Component;
+})();
+
+DC["Route-cotswolds"] = (function () {
+
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+
+return Component;
+})();
+
+DC["Route-cornwall"] = (function () {
+
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+
+return Component;
+})();
+
+DC["Route-dorset"] = (function () {
+
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+
+return Component;
+})();
+
+DC["Route-causeway"] = (function () {
+
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+
+return Component;
+})();
+
+DC["Route-belgium"] = (function () {
+
+class Component extends DCLogic {
+  renderVals() { return {}; }
 }
 
 return Component;
@@ -1563,6 +1662,310 @@ class Component extends DCLogic {
   }
 }
 
+
+return Component;
+})();
+
+DC["RouteStory"] = (function () {
+
+const ROUTES = {
+  nc500: {
+    title: 'The North Coast 500 & Orkney', region: 'Scotland', img: 'assets/nc500.jpg', alt: 'Kylesku Bridge across a Highland loch', seed: 1.3, loop: true, env: 'highland',
+    tagline: 'A tale of single-track roads, white beaches and the edge of the map.',
+    prologue: 'Some journeys begin with a plan. This one begins with a kettle on a gas ring in Inverness, a paper map spread across the table, and the slow realisation that the road ahead goes all the way to the top of Britain and back.',
+    chapters: [
+      { place: 'Inverness', day: 'Day 1', title: 'Where the road begins', story: 'The Highland capital sends you off gently: a walk along the River Ness, fish and chips on a bench, a last supermarket shop. By evening the city lights are behind you and the hills have started to close in.', tip: 'Fill the water tank and the fridge here. Shops grow scarce further north.' },
+      { place: 'Applecross', day: 'Day 2', title: 'Over the pass of the cattle', story: 'The road climbs in tight hairpins over Bealach na Bà, one of the steepest in Britain, then tips you down to a scatter of white cottages facing Skye. Take it slowly; the view from the top deserves a pause.', tip: 'In bad weather, take the longer coast road round instead of the pass.' },
+      { place: 'Ullapool', day: 'Day 3', title: 'A harbour at the end of the day', story: 'Fishing boats, a ferry horn, and streets that smell of salt. Ullapool is the last proper town for a while, and a fine place to sit outside with something warm while the light goes golden over Loch Broom.', tip: 'A good stop to empty and refill, and to book the Orkney ferry if you have not already.' },
+      { place: 'Kylesku', day: 'Day 4', title: 'The bridge in the photograph', story: 'The road curves round and suddenly there it is: the elegant Kylesku Bridge, leaping across the water between two lochs. Seals sometimes haul out on the rocks below. Most people stop, and nobody regrets it.', tip: 'Park in the lay-by at the north end for the classic view.' },
+      { place: 'Durness', day: 'Day 5', title: 'Sand the colour of pearls', story: 'On the very top edge of Scotland, Durness has beaches that look borrowed from somewhere warmer, and a sea cave, Smoo Cave, with a waterfall roaring inside it. The wind is fresh, the light endless in summer.', tip: 'Walk down to Smoo Cave at low tide; the steps are steep but short.' },
+      { place: 'Orkney', day: 'Days 6–8', title: 'The islands of standing stones', story: 'A short ferry hop and you are among some of the oldest places in Europe: the stone village of Skara Brae, the great circle of Brodgar, quiet harbours in Stromness. Time slows to the pace of the tide.', tip: 'Book the ferry with the van in advance in summer. [Confirm crossing details]' },
+      { place: 'Back to Inverness', day: 'Days 9–10', title: 'The long road home', story: 'Down the east coast now, past fairy-tale Dunrobin Castle and fields of grazing sheep, the land softening mile by mile. By the time Inverness reappears, you will have a camera full of light and a few stories of your own.', tip: 'Leave a spare day; the north coast has a way of making people linger.' }
+    ],
+    vans: ['man-lwb-auto', 't5-compact']
+  },
+  hebrides: {
+    title: 'Hebridean Island Hopping', region: 'Scotland', img: 'assets/hebrides.jpg', alt: 'White sand and dune grass on a Hebridean beach', seed: 2.1, loop: false, env: 'island',
+    tagline: 'Ferries, machair and beaches you will not believe are in Britain.',
+    prologue: 'The Outer Hebrides sit out in the Atlantic like a string of beads. Getting there takes a ferry and a little patience. What you find is space: long sand, wide skies and an old, gentle way of life.',
+    chapters: [
+      { place: 'Uig, Skye', day: 'Day 1', title: 'Waiting for the boat', story: 'The ferry terminal at Uig is small, the hills behind it steep and green. You queue in the van with a flask of tea, watching the boat slide into the bay. The adventure begins with a horn.', tip: 'Arrive early for your sailing; vans are loaded in order.' },
+      { place: 'Tarbert, Harris', day: 'Day 2', title: 'Tweed and tide', story: 'Harris greets you with rock and heather, then softens into the weaving town of Tarbert, where cloth has been made by hand for generations. The road south feels like the edge of the world.', tip: 'Single-track roads: use the passing places, and wave.' },
+      { place: 'Luskentyre', day: 'Day 3', title: 'The beach of turquoise water', story: 'Luskentyre is the beach people show you on their phones and you assume has been filtered. It has not. The sand is white, the water impossibly blue, and on a still day the only sound is the sea.', tip: 'Park considerately; the road to the beach is narrow.' },
+      { place: 'Callanish, Lewis', day: 'Day 4', title: 'Stones older than the pyramids', story: 'On a low ridge on Lewis, a cross of tall stones stands against the sky, raised thousands of years ago for reasons nobody fully knows. Visit at dusk and you may have them to yourself.', tip: 'The visitor centre has a café and good parking.' },
+      { place: 'Stornoway', day: 'Day 5', title: 'Back across the Minch', story: 'Stornoway is the islands’ harbour town, busy with boats and gulls. From here the ferry carries you back to Ullapool, the islands shrinking behind you while you plan when to return.', tip: '[Confirm the return crossing and timings]' }
+    ],
+    vans: ['t5-compact', 'man-mwb']
+  },
+  edinburgh: {
+    title: 'Edinburgh, Loch Ness & the Highlands', region: 'Scotland', img: 'assets/edinburgh.jpg', alt: 'Edinburgh skyline from Calton Hill at sunrise', seed: 3.7, loop: true, env: 'highland',
+    tagline: 'Castles, lochs and a monster story or two.',
+    prologue: 'This is Scotland in one long, generous loop: a capital of spires and closes, a glen of legends, and a loch so deep and dark that people have been telling stories about it for centuries.',
+    chapters: [
+      { place: 'Edinburgh', day: 'Day 1', title: 'A city on a volcano', story: 'The castle sits on an old volcanic rock above the Royal Mile. Climb Calton Hill at sunrise and the whole city glows below you, the sea glinting beyond.', tip: 'Stay at a site on the edge of the city and take the bus in.' },
+      { place: 'Stirling', day: 'Day 2', title: 'The gateway to the Highlands', story: 'Stirling Castle watches over the plain where great battles were fought. Beyond it the land lifts, and you can feel the Highlands beginning.', tip: 'The castle car park fills early in summer.' },
+      { place: 'Glencoe', day: 'Day 3', title: 'The glen of weeping', story: 'Glencoe is grand and a little sad, its mountains rising sheer from the valley floor. Pull in, switch off the engine and simply look.', tip: 'Several lay-bys give big views without a long walk.' },
+      { place: 'Loch Ness', day: 'Day 4', title: 'Watching the water', story: 'The ruins of Urquhart Castle stand on a point above the loch. Nessie rarely shows up, but the water is long and dark and strangely compelling.', tip: 'Arrive early or late to avoid the coach crowds.' },
+      { place: 'Pitlochry', day: 'Day 5', title: 'Salmon and slow roads home', story: 'A Victorian town of tearooms and a dam where salmon leap up a fish ladder. From here the road runs gently south towards Edinburgh.', tip: 'A gentle last night before the return to the city.' }
+    ],
+    vans: ['man-lwb-auto', 'crafter-auto']
+  },
+  wales: {
+    title: 'North Wales, Snowdonia, Castles & Coast', region: 'Wales', img: 'assets/wales.jpg', alt: 'Caernarfon Castle lit up at sunset', seed: 4.4, loop: true, env: 'hills',
+    tagline: 'A story told in stone towers and mountain waterfalls.',
+    prologue: 'North Wales packs mountains, sea and some of the finest castles in Europe into a small, easy loop. Every few miles there is another reason to stop.',
+    chapters: [
+      { place: 'Conwy', day: 'Day 1', title: 'Walls you can walk on', story: 'Conwy is still wrapped in its medieval town walls. Walk the walls at golden hour, then wander down to the quay and the smallest house in Britain.', tip: 'Park outside the walls; the town streets are narrow.' },
+      { place: 'Betws-y-Coed', day: 'Day 2', title: 'Into the green valleys', story: 'A village of stone bridges and tumbling rivers on the edge of Snowdonia. A short walk takes you to Swallow Falls, loud with water after rain.', tip: 'A good base for gentle forest walks.' },
+      { place: 'Llanberis', day: 'Day 3', title: 'Under the mountain', story: 'At the foot of Yr Wyddfa (Snowdon), you can ride the little mountain railway towards the summit or watch the clouds pour over the ridge from the lake shore.', tip: 'Book the mountain railway ahead in summer.' },
+      { place: 'Caernarfon', day: 'Day 4', title: 'A castle like a crown', story: 'Caernarfon Castle rises from the water’s edge, its many-sided towers glowing when lit at dusk. It is the kind of place that makes history feel close.', tip: 'Stay for the evening light on the Menai Strait.' },
+      { place: 'Anglesey', day: 'Day 5', title: 'Island lanes and lighthouses', story: 'Cross the bridge to Anglesey for quiet lanes, sandy coves and the lighthouse at South Stack, perched above seabird cliffs.', tip: 'Bring binoculars for the seabirds at South Stack.' }
+    ],
+    vans: ['toleno', 'crafter-manual']
+  },
+  lakes: {
+    title: 'The Lake District Meres & Mountains', region: 'England', img: 'assets/lakes.jpg', alt: 'A wooden jetty on Windermere at sunset', seed: 5.2, loop: true, env: 'hills',
+    tagline: 'Poets’ cottages, steamers and still water at dawn.',
+    prologue: 'The Lake District is a place that inspired poets and painters, and it still has that effect. The trick is to slow down: one lake, one walk, one long lunch at a time.',
+    chapters: [
+      { place: 'Windermere', day: 'Day 1', title: 'The steamer at Bowness', story: 'Begin on the water. A lake cruise from Bowness carries you between wooded islands while the fells rise all around.', tip: 'Sites around Windermere book up early in summer.' },
+      { place: 'Grasmere', day: 'Day 2', title: 'Where Wordsworth wrote', story: 'Dove Cottage, the poet’s home, sits on the edge of a village famous for its gingerbread. The walk round the lake is short and lovely.', tip: 'Buy the gingerbread. Everybody does.' },
+      { place: 'Keswick', day: 'Day 3', title: 'Derwentwater and the stone circle', story: 'A busy market town on Derwentwater, with Castlerigg Stone Circle on the hill above it, ringed by mountains on every side.', tip: 'Visit Castlerigg at sunset for the best light.' },
+      { place: 'Buttermere', day: 'Day 4', title: 'The quiet lake', story: 'Over the Honister Pass to Buttermere, small and perfect, with a level path all the way round. Many visitors say it is their favourite.', tip: 'The pass is steep; take it slowly in the van.' },
+      { place: 'Ullswater', day: 'Day 5', title: 'Daffodils and a long goodbye', story: 'Ullswater curls between the fells, with the waterfall at Aira Force tucked in the woods above it. A good place to end, looking back over still water.', tip: 'Ullswater’s lake steamers make a gentle last outing.' }
+    ],
+    vans: ['man-mwb', 't5-widebed']
+  },
+  york: {
+    title: 'York & the North York Moors', region: 'England', img: 'assets/whitby.jpg', alt: 'Whitby Abbey ruins under a blue sky', seed: 6.6, loop: false, env: 'hills',
+    tagline: 'A medieval city, purple moors and a ruined abbey by the sea.',
+    prologue: 'From the crooked lanes of York to the clifftop ruins at Whitby, this is a short route full of stories, old and newer.',
+    chapters: [
+      { place: 'York', day: 'Day 1', title: 'Inside the city walls', story: 'York Minster soars above the rooftops, and the Shambles leans in so close you could almost shake hands across the street.', tip: 'Use the park-and-ride; the centre is best on foot.' },
+      { place: 'Helmsley', day: 'Day 2', title: 'Market town and castle', story: 'A handsome market square, a ruined castle and the start of the moors. Picnic supplies are easy to find here.', tip: 'Good bakeries for the road ahead.' },
+      { place: 'Hutton-le-Hole', day: 'Day 3', title: 'Sheep on the green', story: 'A village where sheep wander across the green and a little stream runs beside the road. In late summer the moors all around turn purple with heather.', tip: 'Go slowly: the sheep have right of way.' },
+      { place: 'Whitby', day: 'Day 4', title: 'The abbey on the cliff', story: 'Climb the 199 steps to the abbey ruins above the harbour, where the story of Dracula was partly inspired. Fish and chips taste better here, everyone agrees.', tip: 'Park above the town and walk down.' },
+      { place: 'Robin Hood’s Bay', day: 'Day 5', title: 'A smugglers’ village', story: 'Cottages tumble down to the sea in a tangle of steps and alleys once used by smugglers. At low tide, rock pools stretch out across the bay.', tip: 'Leave the van at the top car park; the lane down is very steep.' }
+    ],
+    vans: ['crafter-auto', 't5-spacious']
+  },
+  cotswolds: {
+    title: 'The Cotswolds Villages & Gardens', region: 'England', img: 'assets/cotswolds.jpg', alt: 'Honey-stone cottages beside a stream in the Cotswolds', seed: 7.9, loop: true, env: 'downs',
+    tagline: 'Honey-stone villages, gardens and a little Shakespeare.',
+    prologue: 'In the Cotswolds the stone glows gold in the evening and every village seems to have a stream, a tea room and a church older than most countries.',
+    chapters: [
+      { place: 'Bourton-on-the-Water', day: 'Day 1', title: 'The little Venice', story: 'Low stone bridges cross a shallow river running right through the village. Paddle, people-watch, and eat an ice cream on the green.', tip: 'Arrive early before the coaches.' },
+      { place: 'The Slaughters', day: 'Day 2', title: 'Two villages, one footpath', story: 'Upper and Lower Slaughter are joined by a gentle riverside path past a working water mill. It is hard to find anywhere more peaceful.', tip: 'Walk between them; parking is very limited.' },
+      { place: 'Chipping Campden', day: 'Day 3', title: 'The finest high street', story: 'A curved high street of honey-coloured houses and an old market hall, at the start of the long-distance Cotswold Way.', tip: 'A good place for lunch and an evening stroll.' },
+      { place: 'Stratford-upon-Avon', day: 'Day 4', title: 'Where Shakespeare was born', story: 'Visit the house where Shakespeare was born, then watch the swans and the boats along the river before an evening at the theatre.', tip: 'Book theatre tickets ahead.' },
+      { place: 'Bibury', day: 'Day 5', title: 'The postcard row', story: 'Arlington Row, a line of weavers’ cottages beside a meadow, is one of the most photographed scenes in England, and it is easy to see why.', tip: 'Early morning is quietest for photographs.' }
+    ],
+    vans: ['t5-spacious', 'crafter-manual']
+  },
+  cornwall: {
+    title: 'Cornwall', region: 'South West', img: 'assets/cornwall.jpg', alt: 'Flowers above a Cornish cove', seed: 8.3, loop: false, env: 'coastal',
+    tagline: 'Fishing villages, wild headlands and a theatre carved into a cliff.',
+    prologue: 'Cornwall is a long arm of land reaching into the Atlantic, with a different sea on each side. Every cove has a story, and most have a café.',
+    chapters: [
+      { place: 'St Ives', day: 'Day 1', title: 'Light that drew the painters', story: 'Artists came for the clear light and stayed for the harbour. Wander the galleries, then sit on the sand at Porthmeor as the surfers come in.', tip: 'Use the park-and-ride train into town.' },
+      { place: 'Land’s End', day: 'Day 2', title: 'The far end of England', story: 'Cliffs drop into churning sea at England’s western tip, with the Longships lighthouse out among the waves.', tip: 'The coast path either side is quieter than the visitor centre.' },
+      { place: 'The Minack Theatre', day: 'Day 3', title: 'A stage above the sea', story: 'An open-air theatre carved into the cliffs, its stage hanging over a turquoise bay. Even without a show, the view is a performance.', tip: 'Check performance dates and bring a cushion.' },
+      { place: 'St Michael’s Mount', day: 'Day 4', title: 'The island castle', story: 'At low tide a cobbled causeway rises from the sea and you can walk out to the castle on its island; at high tide, a little boat carries you across.', tip: 'Check the tide times before you go.' },
+      { place: 'Padstow', day: 'Day 5', title: 'Harbour suppers', story: 'A lively fishing harbour on the north coast, known for its seafood. End the trip with supper on the quay as the boats come in.', tip: 'Book ahead for the popular restaurants.' }
+    ],
+    vans: ['t5-compact', 'crafter-auto']
+  },
+  dorset: {
+    title: 'Dorset & the Jurassic Coast', region: 'South West', img: 'assets/durdle.jpg', alt: 'Durdle Door rock arch on the Jurassic Coast', seed: 9.1, loop: false, env: 'coastal',
+    tagline: 'A coastline that tells 185 million years of history.',
+    prologue: 'The Jurassic Coast is a cliff-lined time machine. Its rocks hold the story of ancient seas and deserts, and its beaches still give up fossils after every storm.',
+    chapters: [
+      { place: 'Lulworth & Durdle Door', day: 'Day 1', title: 'The arch in the sea', story: 'A great limestone arch stands in clear water below the cliffs, a short, steep walk from the perfect round bay of Lulworth Cove.', tip: 'Wear proper shoes for the steep path down.' },
+      { place: 'Corfe Castle', day: 'Day 2', title: 'A ruin on a hill', story: 'The jagged ruins of Corfe Castle crown a hill above a village of stone cottages, with a steam railway puffing through below.', tip: 'Catch the steam train to Swanage for a day off driving.' },
+      { place: 'Abbotsbury', day: 'Day 3', title: 'Swans and a long pebble beach', story: 'A thatched village with a swannery, where hundreds of swans nest beside the lagoon behind Chesil Beach.', tip: 'Visit the swannery in late spring for the cygnets.' },
+      { place: 'Lyme Regis', day: 'Day 4', title: 'Hunting for fossils', story: 'Walk the beaches beneath the cliffs and look down: ammonites and other fossils turn up among the pebbles, just as they did for the famous fossil hunter Mary Anning.', tip: 'Search on a falling tide and keep away from the cliff base.' }
+    ],
+    vans: ['man-lwb-manual', 't5-widebed']
+  },
+  causeway: {
+    title: 'Northern Ireland: Coast, Castles & Emerald Green', region: 'Northern Ireland', img: 'assets/causeway.jpg', alt: 'Basalt columns of the Giant’s Causeway', seed: 10.4, loop: false, env: 'coastal',
+    tagline: 'Giants’ stepping stones, a rope bridge and castles on the cliffs.',
+    prologue: 'The Causeway Coast is short in miles and long on wonder: a road that hugs green cliffs above a wild sea, with a legend round every bend.',
+    chapters: [
+      { place: 'Belfast', day: 'Day 1', title: 'The city that built a ship', story: 'Belfast’s Titanic Quarter tells the story of the shipyard that built the famous liner. Then it is north along the coast road.', tip: 'Check ferry options for bringing the van across. [Confirm]' },
+      { place: 'Carrick-a-Rede', day: 'Day 2', title: 'A bridge over the waves', story: 'A rope bridge sways between the mainland and a tiny island, high above the sea. Brave the crossing or simply enjoy the view.', tip: 'Book bridge tickets online in advance.' },
+      { place: 'Giant’s Causeway', day: 'Day 3', title: 'The giant’s stepping stones', story: 'Some forty thousand stone columns step down into the sea. Science says lava; local legend says a giant called Finn McCool. Either way, it is astonishing.', tip: 'Go early in the morning for fewer people.' },
+      { place: 'Dunluce Castle', day: 'Day 4', title: 'A castle on the edge', story: 'The ruins of Dunluce cling to a cliff top so close to the edge that, legend has it, part of the kitchen once fell into the sea.', tip: 'Sunset is the best time for photographs.' }
+    ],
+    vans: ['crafter-auto', 'man-lwb-auto']
+  },
+  belgium: {
+    title: 'Belgium: Medieval Towns & the Great War', region: 'Europe', img: 'assets/bruges.jpg', alt: 'Bruges market square lit at dusk', seed: 11.7, loop: false, env: 'flat',
+    tagline: 'Canals, chocolate and the quiet places of remembrance.',
+    prologue: 'A short crossing and the van rolls onto the flat green fields of Flanders. This chapter of the trip is about beauty and memory: medieval towns of spires and canals, and the battlefields of the First World War.',
+    chapters: [
+      { place: 'Across the Channel', day: 'Day 1', title: 'Over the water', story: 'Watch the white cliffs fade from the ferry deck, then drive on to the Continent. In under two hours you are among canals and church towers.', tip: '[Confirm crossing, cover and documents for Europe]' },
+      { place: 'Bruges', day: 'Day 2', title: 'A city of canals', story: 'Bruges is a fairy tale of canals, cobbles and stepped gables. Take a boat trip, climb the belfry, and choose your chocolates slowly.', tip: 'Stay outside the centre and cycle in.' },
+      { place: 'Ghent', day: 'Day 3', title: 'Towers and quaysides', story: 'Livelier than Bruges, Ghent has a castle in the middle of town and quays lined with grand old guild houses.', tip: 'The evening lights along the Graslei are beautiful.' },
+      { place: 'Ypres', day: 'Day 4', title: 'The Last Post', story: 'Every evening at the Menin Gate, buglers play the Last Post for the soldiers of the Great War. It is a simple, moving ceremony.', tip: 'Arrive a little before 8pm to find a place.' },
+      { place: 'Tyne Cot', day: 'Day 5', title: 'A field of remembrance', story: 'The largest Commonwealth war cemetery in the world lies peacefully among farmland. Many visitors leave a quiet note or a poppy.', tip: 'Allow time; the visitor centre tells the soldiers’ stories.' }
+    ],
+    vans: ['man-lwb-manual', 'crafter-auto']
+  }
+};
+const ROUTE_ORDER = ['nc500', 'hebrides', 'edinburgh', 'wales', 'lakes', 'york', 'cotswolds', 'cornwall', 'dorset', 'causeway', 'belgium'];
+
+const ROUTE_HREF = {nc500:'route-nc500.html',hebrides:'route-hebrides.html',edinburgh:'route-edinburgh.html',wales:'route-wales.html',lakes:'route-lakes.html',york:'route-york.html',cotswolds:'route-cotswolds.html',cornwall:'route-cornwall.html',dorset:'route-dorset.html',causeway:'route-causeway.html',belgium:'route-belgium.html'};
+const VAN_PAGES = {"man-lwb-auto": {"href": "van-man-lwb-auto.html", "label": "MAN TGE LWB Luxury", "img": "assets/v-man-lwb-auto.jpg"}, "man-lwb-manual": {"href": "van-man-lwb-manual.html", "label": "MAN TGE LWB Luxury · Manual", "img": "assets/v-man-lwb-manual.jpg"}, "man-mwb": {"href": "van-man-mwb.html", "label": "MAN TGE MWB", "img": "assets/v-man-mwb.jpg"}, "crafter-auto": {"href": "van-crafter-auto.html", "label": "VW Crafter LWB · Automatic", "img": "assets/v-crafter-auto.jpg"}, "crafter-manual": {"href": "van-crafter-manual.html", "label": "VW Crafter LWB · Manual", "img": "assets/v-crafter-manual.jpg"}, "toleno": {"href": "van-toleno.html", "label": "Toleno R", "img": "assets/v-toleno.jpg"}, "t5-spacious": {"href": "van-t5-spacious.html", "label": "VW T5 Spacious", "img": "assets/v-t5-spacious.jpg"}, "t5-widebed": {"href": "van-t5-widebed.html", "label": "VW T5 Wide Bed", "img": "assets/v-t5-widebed.jpg"}, "t5-compact": {"href": "van-t5-compact.html", "label": "VW T5 Compact", "img": "assets/v-t5-compact.jpg"}};
+// ROUTES data is inserted above this line by the build
+const R_ENV = {
+  highland: { amp: 15, grass: ['#4c6634', '#6f7a3c'], snow: true, sky: '#bcd4ea', sea: '#2a5872' },
+  island:   { amp: 7, grass: ['#5d7a3a', '#8a8a4a'], islands: true, sky: '#c4dcef', sea: '#23708f' },
+  hills:    { amp: 11, grass: ['#4f6e36', '#7a8547'], sky: '#c2d8ec', sea: '#2a5872' },
+  downs:    { amp: 5, grass: ['#6d9a3e', '#a9a957'], fields: true, sky: '#cbe0f3', sea: '#2d6382' },
+  coastal:  { amp: 8, grass: ['#5d7a3a', '#8a8a4a'], sky: '#c6def2', sea: '#22658a' },
+  flat:     { amp: 2.2, grass: ['#6d9a3e', '#8fae4c'], fields: true, sky: '#cfe0ef', sea: '#3a6b86' }
+};
+function rh(x, y) { const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return s - Math.floor(s); }
+function rn(x, y) { const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi, u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf); const a = rh(xi, yi), b = rh(xi + 1, yi), c = rh(xi, yi + 1), d = rh(xi + 1, yi + 1); return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v; }
+function rf(x, y, o) { let s = 0, a = 0.5, f = 1; for (let i = 0; i < (o || 4); i++) { s += a * rn(x * f, y * f); f *= 2; a *= 0.5; } return s; }
+
+function buildRouteMap(T, R) {
+  const E = R_ENV[R.env] || R_ENV.hills, group = new T.Group(), disp = [], seed = R.seed;
+  const land = (x, z) => {
+    const d = Math.sqrt(x * x + z * z) / 95, n = rf(x * 0.025 + seed, z * 0.025 - seed, 5);
+    let m = 1 - d * 1.15 + (n - 0.5) * 0.9;
+    if (E.islands) m = Math.max(m - 0.15, (rf(x * 0.04 + 5, z * 0.04, 3) - 0.48) * 1.2) * (1 - d * 0.35);
+    return m;
+  };
+  const height = (x, z) => { const m = land(x, z); if (m <= 0) return m * 6; return m * E.amp * (0.55 + rf(x * 0.05 - seed, z * 0.05, 4)) + 0.3; };
+  const geo = new T.PlaneGeometry(240, 240, 200, 200); geo.rotateX(-Math.PI / 2);
+  const pos = geo.attributes.position, cols = [], c = new T.Color(), gA = new T.Color(E.grass[0]), gB = new T.Color(E.grass[1]), sand = new T.Color('#d8c9a0'), rock = new T.Color('#8a857c'), snow = new T.Color('#f4f6f8');
+  const fieldPal = ['#6d9a3e', '#86a548', '#a9a957', '#c8b25a', '#5f8a3a'].map((x) => new T.Color(x));
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i), z = pos.getZ(i), h = height(x, z); pos.setY(i, h);
+    c.copy(gA).lerp(gB, rf(x * 0.08, z * 0.08, 2));
+    if (E.fields) c.copy(fieldPal[Math.floor(rh(Math.floor(x / 9), Math.floor(z / 7)) * fieldPal.length)]);
+    if (h < 0.9) c.lerp(sand, Math.min(1, (0.9 - h) / 0.6));
+    if (h > E.amp * 0.65) c.lerp(rock, Math.min(1, (h - E.amp * 0.65) / (E.amp * 0.3)));
+    if (E.snow && h > E.amp * 0.95) c.lerp(snow, Math.min(1, (h - E.amp * 0.95) / (E.amp * 0.2)));
+    cols.push(c.r, c.g, c.b);
+  }
+  geo.setAttribute('color', new T.Float32BufferAttribute(cols, 3)); geo.computeVertexNormals();
+  const lm = new T.MeshStandardMaterial({ vertexColors: true, roughness: 1, flatShading: false });
+  const terrain = new T.Mesh(geo, lm); terrain.receiveShadow = true; terrain.castShadow = true; group.add(terrain); disp.push(geo, lm);
+  const wm = new T.MeshStandardMaterial({ color: E.sea, roughness: 0.22, metalness: 0.05, transparent: true, opacity: 0.94 });
+  const water = new T.Mesh(new T.CircleGeometry(400, 64), wm); water.rotation.x = -Math.PI / 2; water.position.y = 0.05; group.add(water); disp.push(water.geometry, wm);
+  // trees
+  const tg = new T.ConeGeometry(0.9, 2.6, 6); tg.translate(0, 1.3, 0); const tm = new T.MeshStandardMaterial({ color: '#2f4a2e', roughness: 1, flatShading: true });
+  const N = 900, trees = new T.InstancedMesh(tg, tm, N), mx = new T.Matrix4(), q = new T.Quaternion(), s3 = new T.Vector3(), p3 = new T.Vector3(); let k = 0;
+  for (let i = 0; i < N * 3 && k < N; i++) { const x = (rh(i, 1) - 0.5) * 220, z = (rh(i, 2) - 0.5) * 220, h = height(x, z); if (h < 1.2 || h > E.amp * 0.7 || rf(x * 0.04 + 9, z * 0.04, 2) < 0.5) continue; const sc = 0.6 + rh(i, 3) * 0.8; p3.set(x, h - 0.1, z); s3.set(sc, sc, sc); mx.compose(p3, q, s3); trees.setMatrixAt(k++, mx); }
+  trees.count = k; trees.castShadow = true; group.add(trees); disp.push(tg, tm);
+  // stops placed on land, then the road between them
+  const n = R.chapters.length, stops = [];
+  for (let i = 0; i < n; i++) {
+    let x, z;
+    if (R.loop) { const a = seed + (i / n) * Math.PI * 2; const r = 46 + 14 * Math.sin(i * 1.7 + seed); x = Math.cos(a) * r; z = Math.sin(a) * r; }
+    else { const t = n === 1 ? 0.5 : i / (n - 1); x = -68 + 136 * t; z = -34 + 68 * t + Math.sin(t * Math.PI * 2 + seed) * 22; }
+    for (let g = 0; g < 30 && height(x, z) < 1.4; g++) { x *= 0.9; z *= 0.9; }
+    stops.push(new T.Vector3(x, Math.max(height(x, z), 0.6), z));
+  }
+  const base = new T.CatmullRomCurve3(stops, R.loop, 'centripetal');
+  const samples = base.getSpacedPoints(600).map((p) => new T.Vector3(p.x, Math.max(height(p.x, p.z), 0.4) + 0.45, p.z));
+  const path = new T.CatmullRomCurve3(samples, R.loop);
+  const roadM = new T.MeshStandardMaterial({ color: '#D62842', emissive: '#7a0f1f', emissiveIntensity: 0.5, roughness: 0.4 });
+  const tube = new T.Mesh(new T.TubeGeometry(path, 900, 0.42, 8, R.loop), roadM); tube.castShadow = true; group.add(tube); disp.push(tube.geometry, roadM);
+  // pins with numbers
+  const pins = stops.map((p, i) => {
+    const pg = new T.Group(); pg.position.copy(p); group.add(pg);
+    const poleM = new T.MeshStandardMaterial({ color: '#341C5A', roughness: 0.4 }); const headM = new T.MeshStandardMaterial({ color: '#341C5A', roughness: 0.35, emissive: '#170B2B', emissiveIntensity: 0.4 });
+    const pole = new T.Mesh(new T.CylinderGeometry(0.12, 0.12, 4.2, 8), poleM); pole.position.y = 2.1; pg.add(pole);
+    const head = new T.Mesh(new T.SphereGeometry(1.25, 20, 14), headM); head.position.y = 4.8; head.castShadow = true; pg.add(head);
+    const cv = document.createElement('canvas'); cv.width = cv.height = 128; const cx = cv.getContext('2d');
+    cx.fillStyle = '#ffffff'; cx.beginPath(); cx.arc(64, 64, 58, 0, Math.PI * 2); cx.fill(); cx.fillStyle = '#341C5A'; cx.font = 'bold 70px Lato, Arial, sans-serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.fillText(String(i + 1), 64, 68);
+    const tex = new T.CanvasTexture(cv); tex.colorSpace = T.SRGBColorSpace;
+    const sm = new T.SpriteMaterial({ map: tex, depthTest: false }); const sp = new T.Sprite(sm); sp.scale.set(2.4, 2.4, 1); sp.position.y = 7.4; sp.renderOrder = 5; pg.add(sp);
+    disp.push(pole.geometry, head.geometry, poleM, headM, tex, sm);
+    return { group: pg, headM, poleM };
+  });
+  // a little van driving the route
+  const van = new T.Group(); group.add(van);
+  const body = new T.Mesh(new T.BoxGeometry(1.5, 1.5, 3.2), new T.MeshStandardMaterial({ color: '#f4f4f2', roughness: 0.35, metalness: 0.2 })); body.position.y = 1.05; body.castShadow = true; van.add(body);
+  const glass = new T.Mesh(new T.BoxGeometry(1.52, 0.5, 2.6), new T.MeshStandardMaterial({ color: '#1a2230', roughness: 0.1 })); glass.position.set(0, 1.35, -0.1); van.add(glass);
+  const nose = new T.Mesh(new T.BoxGeometry(1.45, 0.75, 0.6), body.material); nose.position.set(0, 0.62, 1.85); van.add(nose);
+  const stripe = new T.Mesh(new T.BoxGeometry(1.53, 0.12, 3.0), new T.MeshStandardMaterial({ color: '#D62842' })); stripe.position.y = 0.75; van.add(stripe);
+  disp.push(body.geometry, body.material, glass.geometry, glass.material, nose.geometry, stripe.geometry, stripe.material);
+  return { group, disp, stops, path, pins, van, height, sky: E.sky };
+}
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { chapter: -1 };
+    this.canvasRef = (el) => this.mount(el);
+    this.chapterEls = [];
+    this.v = null;
+  }
+  componentWillUnmount() { const v = this.v; if (this.io) this.io.disconnect(); if (!v) return; cancelAnimationFrame(v.raf); v.running = false; if (v.ro) v.ro.disconnect(); if (v.io) v.io.disconnect(); v.map.disp.forEach((d) => d.dispose && d.dispose()); v.renderer.dispose(); this.v = null; }
+  route() { return ROUTES[this.props.route] || ROUTES.nc500; }
+  watch(el, i) {
+    if (!el || this.chapterEls[i] === el) return;
+    this.chapterEls[i] = el;
+    if (!this.io) this.io = new IntersectionObserver((es) => { es.forEach((e) => { if (e.isIntersecting) { const k = Number(e.target.getAttribute('data-ch')); if (k !== this.state.chapter) this.setState({ chapter: k }); } }); }, { rootMargin: '-45% 0px -45% 0px' });
+    this.io.observe(el);
+  }
+  mount(el) {
+    if (!el || (this.v && this.v.canvas === el)) return;
+    const T = window.THREE; if (!T) return;
+    let renderer; try { renderer = new T.WebGLRenderer({ canvas: el, antialias: true }); } catch (e) { return; }
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); renderer.outputColorSpace = T.SRGBColorSpace; renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+    renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
+    const scene = new T.Scene(), camera = new T.PerspectiveCamera(38, 1, 0.5, 1500);
+    const map = buildRouteMap(T, this.route());
+    scene.add(map.group); scene.background = new T.Color(map.sky); scene.fog = new T.Fog(map.sky, 220, 620);
+    scene.add(new T.HemisphereLight(0xe6f0ff, 0x6a6448, 1.1));
+    const sun = new T.DirectionalLight(0xfff1dc, 2.4); sun.position.set(80, 120, 60); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); Object.assign(sun.shadow.camera, { left: -130, right: 130, top: 130, bottom: -130, near: 10, far: 400 }); sun.shadow.bias = -0.0005; scene.add(sun);
+    const io = new IntersectionObserver((es) => { if (this.v) this.v.vis = es[0].isIntersecting; }); io.observe(el);
+    this.v = { io, vis: true, T, canvas: el, renderer, scene, camera, map, look: new T.Vector3(), camPos: new T.Vector3(0, 170, 170), az: 0, drag: null, u: 0, last: performance.now(), raf: 0, running: true };
+    const v = this.v;
+    el.addEventListener('pointerdown', (e) => { v.drag = e.clientX; try { el.setPointerCapture(e.pointerId); } catch (x) {} });
+    el.addEventListener('pointermove', (e) => { if (v.drag == null) return; v.az -= (e.clientX - v.drag) * 0.005; v.drag = e.clientX; });
+    const end = () => { v.drag = null; }; el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
+    v.ro = new ResizeObserver(() => this.resize()); v.ro.observe(el); this.resize();
+    camera.position.copy(v.camPos); camera.lookAt(0, 0, 0);
+    this.tick();
+  }
+  resize() { const v = this.v; if (!v) return; const w = v.canvas.clientWidth || 600, h = v.canvas.clientHeight || 600; v.renderer.setSize(w, h, false); v.camera.aspect = w / h; v.camera.updateProjectionMatrix(); }
+  tick() {
+    const v = this.v; if (!v || !v.running) return;
+    v.raf = requestAnimationFrame(() => this.tick());
+    const now = performance.now(), dt = Math.min(0.05, (now - v.last) / 1000); v.last = now;
+    const T = v.T, ch = this.state.chapter, m = v.map, k = 1 - Math.exp(-dt * 2.2);
+    let tgt, cp;
+    if (ch < 0 || ch >= m.stops.length) { tgt = new T.Vector3(0, 0, 0); const a = 0.6 + v.az; cp = new T.Vector3(Math.sin(a) * 150, 150, Math.cos(a) * 150); }
+    else { tgt = m.stops[ch].clone(); const a = 0.7 + ch * 0.55 + v.az; cp = tgt.clone().add(new T.Vector3(Math.sin(a) * 46, 38, Math.cos(a) * 46)); }
+    v.camPos.lerp(cp, k); v.look.lerp(tgt, k); v.camera.position.copy(v.camPos); v.camera.lookAt(v.look);
+    m.pins.forEach((p, i) => { const on = i === ch; const s = on ? 1.35 + 0.08 * Math.sin(now / 250) : 1; p.group.scale.setScalar(p.group.scale.x + (s - p.group.scale.x) * k); p.headM.color.set(on ? '#D62842' : '#341C5A'); });
+    v.u = (v.u + dt * 0.018) % 1;
+    const P = m.path.getPointAt(v.u), Q = m.path.getPointAt((v.u + 0.002) % 1);
+    m.van.position.copy(P); m.van.lookAt(Q.x, P.y, Q.z);
+    if (v.vis) v.renderer.render(v.scene, v.camera);
+  }
+  renderVals() {
+    const R = this.route(), ch = this.state.chapter;
+    const vans = R.vans.map((id) => ({ href: VAN_PAGES[id].href, name: VAN_PAGES[id].label, img: VAN_PAGES[id].img }));
+    const others = ROUTE_ORDER.filter((id) => id !== (this.props.route || 'nc500')).slice(0, 4).map((id) => ({ href: ROUTE_HREF[id], name: ROUTES[id].title, region: ROUTES[id].region, img: ROUTES[id].img }));
+    return {
+      canvasRef: this.canvasRef,
+      title: R.title, region: R.region, tagline: R.tagline, prologue: R.prologue, img: R.img, alt: R.alt,
+      chapterCount: R.chapters.length,
+      mapLabel: ch >= 0 && ch < R.chapters.length ? 'Chapter ' + (ch + 1) + ' · ' + R.chapters[ch].place : 'The whole journey',
+      chapters: R.chapters.map((c, i) => ({ ...c, n: i + 1, anchor: 'ch-' + (i + 1), hash: '#ch-' + (i + 1), hid: 'ch-h-' + (i + 1), num: 'Chapter ' + ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'][i], ref: (el) => this.watch(el, i), dataCh: String(i), cls: 'mt-10 border-l-4 pl-5 transition-colors duration-500 lg:pl-8 ' + (i === ch ? 'border-brand' : 'border-plum/15') })),
+      prologueRef: (el) => this.watch(el, -1),
+      vans, others
+    };
+  }
+}
 
 return Component;
 })();
