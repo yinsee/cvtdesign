@@ -1136,16 +1136,17 @@ function buildPopVan(T, c) {
   const winY0 = yB + 0.005, winY1 = 1.82;
   const dA0 = 1.30, dA1 = 1.86;                                            // A-pillar foot and top
   const dJ = 0.896 - archR;                                                // the flat sides hand over to the rounded nose here
-  const cowlY = 1.295, cowlDrop = 0.045;                                   // windscreen base: highest on the centre line, down to the beltline at the corners
-  const cowlD = (u) => 1.02 + 0.28 * Math.pow(Math.abs(u), 2.4);           // windscreen base, bowed in plan
-  const headD = (u) => 1.74 + 0.12 * Math.pow(Math.abs(u), 2.4);           // windscreen top
+  // the bonnet climbs steeply to a high windscreen base (T5.1: the screen starts well above the beltline on the centre line)
+  const CD0 = 1.08, cowlY = 1.37, cowlDrop = 0.115;                        // windscreen base: depth and height on the centre line, dropping to the beltline at the corners
+  const cowlD = (u) => CD0 + 0.22 * Math.pow(Math.abs(u), 2.4);            // windscreen base, only gently bowed in plan
+  const headD = (u) => 1.70 + 0.16 * Math.pow(Math.abs(u), 2.4);           // windscreen top
 
   // ----- nose: bonnet, front panel and bumper as one surface, rounded in plan
-  const NPd = new T.CatmullRomCurve3([[1.02, cowlY, cowlDrop], [0.80, 1.238, 0.058], [0.58, 1.176, 0.062], [0.38, 1.116, 0.05], [0.25, 1.074, 0.03], [0.17, 1.04, 0.012], [0.128, 1.008, 0], [0.102, 0.96, 0], [0.082, 0.9, 0], [0.066, 0.85, 0], [0.04, 0.815, 0], [0.012, 0.78, 0], [0, 0.72, 0], [0, 0.6, 0], [0.004, 0.48, 0], [0.02, 0.4, 0], [0.06, 0.335, 0], [0.15, 0.3, 0], [0.40, 0.295, 0]].map((p) => V(p[0], p[1], p[2])), false, 'centripetal').getPoints(84).map((p) => [Math.max(0, p.x), p.y, Math.max(0, p.z)]);
+  const NPd = new T.CatmullRomCurve3([[CD0, cowlY, cowlDrop], [0.86, 1.296, 0.095], [0.64, 1.219, 0.078], [0.43, 1.146, 0.058], [0.28, 1.09, 0.034], [0.18, 1.046, 0.014], [0.128, 1.008, 0], [0.102, 0.96, 0], [0.082, 0.9, 0], [0.066, 0.85, 0], [0.04, 0.815, 0], [0.012, 0.78, 0], [0, 0.72, 0], [0, 0.6, 0], [0.004, 0.48, 0], [0.02, 0.4, 0], [0.06, 0.335, 0], [0.15, 0.3, 0], [0.40, 0.295, 0]].map((p) => V(p[0], p[1], p[2])), false, 'centripetal').getPoints(84).map((p) => [Math.max(0, p.x), p.y, Math.max(0, p.z)]);
   const plan = (u) => Math.pow(Math.max(0, 1 - Math.pow(Math.min(1, Math.abs(u)), 2.15)), 1 / 2.15);
   const nosePt = (d, y, drop, u) => {
     u = Math.max(-1, Math.min(1, u)); const au = Math.abs(u);
-    let dd = d + (cowlD(u) - 1.02) * Math.min(1, Math.max(0, (d - dJ) / (1.02 - dJ)));
+    let dd = d + (cowlD(u) - CD0) * Math.min(1, Math.max(0, (d - dJ) / (CD0 - dJ)));
     if (dd < dJ) dd = dJ - (dJ - dd) * plan(u);
     return V(xS * u, y - drop * au * au * au, Z(dd));
   };
@@ -1277,7 +1278,7 @@ function buildPopVan(T, c) {
   const yWT = 1.862, apF = 2.25, apR = 4.45, apW = 0.56;                    // windscreen top; roof opening (front, rear, half-width)
   const band = (secs, us) => loft(secs.map((s) => us.map((u) => roofPt(s, u))), paintD);
   const uAll = []; for (let j = 0; j <= 30; j++) uAll.push(-Math.cos(Math.PI * j / 30));
-  const brow = []; for (let i = 0; i <= 7; i++) { const t = i / 7, e = Math.sin(t * Math.PI / 2); brow.push([1.74 + 0.17 * t, 1.86 + 0.05 * t, yWT + (H - yWT) * Math.pow(e, 0.85), yWT + (yC - yWT) * t]); }
+  const brow = []; for (let i = 0; i <= 7; i++) { const t = i / 7, e = Math.sin(t * Math.PI / 2); brow.push([1.70 + 0.21 * t, 1.86 + 0.05 * t, yWT + (H - yWT) * Math.pow(e, 0.85), yWT + (yC - yWT) * t]); }
   const flatSec = (d, dy) => [d, d, H - (dy || 0), yC - (dy || 0) * 0.2];
   band(brow.concat([flatSec(apF)]), uAll);
   band([flatSec(apR), flatSec(4.8), flatSec(4.86, 0.035)], uAll);
@@ -1292,12 +1293,12 @@ function buildPopVan(T, c) {
     [-1, 1].forEach((sd) => rbox(0.03, fh, apR - apF, 0.01, ceiling, sd * (apW + 0.015), fy, Z((apF + apR) / 2)));
   }
   const wsPt = (ug, v) => {
-    const xb = (xS - 0.072) * ug, xt = (xR - 0.062) * ug, cb = nosePt(1.02, cowlY, cowlDrop, xb / xS), bz = Math.sin(Math.PI * v) * 0.016;
+    const xb = (xS - 0.072) * ug, xt = (xR - 0.062) * ug, cb = nosePt(CD0, cowlY, cowlDrop, xb / xS), bz = Math.sin(Math.PI * v) * 0.016;
     return V(xb + (xt - xb) * v, cb.y + 0.004 + (yWT - cb.y - 0.004) * v + bz * 0.6, cb.z + (Z(headD(xt / xR)) - cb.z) * v + bz * 0.8);
   };
   { const rows = []; for (let i = 0; i <= 16; i++) { const row = []; for (let j = 0; j <= 6; j++) row.push(wsPt(-1 + i / 8, j / 6)); rows.push(row); } noShadow(loft(rows, cabOutF)); noShadow(loft(rows, cabInB)); }
   { const us = []; for (let i = 0; i <= 16; i++) us.push(-0.96 + 0.12 * i); // scuttle panel and wipers
-    noShadow(loft([us.map((u) => nosePt(1.02, cowlY + 0.012, cowlDrop, u)), us.map((u) => nosePt(0.93, cowlY - 0.02, 0.05, u))], plasticD));
+    noShadow(loft([us.map((u) => nosePt(CD0, cowlY + 0.012, cowlDrop, u)), us.map((u) => nosePt(CD0 - 0.09, cowlY - 0.03, 0.085, u))], plasticD));
     const wp = (ug, v) => wsPt(ug, v).add(V(0, 0.012, 0.012));
     noShadow(bar(wp(-0.78, 0.03), wp(-0.08, 0.1), 0.014, 0.02, plastic)); noShadow(bar(wp(-0.02, 0.03), wp(0.66, 0.1), 0.014, 0.02, plastic)); }
 
