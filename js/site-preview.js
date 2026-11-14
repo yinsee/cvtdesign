@@ -620,12 +620,13 @@ DC["Van3D"] = (function () {
 
 const VAN_SPECS = {
   // paint, trim, wheels, glazing and setting follow each van's own cover photo
-  'man-lwb-auto': { env: 'alps', name: 'MAN TGE LWB Luxury · Automatic', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#38393d', layout: 'northsouth', bath: true, rearAxle: 1.75, doors: 'barn', wheels: 'alloy' },
-  'man-lwb-manual': { env: 'dales', name: 'MAN TGE LWB Luxury · Manual', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#36383c', layout: 'transverse', bedDepth: 1.5, bath: true, rearAxle: 1.75, doors: 'barn', wheels: 'alloy', pod: true },
-  'man-mwb': { env: 'farmland', name: 'MAN TGE MWB · 2 berth', L: 5.99, W: 2.04, H: 2.6, kind: 'high', paint: '#3d3f43', layout: 'transverse', bedDepth: 1.6, bath: true, rearAxle: 1.15, doors: 'barn', wheels: 'alloy' },
-  'crafter-auto': { env: 'coast', name: 'VW Crafter LWB · Automatic', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#efefed', metal: 0.25, layout: 'transverse', bedDepth: 1.4, bath: true, dinette: true, rearAxle: 1.75, doors: 'barn', wheels: 'steel', band: '#6f7378' },
-  'crafter-manual': { env: 'grove', name: 'VW Crafter LWB · Manual', L: 6.84, W: 2.04, H: 2.6, kind: 'high', paint: '#b7babe', metal: 0.85, layout: 'transverse', bedDepth: 1.4, bath: true, dinette: true, rearAxle: 1.75, doors: 'barn', wheels: 'steel', fullGlass: true, strip: '#1c1d20' },
-  'toleno': { env: 'forest', name: 'Toleno R · 4 berth', L: 6.36, W: 2.05, H: 2.62, kind: 'high', paint: '#f4f4f2', metal: 0.2, stripes: true, layout: 'transverse', bedDepth: 1.45, bath: true, dinette: true, rearAxle: 1.5, doors: 'barn', wheels: 'dark', band: '#1d1e21', bonnet: 0.68 },
+  // body: which family in VAN_BODY; L, wb, W, H from the makers' dimension sheets (research/remodel-factsheet-*.md)
+  'man-lwb-auto': { env: 'alps', name: 'MAN TGE LWB Luxury · Automatic', body: 'tge', face: 'a', L: 6.836, wb: 4.49, W: 2.04, H: 2.59, kind: 'high', paint: '#38393d', layout: 'northsouth', bath: true, doors: 'barn', wheels: 'alloy', wins: { n: [[2.57, 3.8], [3.98, 5.3]], o: [[2.57, 3.8], [3.98, 5.3]] } },
+  'man-lwb-manual': { env: 'dales', name: 'MAN TGE LWB Luxury · Manual', body: 'tge', face: 'a', L: 6.836, wb: 4.49, W: 2.04, H: 2.59, kind: 'high', paint: '#36383c', layout: 'transverse', bedDepth: 1.5, bath: true, doors: 'barn', wheels: 'alloy', pod: true, wins: { n: [[2.57, 3.8]], o: [[2.62, 3.74, 0, 0, 0.52]] } },
+  'man-mwb': { env: 'farmland', name: 'MAN TGE MWB · 2 berth', body: 'tge', face: 'a', L: 5.986, wb: 3.64, W: 2.04, H: 2.59, kind: 'high', paint: '#3d3f43', layout: 'transverse', bedDepth: 1.6, bath: true, doors: 'barn', wheels: 'alloy', wins: { n: [[2.57, 3.8], [4.2, 5.3, 1.5, 2.0]], o: [[2.57, 3.8], [4.2, 5.3, 1.5, 2.0]] } },
+  'crafter-auto': { env: 'coast', name: 'VW Crafter LWB · Automatic', body: 'tge', face: 'b', L: 6.836, wb: 4.49, W: 2.04, H: 2.59, kind: 'high', paint: '#efefed', metal: 0.25, layout: 'transverse', bedDepth: 1.4, bath: true, dinette: true, doors: 'barn', wheels: 'steel', bumper: '#3b3d41', bumperTop: 0.76, band: ['#74777b', 0.42, 0.78, true], sill: '#74777b', handles: 'black', wins: { n: [[2.62, 3.74, 0, 0, 0.5]], o: [[2.57, 3.8]] } },
+  'crafter-manual': { env: 'grove', name: 'VW Crafter LWB · Manual', body: 'mk1', L: 6.94, wb: 4.325, W: 1.993, H: 2.705, kind: 'high', paint: '#b7babe', metal: 0.85, layout: 'transverse', bedDepth: 1.4, bath: true, dinette: true, doors: 'barn', wheels: 'steelS', bumper: 'black', fullGlass: true, strip: ['#1c1d20', 0.71, 0.14], handles: 'black', roof: { rail: true, vents: [[2.15, 0.34, 0.5], [4.6, 0.5, 0.5]] }, wins: { n: [[2.52, 3.66], [3.82, 5.22], [5.34, 6.72]], o: [[2.52, 3.66, 0, 0, 0.55], [3.82, 5.22], [5.34, 6.72]] } },
+  'toleno': { env: 'forest', name: 'Toleno R · 4 berth', body: 'ducato', L: 5.998, wb: 4.035, W: 2.05, H: 2.524, kind: 'high', paint: '#f4f4f2', metal: 0.2, stripes: true, layout: 'transverse', bedDepth: 1.3, bath: true, bathLen: 0.75, dinette: true, doors: 'barn', wheels: 'dark', band: ['black', 0.4, 0.64], sill: 'black', bumperRear: 'black', rearCorner: 0.3, winFrame: true, awning: '#e9e9e6', hatch: { o: [3.75, 4.1, 0.75, 1.15] }, roof: { dome: [5.0, 0.55], vents: [[3.0, 0.7, 0.5], [5.2, 0.4, 0.4, -0.3]], solar: [[4.15, 1.2, 0.6]] }, wins: { n: [[2.52, 3.45, 1.4, 1.98]], o: [[2.5, 3.5, 1.4, 1.98]] } },
   // the T5s: 4.892 x 1.904 m body on a 3.0 m wheelbase, 1.94 m to the steel roof and 2.0 m with the pop-top shut (see research/t5-factsheet.md)
   't5-spacious': { env: 'dales', name: 'VW T5 Spacious · Pop-top', L: 4.892, W: 1.904, H: 1.94, kind: 'pop', paint: '#56585b', metal: 0.32, layout: 'rockroll', bath: false, doors: 'tailgate', wheels: 'alloy', canvas: '#6f6a64', canvasLean: 0.06, microwave: true },
   't5-widebed': { env: 'farmland', name: 'VW T5 Wide Bed · Pop-top', L: 4.892, W: 1.904, H: 1.94, kind: 'pop', paint: '#b5b9be', metal: 0.85, layout: 'rockroll', wideBed: true, bath: false, doors: 'tailgate', wheels: 'cover', canvas: '#1c1c1e', canvasSheen: 0.1, lid: '#2b2c2f', canvasLean: 0.06 },
@@ -746,8 +747,39 @@ function mirrorGlassGeo(T, w, h, r) {
 }
 
 // ---------- the van
+// body families for the high-roof vans (unbranded). Dimensions and proportions follow research/remodel-factsheet-*.md.
+// d = metres back from the front bumper. NP is the centre-line profile of the nose from the windscreen base down to the underside: [d, height, how far the bonnet edge drops at the sides]
+const VAN_BODY = {
+  // 2017-on large van, the body shared by the MAN TGE and VW Crafter Mk2: 2.04 m wide, 2.59 m high roof, overhangs 1.0 m front and 1.346 m rear
+  tge: { fo: 1.0, wheelR: 0.356, tyreW: 0.118, wx: 0.868, sillY: 0.33, floorY: 0.58, archR: 0.47, archUp: 0.03, yB: 1.39, cant: 0.15, tumble: 0.085, planN: 2.8,
+    NP: [[0.8, 1.475, 0.075], [0.64, 1.39, 0.07], [0.47, 1.295, 0.06], [0.33, 1.21, 0.045], [0.22, 1.15, 0.028], [0.14, 1.105, 0.012], [0.098, 1.06, 0], [0.08, 0.99, 0], [0.066, 0.9, 0], [0.054, 0.82, 0], [0.038, 0.775, 0], [0.016, 0.745, 0], [0, 0.69, 0], [0, 0.55, 0], [0.005, 0.44, 0], [0.028, 0.375, 0], [0.08, 0.335, 0], [0.18, 0.315, 0], [0.44, 0.31, 0]],
+    cowlBow: 0.32, HD0: 1.56, headBow: 0.17, yWT: 2.15, yA1: 2.12, capEnd: 2.45, capPow: 0.8,
+    doorF: 1.335, dB: 2.42, slide: [2.47, 3.87], handleY: 1.26, swage: 1.18, crease: 0.64, winY0: 1.415, winY1: 2.08, railY: 1.365, gutter: 2.14,
+    cabWin: [[2.33, 1.415], [1.33, 1.415], [1.755, 2.07], [2.33, 2.07]], quarter: 1.62,
+    seatD: 2.0, dash: 0.62, eye: 1.2, doorY0: 0.6, lampR: [0.98, 1.6], bumpR: [0.36, 0.6],
+    mirror: { d: 1.3, y: 1.6, w: 0.185, h: 0.36, out: 0.012, armY: -0.13 } },
+  // 2006-2016 large van (VW Crafter Mk1, the Sprinter-derived body): 1.993 m wide, 2.705 m high roof, overhangs about 1.0 m front and 1.615 m rear
+  mk1: { fo: 1.0, wheelR: 0.356, tyreW: 0.118, wx: 0.85, sillY: 0.36, floorY: 0.66, archR: 0.45, archUp: 0.02, yB: 1.38, cant: 0.19, tumble: 0.11, planN: 2.35,
+    NP: [[0.78, 1.5, 0.08], [0.62, 1.43, 0.08], [0.46, 1.35, 0.075], [0.32, 1.27, 0.065], [0.21, 1.195, 0.05], [0.14, 1.13, 0.03], [0.1, 1.06, 0.012], [0.078, 0.96, 0], [0.06, 0.87, 0], [0.042, 0.8, 0], [0.02, 0.76, 0], [0.004, 0.72, 0], [0, 0.64, 0], [0, 0.52, 0], [0.008, 0.44, 0], [0.035, 0.385, 0], [0.09, 0.35, 0], [0.2, 0.335, 0], [0.44, 0.33, 0]],
+    cowlBow: 0.4, HD0: 1.74, headBow: 0.2, yWT: 2.25, yA1: 2.21, capEnd: 2.66, capPow: 0.85,
+    doorF: 1.3, dB: 2.36, slide: [2.42, 3.75], handleY: 1.24, swage: 1.16, crease: 0, winY0: 1.41, winY1: 2.13, railY: 1.35, gutter: 2.24,
+    cabWin: [[2.27, 1.42], [1.3, 1.42], [1.95, 2.15], [2.27, 2.15]], quarter: 0,
+    seatD: 2.08, dash: 0.6, eye: 1.18, doorY0: 0.68, lampR: [0.98, 1.72], bumpR: [0.4, 0.66],
+    mirror: { d: 1.36, y: 1.62, w: 0.17, h: 0.3, out: 0.04, armY: -0.1 } },
+  // 2014-on large front-wheel-drive van (Fiat Ducato X290 family, the base of the Toleno R): 2.05 m wide, 2.524 m roof, overhangs 0.948 m front and 1.015 m rear
+  ducato: { fo: 0.948, wheelR: 0.368, tyreW: 0.113, wx: 0.89, sillY: 0.33, floorY: 0.56, archR: 0.46, archUp: 0.03, yB: 1.4, cant: 0.17, tumble: 0.1, planN: 2.5,
+    NP: [[0.66, 1.52, 0.05], [0.52, 1.465, 0.05], [0.38, 1.405, 0.045], [0.26, 1.35, 0.035], [0.17, 1.3, 0.022], [0.115, 1.255, 0.01], [0.082, 1.19, 0], [0.062, 1.08, 0], [0.045, 0.95, 0], [0.03, 0.85, 0], [0.012, 0.78, 0], [0, 0.72, 0], [0, 0.56, 0], [0.006, 0.45, 0], [0.03, 0.385, 0], [0.085, 0.345, 0], [0.19, 0.325, 0], [0.42, 0.32, 0]],
+    cowlBow: 0.4, HD0: 1.56, headBow: 0.2, yWT: 2.2, yA1: 2.17, capEnd: 2.5, capPow: 0.7,
+    doorF: 1.2, dB: 2.28, slide: [2.33, 3.62], handleY: 1.22, swage: 1.3, crease: 0.72, winY0: 1.42, winY1: 1.98, railY: 1.36, gutter: 0,
+    cabWin: [[2.19, 1.43], [1.2, 1.43], [1.83, 2.1], [2.19, 2.1]], quarter: 1.6,
+    seatD: 1.96, dash: 0.62, eye: 1.2, doorY0: 0.58, lampR: [1.0, 1.62], bumpR: [0.36, 0.6],
+    mirror: { d: 1.26, y: 1.6, w: 0.17, h: 0.34, out: 0.09, armY: -0.1 } }
+};
+
+// ---------- the high-roof vans: one builder, three body families (see VAN_BODY). Unbranded: plain lamps and grilles in the right places, no badges or lettering
 function buildVan(T, c) {
-  if (c.kind === 'pop') return buildPopVan(T, c); // pop-tops have their own builder, below; this one is the high-roof vans
+  if (c.kind === 'pop') return buildPopVan(T, c); // pop-tops have their own builder, below
+  const F = VAN_BODY[c.body || 'tge'];
   const g = new T.Group();
   const mats = [], texs = [];
   const P = (o) => { const m = new T.MeshPhysicalMaterial(o); mats.push(m); return m; };
@@ -764,29 +796,37 @@ function buildVan(T, c) {
   }, 1, 3); texs.push(floorTex);
 
   // materials that reflect the scenery (the scene reflection map is given to them by setEnv)
+  const DS = T.DoubleSide;
   const refl = [], X = (m) => { refl.push(m); return m; };
-  const paint = paleReflections(X(P(paintSpec(c))), 0.3);
-  const plastic = S({ color: '#1b1c1f', roughness: 0.78 });
+  const paintO = paintSpec(c);
+  const paint = paleReflections(X(P(paintO)), 0.3), paintD = paleReflections(X(P(Object.assign({ side: DS }, paintO))), 0.3);
+  const plastic = S({ color: '#1b1c1f', roughness: 0.78 }), plasticD = S({ color: '#1b1c1f', roughness: 0.78, side: DS });
   const satin = S({ color: '#2b2c30', roughness: 0.5, metalness: 0.15 });
-  const chrome = X(S({ color: '#dfe3e8', roughness: 0.12, metalness: 1 }));
+  const gloss = X(P({ color: '#0c0d0f', roughness: 0.12, metalness: 0.2, clearcoat: 1, side: DS }));
+  const chrome = X(S({ color: '#dfe3e8', roughness: 0.14, metalness: 1, side: DS }));
   const mirrorM = X(S({ color: '#e6ebef', roughness: 0.02, metalness: 1, envMapIntensity: 1.05 }));
   const gap = gapMats(T); mats.push(gap.core, gap.halo);
   const tyreM = S({ color: '#141416', roughness: 0.92 });
+  const linerM = S({ color: '#0f0f11', roughness: 0.95, side: DS });
   const rimM = X(S({ color: '#c5c9cf', roughness: 0.25, metalness: 0.95 }));
-  const darkRim = X(S({ color: '#1c1d20', roughness: 0.3, metalness: 0.6 })), steelRim = X(S({ color: '#2b2d31', roughness: 0.5, metalness: 0.5 })), coverM = X(S({ color: '#bfc3c8', roughness: 0.35, metalness: 0.7 }));
-  const glassSide = X(P({ color: '#0b0f14', metalness: 0.15, roughness: 0.03, transparent: true, opacity: 0.74, side: T.DoubleSide, depthWrite: false, envMapIntensity: 1.5 }));
+  const darkRim = X(S({ color: '#1c1d20', roughness: 0.3, metalness: 0.6 })), steelRim = X(S({ color: '#2b2d31', roughness: 0.5, metalness: 0.5 })), coverM = X(S({ color: '#b9bdc2', roughness: 0.38, metalness: 0.7 }));
+  const glassSide = X(P({ color: '#0b0f14', metalness: 0.15, roughness: 0.03, transparent: true, opacity: 0.74, side: DS, depthWrite: false, envMapIntensity: 1.5 }));
   const tint = (side, out) => out
     ? X(P({ color: '#07090c', metalness: 0.2, roughness: 0.04, transparent: true, opacity: 0.93, side, depthWrite: false, envMapIntensity: 1.5, emissive: '#ffc985', emissiveIntensity: 0 }))
     : P({ color: '#10161c', metalness: 0.05, roughness: 0.03, transparent: true, opacity: 0.28, side, depthWrite: false, envMapIntensity: 1.2 });
   const tintOutF = tint(T.FrontSide, true), tintOutB = tint(T.BackSide, true), tintInF = tint(T.FrontSide, false), tintInB = tint(T.BackSide, false);
-  const bodyLow = c.bumpers === 'body';
-  const glassFront = X(P({ color: '#30404c', metalness: 0.05, roughness: 0.03, transparent: true, opacity: 0.22, side: T.DoubleSide, depthWrite: false, envMapIntensity: 1.3 }));
-  const headM = X(P({ color: '#e8eef4', roughness: 0.05, metalness: 0.2, clearcoat: 1, emissive: '#d8e8ff', emissiveIntensity: 0.55 }));
-  const drlM = S({ color: '#ffffff', emissive: '#ffffff', emissiveIntensity: 2.5 });
-  const tailM = P({ color: '#9c1022', roughness: 0.1, clearcoat: 1, emissive: '#6a0a16', emissiveIntensity: 0.9 });
-  const plateM = S({ color: '#f2f2ee', roughness: 0.5 });
+  const cabGlass = (side, out) => { const m = P({ color: out ? '#15181b' : '#30404c', metalness: 0.1, roughness: 0.03, transparent: true, opacity: out ? 0.66 : 0.14, side, depthWrite: false, envMapIntensity: out ? 1.1 : 1.0 }); return out ? X(m) : m; };
+  const cabOutF = cabGlass(T.FrontSide, true), cabOutB = cabGlass(T.BackSide, true), cabInF = cabGlass(T.FrontSide, false), cabInB = cabGlass(T.BackSide, false);
+  const headM = X(P({ color: '#c3cad1', roughness: 0.16, metalness: 0.85, clearcoat: 1, emissive: '#d8e8ff', emissiveIntensity: 0.12 }));
+  const lensM = X(P({ color: '#3a3d42', roughness: 0.1, metalness: 0.6, clearcoat: 1, envMapIntensity: 0.7 }));
+  const lensL = X(P({ color: '#9aa1a8', roughness: 0.12, metalness: 0.75, clearcoat: 1, envMapIntensity: 0.9 }));
+  const drlM = S({ color: '#ffffff', emissive: '#ffffff', emissiveIntensity: 1.6, side: DS });
+  const slatM = S({ color: '#50545a', roughness: 0.4, metalness: 0.5, side: DS });
+  const amberM = P({ color: '#e08a1c', roughness: 0.15, clearcoat: 1, emissive: '#7a3d00', emissiveIntensity: 0.5, side: DS });
+  const tailM = P({ color: '#8d0f1d', roughness: 0.14, clearcoat: 1, emissive: '#4a060e', emissiveIntensity: 0.35, envMapIntensity: 0.6 });
+  const plateF = S({ color: '#f2f2ee', roughness: 0.5, side: DS }), plateR = S({ color: '#e8c53a', roughness: 0.5 });
   const lining = P({ color: '#8f8b85', roughness: 1, sheen: 0.5, sheenColor: '#b9b4ab' });
-  const ceiling = S({ color: '#efebe4', roughness: 0.9 });
+  const ceiling = S({ color: '#efebe4', roughness: 0.9, side: DS });
   const wood = S({ color: '#ffffff', map: woodTex, roughness: 0.55 });
   const floorM = S({ color: '#ffffff', map: floorTex, roughness: 0.65 });
   const worktop = S({ color: '#26272b', roughness: 0.22, metalness: 0.15 });
@@ -796,249 +836,370 @@ function buildVan(T, c) {
   const throwM = P({ color: '#b02e46', roughness: 1, sheen: 0.6, sheenColor: '#e07a8c' });
   const white = S({ color: '#f5f5f3', roughness: 0.4 });
   const steel = S({ color: '#cfd3d8', roughness: 0.22, metalness: 0.9 });
-  const canvasM = P({ color: '#5f5a54', roughness: 1, sheen: 0.4, sheenColor: '#9a948c', side: T.DoubleSide });
   const lampM = S({ color: '#fff4dd', emissive: '#ffe9c4', emissiveIntensity: 3 });
   const ledM = S({ color: '#ffe2b0', emissive: '#ffcf8a', emissiveIntensity: 2.2 });
   const screenM = S({ color: '#0b1220', emissive: '#1d3d66', emissiveIntensity: 0.9, roughness: 0.2 });
   const solarM = P({ color: '#15213b', metalness: 0.4, roughness: 0.15, clearcoat: 1 });
-  const awningM = S({ color: '#a7acb2', roughness: 0.35, metalness: 0.6 });
-  const stripeA = P({ color: '#b5233a', roughness: 0.3, clearcoat: 1 });
-  const stripeB = P({ color: '#2b2d33', roughness: 0.3, clearcoat: 1 });
+  const awningM = S({ color: c.awning || '#a7acb2', roughness: 0.35, metalness: 0.6 });
+  // unpainted lower trim: black, grey, or painted like the body
+  const trimM = (v) => !v || v === 'body' ? paint : v === 'black' ? plasticD : S({ color: v, roughness: 0.62, metalness: 0.1, side: DS });
+  const bumperM = trimM(c.bumper), bumperD = !c.bumper || c.bumper === 'body' ? paintD : c.bumper === 'black' ? plasticD : bumperM;
 
   const add = (geo, mat, x, y, z, parent) => { const m = new T.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true; (parent || g).add(m); return m; };
   const box = (w, h, d, mat, x, y, z, parent) => add(new T.BoxGeometry(w, h, d), mat, x, y, z, parent);
   const rbox = (w, h, d, r, mat, x, y, z, parent) => add(rboxGeo(T, w, h, d, r), mat, x, y, z, parent);
   const noShadow = (m) => { m.castShadow = false; return m; };
-
-  const L = c.L, W = c.W, H = c.H, half = L / 2, rearZ = -half;
-  const rr = 0.25;
-  const sillY = 0.34, floorY = 0.56, wheelR = 0.37;
-  const bonnetLen = c.bonnet || 0.86, bonnetH = 1.12;
-  const wsBaseZ = half - bonnetLen;
-  const wsTopY = 2.08;
-  const wsRun = 0.94;
-  const wsTopZ = wsBaseZ - wsRun;
-  const capRun = 0.46;
-  const roofFrontZ = wsTopZ - capRun;
-  const fAx = half - 0.92;
-  const rAx = rearZ + c.rearAxle;
-  const archR = wheelR + 0.07, archY = sillY + 0.02;
-  const cabDoorRear = wsBaseZ - 1.02;
-  const topY = H - rr;
-  const lerp2 = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
-
-  // --- side profile with wheel arches
-  const outline = () => {
-    const s = new T.Shape();
-    s.moveTo(rearZ, archY);
-    s.lineTo(rAx - archR, archY);
-    s.absarc(rAx, archY, archR, Math.PI, 0, true);
-    s.lineTo(fAx - archR, archY);
-    s.absarc(fAx, archY, archR, Math.PI, 0, true);
-    s.lineTo(half - 0.3, archY);
-    s.lineTo(half - 0.3, bonnetH - 0.07);
-    s.lineTo(wsBaseZ, bonnetH - 0.07);
-    s.lineTo(wsBaseZ, bonnetH);
-    s.lineTo(wsTopZ, Math.min(wsTopY, topY));
-    s.quadraticCurveTo(wsTopZ - 0.08, topY, roofFrontZ, topY);
-    s.lineTo(rearZ + 0.06, topY);
-    s.quadraticCurveTo(rearZ, topY, rearZ, topY - 0.06);
-    s.lineTo(rearZ, archY);
-    return s;
-  };
-  const rect = (z0, z1, y0, y1) => [[z0, y0], [z1, y0], [z1, y1], [z0, y1]];
-  const cabWin = () => {
-    const a = [wsBaseZ, bonnetH], b = [wsTopZ, Math.min(wsTopY, topY)];
-    const p1 = lerp2(a, b, 0.16), p2 = lerp2(a, b, 0.84);
-    const top = Math.min(p2[1], topY - 0.1);
-    return [[cabDoorRear + 0.08, bonnetH + 0.15], [p1[0] - 0.11, bonnetH + 0.15], [p2[0] - 0.11, top], [cabDoorRear + 0.08, top]];
-  };
-  const winY0 = 1.3, winY1 = 1.84;
-  const livingWins = (side) => {
-    const w = [];
-    const mid = (rearZ + cabDoorRear) / 2;
-    if (c.stripes) {
-      if (side > 0) w.push(rect(cabDoorRear - 1.05, cabDoorRear - 0.2, winY0, winY1));
-      w.push(rect(rearZ + 0.35, rearZ + 1.15, winY0 + 0.05, winY1));
-      if (side < 0) w.push(rect(mid - 0.35, mid + 0.35, winY0, winY1));
-      return w;
-    }
-    const gy0 = bonnetH + 0.16, gy1 = topY - 0.2;
-    if (c.fullGlass) { const z0 = rearZ + 0.32, z1 = cabDoorRear - 0.1, n = 4, pw = (z1 - z0 - 0.09 * (n - 1)) / n; for (let k = 0; k < n; k++) w.push(rect(z0 + k * (pw + 0.09), z0 + k * (pw + 0.09) + pw, gy0, gy1)); return w; }
-    w.push(rect(cabDoorRear - 1.22, cabDoorRear - 0.1, gy0, gy1));
-    w.push(rect(rearZ + 0.42, cabDoorRear - 1.36, gy0, gy1));
-    return w;
+  const V = (x, y, z) => new T.Vector3(x, y, z);
+  const yAxis = V(0, 1, 0);
+  const setBar = (m, a, b) => { const d = b.clone().sub(a), len = d.length() || 1e-4; m.position.copy(a).addScaledVector(d, 0.5); m.quaternion.setFromUnitVectors(yAxis, d.multiplyScalar(1 / len)); m.scale.y = len; return m; };
+  const bar = (a, b, w, t, mat, r, parent) => setBar(add(r ? rboxGeo(T, w, 1, t, r) : new T.BoxGeometry(w, 1, t), mat, 0, 0, 0, parent), a, b);
+  const loft = (rows, mat, parent) => {
+    const n = rows.length, m = rows[0].length, pos = new Float32Array(n * m * 3), idx = [];
+    rows.forEach((r, i) => r.forEach((p, j) => { const o = (i * m + j) * 3; pos[o] = p.x; pos[o + 1] = p.y; pos[o + 2] = p.z; }));
+    for (let i = 0; i < n - 1; i++) for (let j = 0; j < m - 1; j++) { const a = i * m + j, b = a + 1, d = a + m, e = d + 1; idx.push(a, d, b, b, d, e); }
+    const geo = new T.BufferGeometry(); geo.setAttribute('position', new T.BufferAttribute(pos, 3)); geo.setIndex(idx); geo.computeVertexNormals();
+    return add(geo, mat, 0, 0, 0, parent);
   };
   const toPath = (pts, Ctor) => { const p = new Ctor(); p.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) p.lineTo(pts[i][0], pts[i][1]); p.closePath(); return p; };
-  const sideMesh = (shape, depth, mat, x, bevel) => {
-    const geo = new T.ExtrudeGeometry(shape, bevel
-      ? { depth, bevelEnabled: true, bevelThickness: 0.01, bevelSize: 0.014, bevelSegments: 3, curveSegments: 40 }
-      : { depth, bevelEnabled: false, curveSegments: 24 });
-    geo.rotateY(-Math.PI / 2);
-    return add(geo, mat, x, 0, 0);
+  // small fixed trim (lamp and grille pieces, bands, stripes) is pooled and merged into one mesh per material, to keep the draw calls down
+  const pools = new Map(), stub = { castShadow: false, receiveShadow: false };
+  const pool = (geo, mat) => { if (mat.transparent && mat !== gap.core && mat !== gap.halo) return null; if (!pools.has(mat.uuid)) pools.set(mat.uuid, { mat, list: [] }); pools.get(mat.uuid).list.push(geo); return stub; };
+  const loftGeo = (rows) => { const n = rows.length, m = rows[0].length, pos = new Float32Array(n * m * 3), idx = []; rows.forEach((r, i) => r.forEach((p, j) => { const o = (i * m + j) * 3; pos[o] = p.x; pos[o + 1] = p.y; pos[o + 2] = p.z; })); for (let i = 0; i < n - 1; i++) for (let j = 0; j < m - 1; j++) { const a = i * m + j, b = a + 1, d = a + m, e = d + 1; idx.push(a, d, b, b, d, e); } const geo = new T.BufferGeometry(); geo.setAttribute('position', new T.BufferAttribute(pos, 3)); geo.setIndex(idx); geo.computeVertexNormals(); return geo; };
+
+  // ----- key dimensions (metres)
+  const L = c.L, W = c.W, H = c.H, half = L / 2, rearZ = -half, Z = (d) => half - d;
+  const wheelR = F.wheelR, wx = F.wx, fAx = Z(F.fo), rAx = Z(F.fo + c.wb), dRA = F.fo + c.wb;
+  const sillY = F.sillY, floorY = F.floorY, archR = F.archR, archC = wheelR + (F.archUp || 0);
+  const yB = F.yB, yC = H - F.cant, xS = W / 2 - 0.012, tl = F.tumble / (yC - yB);    // waist, cant rail, tumblehome
+  const sx = (y) => xS - Math.max(0, y - yB) * tl;                                   // body half-width at height y
+  const xR = sx(yC), yCeil = H - 0.07;
+  const CD0 = F.NP[0][0], cowlY = F.NP[0][1], cowlDrop = F.NP[0][2];
+  const dA0 = CD0 + F.cowlBow, dA1 = F.HD0 + F.headBow, yWT = F.yWT, yA1 = F.yA1;     // A-pillar foot and top
+  const dJ = F.fo - archR;                                                          // the flat sides hand over to the rounded nose here
+  const cowlD = (u) => CD0 + F.cowlBow * Math.pow(Math.abs(u), 2.4);
+  const headD = (u) => F.HD0 + F.headBow * Math.pow(Math.abs(u), 2.4);
+  const dB = F.dB, sl0 = F.slide[0], sl1 = F.slide[1];
+  const dd = (d) => d < 0 ? L + d : d;                                              // window positions may be given from the rear (negative)
+
+  // ----- nose: bonnet, front panel and bumper as one surface, rounded in plan
+  const NPd = new T.CatmullRomCurve3(F.NP.map((p) => V(p[0], p[1], p[2])), false, 'centripetal').getPoints(90).map((p) => [Math.max(0, p.x), p.y, Math.max(0, p.z)]);
+  const plan = (u) => Math.pow(Math.max(0, 1 - Math.pow(Math.min(1, Math.abs(u)), F.planN)), 1 / F.planN);
+  const nosePt = (d, y, drop, u) => {
+    u = Math.max(-1, Math.min(1, u)); const au = Math.abs(u);
+    let q = d + (cowlD(u) - CD0) * Math.min(1, Math.max(0, (d - dJ) / (CD0 - dJ)));
+    if (q < dJ) q = dJ - (dJ - q) * plan(u);
+    return V(xS * u, y - drop * au * au * au, Z(q));
   };
-  [-1, 1].forEach((side) => {
-    const holes = [cabWin()].concat(livingWins(side));
-    const s = outline();
-    holes.forEach((h) => s.holes.push(toPath(h, T.Path)));
-    sideMesh(s, 0.025, paint, side > 0 ? W / 2 - 0.012 : -W / 2 + 0.037, true);
-    const lin = toPath(rect(rearZ + 0.04, cabDoorRear, floorY, topY - 0.02), T.Shape);
-    livingWins(side).forEach((h) => lin.holes.push(toPath(h, T.Path)));
-    sideMesh(lin, 0.015, lining, side > 0 ? W / 2 - 0.05 : -W / 2 + 0.065, false);
-    holes.forEach((h, i) => {
-      const sg = new T.ShapeGeometry(toPath(h, T.Shape)); sg.rotateY(-Math.PI / 2); const gx = side > 0 ? W / 2 - 0.022 : -W / 2 + 0.022;
-      if (i === 0) { noShadow(add(sg, glassFront, gx, 0, 0)); return; }
-      // the pane faces -x: seen from outside on the +x side it is the back face
-      noShadow(add(sg, side > 0 ? tintOutB : tintOutF, gx, 0, 0)); noShadow(add(sg, side > 0 ? tintInF : tintInB, gx, 0, 0));
-    });
-    // arch flares
-    [fAx, rAx].forEach((z) => { const f = add(new T.TorusGeometry(archR + 0.012, 0.04, 14, 48, Math.PI), bodyLow ? paint : plastic, side * (W / 2 + 0.004), archY, z); f.rotation.y = Math.PI / 2; });
-    // sill + rubbing strip
-    rbox(0.05, 0.1, (fAx - archR) - (rAx + archR) - 0.04, 0.02, bodyLow ? paint : plastic, side * (W / 2 + 0.01), sillY + 0.07, (fAx + rAx) / 2);
-    // lower body band (grey on the Crafter Auto, black on the Toleno), kept clear of the wheel arches
-    if (c.band) { const bandM = S({ color: c.band, roughness: 0.55, metalness: 0.2 }), bt = 0.3, segs = [[rearZ + 0.04, rAx - archR - 0.03], [rAx + archR + 0.03, fAx - archR - 0.03], [fAx + archR + 0.03, half - 0.34]];
-      segs.forEach(([z0, z1]) => { if (z1 - z0 > 0.05) noShadow(box(0.012, bt, z1 - z0, bandM, side * (W / 2 + 0.006), archY + bt / 2, (z0 + z1) / 2)); }); }
-    // black rubbing strip along the side (Crafter Manual)
-    if (c.strip) { const stM = S({ color: c.strip, roughness: 0.6 }); [[rAx + archR + 0.03, fAx - archR - 0.03], [rearZ + 0.04, rAx - archR - 0.03]].forEach(([z0, z1]) => noShadow(rbox(0.035, 0.12, z1 - z0, 0.02, stM, side * (W / 2 + 0.012), archY + 0.24, (z0 + z1) / 2))); }
-    // rear side pod (MAN Manual): a glazed extension at the back of the living area
-    if (c.pod) { const podM = X(P({ color: '#1d1e22', metalness: 0.3, roughness: 0.25, clearcoat: 1 })), pz = rearZ + 0.72, py = winY0 + 0.22;
-      rbox(0.2, 0.62, 1.12, 0.07, podM, side * (W / 2 + 0.07), py, pz);
-      noShadow(rbox(0.012, 0.36, 0.86, 0.02, side > 0 ? tintOutB : tintOutF, side * (W / 2 + 0.172), py + 0.04, pz)); }
-    // mirror
-    // door mirror: a tall black housing on a short arm, with a domed mirror glass facing backwards
-    rbox(0.2, 0.3, 0.1, 0.04, plastic, side * (W / 2 + 0.2), bonnetH + 0.36, wsBaseZ - 0.14);
-    noShadow(add(mirrorGlassGeo(T, 0.165, 0.26, 0.03), mirrorM, side * (W / 2 + 0.2), bonnetH + 0.36, wsBaseZ - 0.14 - 0.058));
-    rbox(0.14, 0.04, 0.06, 0.015, plastic, side * (W / 2 + 0.05), bonnetH + 0.27, wsBaseZ - 0.14);
-    // door seams and handles
-    const seam = (z, y0, y1) => { [[gap.halo, 0.016, 0.0022], [gap.core, 0.0045, 0.0028]].forEach(([m, wd, off]) => { const b = box(0.001, y1 - y0, wd, m, side * (W / 2 + off), (y0 + y1) / 2, z); b.castShadow = false; b.receiveShadow = false; }); };
-    seam(cabDoorRear, sillY + 0.12, Math.min(wsTopY, topY) - 0.12);
-    rbox(0.03, 0.035, 0.16, 0.012, satin, side * (W / 2 + 0.012), bonnetH + 0.02, cabDoorRear + 0.18);
-    if (side > 0) { seam(cabDoorRear - 1.25, sillY + 0.12, topY - 0.15); rbox(0.03, 0.035, 0.18, 0.012, satin, W / 2 + 0.012, bonnetH + 0.02, cabDoorRear - 1.12); box(0.01, 0.025, cabDoorRear - 1.25 - rearZ - 0.2, plastic, W / 2 + 0.008, winY1 + 0.08, (rearZ + 0.2 + cabDoorRear - 1.25) / 2); }
-    if (c.stripes) {
-      const slant = (z0, y0, len, hgt, lean, m) => { const sh = new T.Shape(); sh.moveTo(z0, y0); sh.lineTo(z0 + len, y0); sh.lineTo(z0 + len + lean, y0 + hgt); sh.lineTo(z0 + lean, y0 + hgt); sh.closePath(); const sg = new T.ShapeGeometry(sh); sg.rotateY(-Math.PI / 2); noShadow(add(sg, m, side * (W / 2 + 0.008), 0, 0)).material.side = T.DoubleSide; };
-      const grey = S({ color: '#8f949a', roughness: 0.4 }), dark = S({ color: '#3a3d43', roughness: 0.4 });
-      [[0, dark], [1, stripeA], [2, grey], [3, dark]].forEach(([k, m]) => slant(rearZ + 0.08, 1.02 + k * 0.1, 1.25 - k * 0.12, 0.055, 0.2, m));
-      [[0, dark], [1, stripeA], [2, grey]].forEach(([k, m]) => slant(cabDoorRear - 0.95 + k * 0.05, 0.86 + k * 0.08, 0.7 - k * 0.1, 0.045, 0.16, m));
+  { const M = 40, rows = []; for (let j = 0; j <= M; j++) { const u = -Math.cos(Math.PI * j / M); rows.push(NPd.map((p) => nosePt(p[0], p[1], p[2], u))); } loft(rows, paintD); }
+  const faceD = (y) => { for (let i = 1; i < NPd.length; i++) { const a = NPd[i - 1], b = NPd[i]; if (a[0] < 0.26 && a[1] >= y && b[1] <= y) return a[0] + (b[0] - a[0]) * (a[1] - y) / Math.max(1e-6, a[1] - b[1]); } return 0; };
+  // a patch lying on the front of the nose between two heights (numbers or functions of u), a little proud of it
+  const nosePatch = (u0, u1, y0, y1, off, mat, nu, nv) => {
+    const f0 = typeof y0 === 'function' ? y0 : () => y0, f1 = typeof y1 === 'function' ? y1 : () => y1, g0 = typeof u0 === 'function' ? u0 : () => u0, g1 = typeof u1 === 'function' ? u1 : () => u1, rows = [];
+    for (let i = 0; i <= nu; i++) {
+      const row = [];
+      for (let j = 0; j <= nv; j++) {
+        const t = j / nv, u = g0(t) + (g1(t) - g0(t)) * i / nu, y = f0(u) + (f1(u) - f0(u)) * t, d = faceD(y), p = nosePt(d, y, 0, u), q = nosePt(d, y, 0, u + 0.01), r = nosePt(d, y, 0, u - 0.01);
+        const tx = q.x - r.x, tz = q.z - r.z, tn = Math.hypot(tx, tz) || 1;
+        p.x += -tz / tn * off; p.z += tx / tn * off; row.push(p);
+      }
+      rows.push(row);
     }
-  });
-
-  // --- rounded roof
-  const roofGeo = (len) => {
-    const th = 0.045, s = new T.Shape(), w = W / 2;
-    s.moveTo(-w, -rr); s.quadraticCurveTo(-w, 0, -w + rr, 0); s.lineTo(w - rr, 0); s.quadraticCurveTo(w, 0, w, -rr);
-    s.lineTo(w - th, -rr); s.quadraticCurveTo(w - th, -th, w - rr, -th); s.lineTo(-w + rr, -th); s.quadraticCurveTo(-w + th, -th, -w + th, -rr); s.closePath();
-    return new T.ExtrudeGeometry(s, { depth: len, bevelEnabled: false, curveSegments: 24 });
+    return pool(loftGeo(rows), mat) || noShadow(loft(rows, mat));
   };
-  add(roofGeo(roofFrontZ - rearZ), paint, 0, H, rearZ);
-  const dy = H - wsTopY, ln = Math.hypot(dy, capRun);
-  const cap = add(roofGeo(ln + 0.02), paint, 0, H, roofFrontZ - 0.01); cap.rotation.x = Math.atan2(dy, capRun);
-  rbox(0.95, 0.035, 1.55, 0.02, solarM, 0, H + 0.03, rearZ + 1.35);
-  rbox(0.5, 0.09, 0.5, 0.04, white, 0, H + 0.04, cabDoorRear - 1.6);
-  rbox(0.13, 0.12, L - bonnetLen - 1.4, 0.04, awningM, W / 2 + 0.07, topY - 0.02, (rearZ + 0.25 + cabDoorRear - 0.3) / 2 - 0.1);
-  box(W - 0.12, 0.02, roofFrontZ - rearZ - 0.06, ceiling, 0, topY - 0.03, (rearZ + roofFrontZ) / 2);
-
-  // --- windscreen, A-pillars
-  {
-    const top = Math.min(wsTopY, topY), dy = top - bonnetH, len = Math.hypot(dy, wsRun);
-    const ws = noShadow(add(new T.PlaneGeometry(W - 0.16, len), glassFront, 0, (bonnetH + top) / 2, (wsBaseZ + wsTopZ) / 2));
-    ws.rotation.x = -Math.atan2(wsRun, dy);
-    [-1, 1].forEach((side) => { const p = rbox(0.08, len, 0.07, 0.025, paint, side * (W / 2 - 0.04), (bonnetH + top) / 2, (wsBaseZ + wsTopZ) / 2); p.rotation.x = -Math.atan2(wsRun, dy); });
-    rbox(W - 0.04, 0.07, 0.08, 0.025, paint, 0, top, wsTopZ);
-    noShadow(box(W - 0.3, 0.06, 0.02, plastic, 0, bonnetH + 0.02, wsBaseZ - 0.02));
+  const gapLine = (u0, u1, y, n) => { nosePatch(u0, u1, typeof y === 'function' ? (u) => y(u) - 0.002 : y - 0.002, typeof y === 'function' ? (u) => y(u) + 0.002 : y + 0.002, 0.0016, gap.core, n, 1).receiveShadow = false; nosePatch(u0, u1, typeof y === 'function' ? (u) => y(u) - 0.0075 : y - 0.0075, typeof y === 'function' ? (u) => y(u) + 0.0075 : y + 0.0075, 0.0011, gap.halo, n, 1).receiveShadow = false; };
+  const sides = (fn) => [-1, 1].forEach((s) => fn(s, (a, b) => s > 0 ? [a, b] : [-b, -a]));
+  // generic fronts: plain lamps, a slatted grille and a lower intake where each real van has them; a blank plate; no badge
+  const face = c.face || F.face || 'a';
+  if (c.body === 'ducato') {
+    // slim lamps high at the corners, a broad black grille below them reaching down into the bumper, a row of slots, plate, skid plate
+    const gw = (t) => 0.4 + 0.2 * t;
+    nosePatch((t) => -gw(t), gw, 0.74, 1.065, 0.004, plastic, 16, 8);
+    [0.79, 0.845, 0.9, 0.955, 1.01].forEach((y) => { const hw = gw((y - 0.74) / 0.325) - 0.035; nosePatch(-hw, hw, y - 0.007, y + 0.007, 0.011, satin, 12, 1); });
+    nosePatch(-0.4, 0.4, 0.625, 0.675, 0.004, plastic, 10, 1);
+    for (let k = 0; k < 7; k++) { const u = -0.33 + k * 0.11; nosePatch(u - 0.04, u + 0.04, 0.633, 0.667, 0.008, slatM, 2, 1); }
+    nosePatch(-0.255, 0.255, 0.465, 0.575, 0.012, plateF, 6, 1);
+    nosePatch(-0.5, 0.5, 0.385, 0.45, 0.006, slatM, 12, 1);
+    nosePatch(-0.46, 0.46, 0.4, 0.435, 0.011, plastic, 12, 1);
+    gapLine(-0.5, 0.5, 1.09, 20);
+    sides((s, o) => {
+      const k = (u) => Math.max(0, Math.abs(u) - 0.48) / 0.49, lo = (u) => 1.06 + 0.07 * Math.pow(k(u), 1.4), hi = (u) => 1.2 + 0.075 * k(u);
+      nosePatch(...o(0.48, 0.97), lo, hi, 0.006, lensL, 14, 3);
+      nosePatch(...o(0.54, 0.8), (u) => lo(u) + 0.024, (u) => hi(u) - 0.018, 0.01, headM, 6, 2);
+      nosePatch(...o(0.5, 0.95), (u) => lo(u) + 0.004, (u) => lo(u) + 0.02, 0.011, drlM, 8, 1);
+      nosePatch(...o(0.84, 0.95), (u) => hi(u) - 0.045, (u) => hi(u) - 0.02, 0.01, amberM, 3, 1);
+      nosePatch(...o(0.7, 0.86), 0.53, 0.62, 0.004, plastic, 4, 1); nosePatch(...o(0.74, 0.82), 0.55, 0.6, 0.009, headM, 3, 1);
+      nosePatch(...o(0.6, 0.72), 0.75, 0.8, 0.004, plastic, 4, 1);
+    });
+  } else if (c.body === 'mk1') {
+    // tall lamps at the corners, a slatted grille between them, an unpainted bumper with the plate and a lower intake
+    nosePatch(-1, 1, 0.345, 0.77, 0.009, bumperD, 44, 6);
+    const gHw = (y) => 0.5 + 0.1 * (y - 0.8) / 0.3;
+    for (let i = 0; i < 4; i++) { const y0 = 0.8 + i * 0.07; nosePatch(-gHw(y0 + 0.035), gHw(y0 + 0.035), y0, y0 + 0.07, 0.004, plastic, 14, 1); }
+    [0.835, 0.905, 0.975, 1.045].forEach((y) => nosePatch(-gHw(y) + 0.02, gHw(y) - 0.02, y - 0.013, y + 0.013, 0.012, chrome, 12, 1));
+    nosePatch(-0.5, 0.5, 0.42, 0.5, 0.013, plasticD, 10, 1);
+    [0.44, 0.48].forEach((y) => nosePatch(-0.47, 0.47, y - 0.006, y + 0.006, 0.018, satin, 10, 1));
+    nosePatch(-0.262, 0.262, 0.555, 0.665, 0.019, plateF, 6, 1);
+    gapLine(-0.6, 0.6, 1.095, 24);
+    sides((s, o) => {
+      const lo = (u) => 0.8 + 0.03 * (Math.abs(u) - 0.62) / 0.35, hi = (u) => 1.1 + 0.11 * Math.pow(Math.max(0, Math.abs(u) - 0.62) / 0.35, 0.8);
+      nosePatch(...o(0.62, 0.975), lo, hi, 0.006, lensL, 12, 4);
+      nosePatch(...o(0.68, 0.87), 0.88, 1.06, 0.01, headM, 5, 2);
+      nosePatch(...o(0.72, 0.95), (u) => hi(u) - 0.05, (u) => hi(u) - 0.018, 0.01, amberM, 4, 1);
+      nosePatch(...o(0.66, 0.8), 0.43, 0.5, 0.016, headM, 3, 1);
+    });
+  } else {
+    // lamps level with the bonnet edge, a grille between them, a bumper bar, then a wide lower intake with the plate
+    if (c.bumper && c.bumper !== 'body') nosePatch(-1, 1, 0.34, c.bumperTop || 0.66, 0.009, bumperD, 44, 6);
+    nosePatch(-0.6, 0.6, 0.79, 1.035, 0.004, plastic, 16, 3);
+    if (face === 'b') [0.84, 0.91, 0.98].forEach((y) => nosePatch(-0.585, 0.585, y - 0.011, y + 0.011, 0.012, chrome, 14, 1));
+    else { [0.835, 0.895, 0.955].forEach((y) => nosePatch(-0.57, 0.57, y - 0.012, y + 0.012, 0.011, satin, 14, 1)); nosePatch(-0.6, 0.6, 1.012, 1.036, 0.012, chrome, 14, 1); }
+    const iHw = (y) => 0.74 - 0.12 * Math.max(0, (0.5 - y) / 0.14);
+    for (let i = 0; i < 10; i++) { const y0 = 0.365 + i * 0.026; nosePatch(-iHw(y0), iHw(y0), y0, y0 + 0.0265, 0.012, plasticD, 16, 1); }
+    [0.4, 0.45, 0.585].forEach((y) => nosePatch(-iHw(y) + 0.03, iHw(y) - 0.03, y - 0.006, y + 0.006, 0.018, satin, 14, 1));
+    nosePatch(-0.257, 0.257, 0.465, 0.575, 0.021, plateF, 6, 1);
+    gapLine(-0.62, 0.62, 1.05, 24); gapLine(-1, 1, 0.775, 44);
+    sides((s, o) => {
+      const k = (u) => Math.max(0, Math.abs(u) - 0.6) / 0.37, lo = (u) => 0.9 - 0.045 * Math.pow(k(u), 0.7) + 0.03 * Math.pow(Math.max(0, k(u) - 0.6) / 0.4, 2), hi = (u) => 1.045 + 0.05 * k(u);
+      nosePatch(...o(0.6, 0.972), lo, hi, 0.006, lensM, 14, 3);
+      nosePatch(...o(0.66, 0.93), (u) => lo(u) + 0.04, (u) => hi(u) - 0.03, 0.01, headM, 6, 2);
+      nosePatch(...o(0.63, 0.955), (u) => lo(u) + 0.01, (u) => lo(u) + 0.026, 0.011, drlM, 8, 1);
+      nosePatch(...o(0.8, 0.9), 0.4, 0.47, 0.018, headM, 3, 1);
+    });
   }
-  // --- rounded nose (bonnet + front)
-  {
+
+  // ----- body sides: an upright lower half with wheel arches, and an upper half that leans in to the roof
+  const wing = []; NPd.forEach((p) => { const q = nosePt(p[0], p[1], p[2], 1); if (q.z < Z(dJ) - 0.004 && p[0] > 0.3) wing.push([q.z, q.y - 0.003]); });
+  const rearY0 = sillY + 0.03;
+  const lower = () => {
     const s = new T.Shape();
-    s.moveTo(wsBaseZ, bonnetH - 0.17); s.lineTo(half - 0.4, bonnetH - 0.17); s.lineTo(half - 0.4, sillY + 0.14);
-    s.lineTo(half - 0.12, sillY + 0.14); s.quadraticCurveTo(half - 0.04, sillY + 0.14, half - 0.04, sillY + 0.32);
-    s.lineTo(half - 0.045, bonnetH - 0.28); s.quadraticCurveTo(half - 0.03, bonnetH - 0.14, half - 0.36, bonnetH - 0.09);
-    s.lineTo(wsBaseZ, bonnetH + 0.005); s.closePath();
-    const bev = 0.1, depth = W - 0.012 - 2 * bev;
-    const geo = new T.ExtrudeGeometry(s, { depth, bevelEnabled: true, bevelThickness: bev, bevelSize: 0.035, bevelSegments: 8, curveSegments: 32 });
-    geo.rotateY(-Math.PI / 2);
-    add(geo, paint, depth / 2, 0, 0);
-  }
-  // grille, lights, bumpers, plate (generic design)
-  rbox(W * 0.6, 0.3, 0.06, 0.04, plastic, 0, bonnetH - 0.33, half - 0.005);
-  [0, 1, 2].forEach((i) => noShadow(rbox(W * 0.55, 0.022, 0.03, 0.008, i === 0 ? chrome : satin, 0, bonnetH - 0.24 - i * 0.075, half + 0.025)));
-  [-1, 1].forEach((side) => {
-    const sh = new T.Shape();
-    sh.moveTo(0, 0); sh.lineTo(0.4, 0.035); sh.quadraticCurveTo(0.44, 0.08, 0.42, 0.16); sh.lineTo(0.05, 0.13); sh.quadraticCurveTo(0, 0.08, 0, 0);
-    const hg = new T.ExtrudeGeometry(sh, { depth: 0.035, bevelEnabled: true, bevelThickness: 0.01, bevelSize: 0.01, bevelSegments: 2 });
-    const hl = add(hg, headM, side * (W * 0.3 + 0.02), bonnetH - 0.4, half - 0.035);
-    if (side < 0) hl.scale.x = -1;
-    noShadow(box(0.34, 0.012, 0.012, drlM, side * (W * 0.3 + 0.21), bonnetH - 0.385, half + 0.012));
-    rbox(0.09, 0.5, 0.06, 0.025, tailM, side * (W / 2 - 0.06), sillY + 0.75, rearZ - 0.005);
-    rbox(0.12, 0.2, 0.05, 0.02, plastic, side * (W / 2 - 0.12), sillY - 0.02, fAx - archR - 0.06);
-  });
-  rbox(W * 0.48, 0.12, 0.05, 0.03, plastic, 0, sillY + 0.3, half - 0.04);
-  rbox(W + 0.06, 0.24, 0.3, 0.08, bodyLow ? paint : plastic, 0, sillY + 0.1, half - 0.1);
-  rbox(W + 0.04, 0.22, 0.22, 0.06, bodyLow ? paint : plastic, 0, sillY + 0.09, rearZ + 0.06);
-  noShadow(rbox(0.52, 0.11, 0.02, 0.012, plateM, 0, sillY + 0.15, half + 0.055));
-  noShadow(rbox(0.52, 0.11, 0.02, 0.012, plateM, 0, sillY + 0.55, rearZ - 0.03));
-  box(W - 0.08, 0.04, L - bonnetLen - 0.06, floorM, 0, floorY - 0.02, rearZ + (L - bonnetLen) / 2);
-  box(W - 0.6, 0.3, L - 0.6, plastic, 0, sillY - 0.02, 0);
+    s.moveTo(rearZ + 0.07, rearY0); s.lineTo(rAx - archR, rearY0); s.lineTo(rAx - archR, archC); s.absarc(rAx, archC, archR, Math.PI, 0, true);
+    s.lineTo(rAx + archR, sillY); s.lineTo(fAx - archR, sillY); s.lineTo(fAx - archR, archC); s.absarc(fAx, archC, archR, Math.PI, 0, true);
+    s.lineTo(Z(dJ), wing[wing.length - 1][1]);
+    for (let i = wing.length - 1; i >= 0; i--) s.lineTo(wing[i][0], wing[i][1]);
+    s.lineTo(Z(dA0), yB); s.lineTo(rearZ + 0.07, yB); s.closePath();
+    return s;
+  };
+  // the front of the high roof: it climbs from the windscreen header to full height over the cab
+  const NB = 10, capF = (t) => Math.pow(Math.sin(t * Math.PI / 2), F.capPow);
+  const brow = []; for (let i = 0; i <= NB; i++) { const t = i / NB, e = capF(t); brow.push([F.HD0 + (F.capEnd - F.HD0) * t, dA1 + (F.capEnd - dA1) * t, yWT + (H - yWT) * e, yA1 + (yC - yA1) * e]); }
+  const dP = (y) => dA0 + (y - yB) / (yA1 - yB) * (dA1 - dA0);                       // the A-pillar line in side view
+  const zr = (d0, d1, y0, y1) => [[Z(d1), y0], [Z(d0), y0], [Z(d0), y1], [Z(d1), y1]];
+  const rwin = (d0, d1, y0, y1, r) => { r = r || 0.05; const p = [], a = Z(d1), b = Z(d0); [[a + r, y0 + r, Math.PI, 1.5 * Math.PI], [b - r, y0 + r, 1.5 * Math.PI, 2 * Math.PI], [b - r, y1 - r, 0, 0.5 * Math.PI], [a + r, y1 - r, 0.5 * Math.PI, Math.PI]].forEach(([cx, cy, a0, a1]) => { for (let i = 0; i <= 4; i++) { const an = a0 + (a1 - a0) * i / 4; p.push([cx + Math.cos(an) * r, cy + Math.sin(an) * r]); } }); return p; };
+  const cabWin = F.cabWin.map((p) => [Z(p[0]), p[1]]);
+  // side windows of the living area, per side (n: nearside, the sliding-door side; o: offside): [d0, d1, y0, y1]; negative d counts from the rear
+  const winList = (side) => ((c.wins || {})[side > 0 ? 'n' : 'o'] || []).map((w) => ({ d0: dd(w[0]), d1: dd(w[1]), y0: w[2] || F.winY0, y1: w[3] || F.winY1, slider: w[4] }));
+  const winPts = (w) => rwin(w.d0, w.d1, w.y0, w.y1, c.winR || 0.045);
+  const upper = (side) => {
+    const pts = [[rearZ + 0.07, yB], [Z(dA0), yB]]; brow.forEach((b) => pts.push([Z(b[1]), b[3]])); pts.push([rearZ + 0.07, yC]);
+    const s = toPath(pts, T.Shape); s.holes.push(toPath(cabWin, T.Path)); winList(side).forEach((w) => s.holes.push(toPath(winPts(w), T.Path))); return s;
+  };
+  const lean = (geo, side) => { const p = geo.attributes.position; for (let i = 0; i < p.count; i++) { const y = p.getY(i); if (y > yB) p.setX(i, p.getX(i) - side * (y - yB) * tl); } geo.computeVertexNormals(); return geo; };
+  const plate = (shape, depth, mat, x, side) => { const geo = new T.ExtrudeGeometry(shape, { depth, bevelEnabled: false, curveSegments: 28 }); geo.rotateY(-Math.PI / 2); lean(geo, side); return add(geo, mat, x, 0, 0); };
+  const flat = (pts, mat, x, side) => { const sg = new T.ShapeGeometry(toPath(pts, T.Shape)); sg.rotateY(-Math.PI / 2); lean(sg, side); if (!mat.transparent) { sg.translate(x, 0, 0); return pool(sg, mat); } return noShadow(add(sg, mat, x, 0, 0)); };
+  const onSide = (d, y, side, off) => V(side * (sx(y) + (off === undefined ? 0.003 : off)), y, Z(d));
+  // shut lines and other thin trim are gathered into one mesh per material
+  const thinGeos = [], thinM = new T.Mesh();
+  const thin = (a, b, w, t) => { const geo = new T.BoxGeometry(w, 1, t); setBar(thinM, a, b); thinM.updateMatrix(); geo.applyMatrix4(thinM.matrix); thinGeos.push(geo); };
+  const gapGeos = [[], []];
+  const seam = (pts, side) => { for (let i = 1; i < pts.length; i++) [[0.016, 0.0016], [0.0045, 0.0022]].forEach(([wd, off], k) => { thin(onSide(pts[i - 1][0], pts[i - 1][1], side, off), onSide(pts[i][0], pts[i][1], side, off), wd, 0.0008); gapGeos[k].push(thinGeos.pop()); }); };
+  const strip = (d0, d1, y, side, proud, h, mat) => bar(onSide(d0, y, side, proud / 2 - 0.004), onSide(d1, y, side, proud / 2 - 0.004), proud, h, mat, Math.min(proud, h) * 0.4);
+  const archEdge = (y, R) => Math.sqrt(Math.max(0, R * R - Math.pow(y - archC, 2)));   // how far an arch of radius R reaches fore and aft at height y
+  const archSeamY = (d, dAx) => archC + Math.sqrt(Math.max(0, Math.pow(archR + 0.055, 2) - Math.pow(d - dAx, 2)));
+  // a band low on the side between two heights, cut round the wheel arches
+  const lowBands = (y0, y1, mat, side, off, front) => {
+    const R = archR + 0.062, n = 8, edge = (ax, sgn, rev) => { const o = []; for (let i = 0; i <= n; i++) { const y = y0 + (y1 - y0) * (rev ? n - i : i) / n; o.push([Z(ax + sgn * archEdge(y, R)), y]); } return o; };
+    const segs = [edge(F.fo, 1).concat(edge(dRA, -1, true)), edge(dRA, 1).concat([[Z(L - 0.075), y1], [Z(L - 0.075), y0]])];
+    if (front) segs.push([[Z(dJ + 0.005), y0], [Z(dJ + 0.005), y1]].concat(edge(F.fo, -1, true)));
+    segs.forEach((p) => flat(p, mat, side * (xS + off), side));
+  };
 
-  // --- wheels: tyre (lathe), alloy rim, spokes
+  const stripeMs = c.stripes ? [S({ color: '#3a3d43', roughness: 0.4, side: DS }), P({ color: '#b5233a', roughness: 0.3, clearcoat: 1, side: DS }), S({ color: '#8f949a', roughness: 0.4, side: DS })] : null;
+  [-1, 1].forEach((side) => {
+    const px = side > 0 ? xS : -xS + 0.025, wins = winList(side);
+    plate(lower(), 0.025, paint, px, side);
+    plate(upper(side), 0.025, paint, px, side);
+    // inner trim: wall lining behind the cab (with the window openings) and a box over each rear wheel
+    { const lin = toPath([[rearZ + 0.1, floorY], [Z(dB - 0.02), floorY], [Z(dB - 0.02), yC - 0.02], [rearZ + 0.1, yC - 0.02]], T.Shape); wins.forEach((w) => lin.holes.push(toPath(winPts(w), T.Path))); plate(lin, 0.015, lining, side > 0 ? xS - 0.05 : -xS + 0.065, side); }
+    { const wb = add(new T.CylinderGeometry(archR + 0.03, archR + 0.03, 0.33, 24, 1, true, 0, Math.PI), lining, side * (xS - 0.22), archC, rAx); wb.rotation.z = Math.PI / 2;
+      const wc = add(new T.CircleGeometry(archR + 0.03, 24, 0, Math.PI), lining, side * (xS - 0.385), archC, rAx); wc.rotation.y = -side * Math.PI / 2; }
+    // glazing: clear in the cab, privacy tint behind (the pane faces -x, so from outside on the +x side it is the back face)
+    const gx = side * (xS - 0.009), fx = side * (xS + 0.002);
+    flat(cabWin, side > 0 ? cabOutB : cabOutF, gx, side); flat(cabWin, side > 0 ? cabInF : cabInB, gx, side);
+    wins.forEach((w) => {
+      const h = winPts(w); flat(h, side > 0 ? tintOutB : tintOutF, gx, side); flat(h, side > 0 ? tintInF : tintInB, gx, side);
+      if (c.winFrame) { const fr = toPath(rwin(w.d0 - 0.035, w.d1 + 0.035, w.y0 - 0.035, w.y1 + 0.035, 0.07), T.Shape); fr.holes.push(toPath(h, T.Path)); const sg = new T.ShapeGeometry(fr); sg.rotateY(-Math.PI / 2); lean(sg, side); noShadow(add(sg, plasticD, side * (xS + 0.004), 0, 0)); }
+      if (w.slider) { const m = w.d0 + (w.d1 - w.d0) * w.slider, f = [[m, w.y0 + 0.05], [w.d1 - 0.06, w.y0 + 0.05], [w.d1 - 0.06, w.y1 - 0.05], [m, w.y1 - 0.05], [m, w.y0 + 0.05]]; for (let i = 1; i < f.length; i++) thin(onSide(f[i - 1][0], f[i - 1][1], side, 0.001), onSide(f[i][0], f[i][1], side, 0.001), 0.008, 0.02); }
+    });
+    // glossy black pillars joining neighbouring panes into one band of glass
+    for (let i = 1; i < wins.length; i++) { const a = wins[i - 1], b = wins[i]; if (Math.abs(b.d0 - a.d1) < 0.16 && c.fullGlass) flat(zr(a.d1 - 0.03, b.d0 + 0.03, Math.max(a.y0, b.y0), Math.min(a.y1, b.y1)), gloss, fx, side); }
+    if (F.quarter) { const q = F.cabWin, n = q.length, a = q[n - 3], b = q[n - 2], yq = a[1] + (b[1] - a[1]) * (F.quarter - a[0]) / (b[0] - a[0]); thin(onSide(F.quarter, q[0][1], side, -0.004), onSide(F.quarter, yq, side, -0.004), 0.006, 0.026); }   // quarter-light divider
+    { const q = F.cabWin, i0 = q.length === 4 ? 1 : 2, a = q[i0], b = q[i0 + 1], t = 0.2; flat([[Z(a[0]), a[1]], [Z(a[0] + 0.2), a[1] + (q[i0 - 1][1] - a[1]) * 0.5], [Z(a[0] + (b[0] - a[0]) * t), a[1] + (b[1] - a[1]) * t]], plasticD, fx, side); } // mirror base
+    // wheel-arch lips and liners, sill
+    const archM = trimM(c.arches);
+    [fAx, rAx].forEach((z) => {
+      const f = add(new T.TorusGeometry(archR + 0.012, 0.036, 12, 48, Math.PI), archM, side * (xS - 0.006), archC, z); f.rotation.y = Math.PI / 2; f.scale.z = 1.25;
+      const ln = add(new T.CylinderGeometry(archR - 0.004, archR - 0.004, 0.4, 28, 1, true, 0, Math.PI), linerM, side * (xS - 0.22), archC, z); ln.rotation.z = Math.PI / 2;
+      const cp = add(new T.CircleGeometry(archR - 0.004, 28, 0, Math.PI), linerM, side * (xS - 0.415), archC, z); cp.rotation.y = Math.PI / 2;
+    });
+    rbox(0.05, 0.085, (fAx - archR) - (rAx + archR) - 0.03, 0.02, trimM(c.sill), side * (xS - 0.006), sillY + 0.042, (fAx + rAx) / 2);
+    // creases pressed into the side, lower cladding and rubbing strips as each van has them
+    if (F.swage) strip(dJ + 0.25, L - 0.1, F.swage, side, 0.014, 0.02, paint);
+    if (F.crease && !c.band) [[F.fo + archR + 0.08, dRA - archR - 0.08], [dRA + archR + 0.08, L - 0.1]].forEach(([a, b]) => strip(a, b, F.crease, side, 0.012, 0.018, paint));
+    if (F.gutter) strip(dA1 + 0.05, L - 0.1, F.gutter, side, 0.012, 0.016, paint);
+    if (c.band) lowBands(c.band[1], c.band[2], trimM(c.band[0]), side, 0.004, c.band[3]);
+    if (c.strip) { const stM = trimM(c.strip[0]); [[dJ + 0.02, F.fo - archEdge(c.strip[1], archR + 0.07)], [F.fo + archEdge(c.strip[1], archR + 0.07), dRA - archEdge(c.strip[1], archR + 0.07)], [dRA + archEdge(c.strip[1], archR + 0.07), L - 0.08]].forEach(([a, b]) => { if (b - a > 0.08) noShadow(strip(a, b, c.strip[1], side, 0.022, c.strip[2], stM)); });
+      [1.75, (sl0 + sl1) / 2, dRA + 0.75].forEach((d) => noShadow(rbox(0.01, 0.026, 0.05, 0.004, amberM, side * (xS + 0.02), c.strip[1], Z(d)))); }
+    // door shut lines and handles
+    const dTop = (d) => { let y = yC - 0.03; for (let i = 1; i < brow.length; i++) if (d >= brow[i - 1][1] && d <= brow[i][1]) y = brow[i - 1][3] + (brow[i][3] - brow[i - 1][3]) * (d - brow[i - 1][1]) / (brow[i][1] - brow[i - 1][1]) - 0.03; return y; };
+    const yDoorTop = Math.min(dTop(dB), (F.gutter || yC) - 0.02);
+    seam([[F.doorF, archSeamY(F.doorF, F.fo)], [F.doorF, yB - 0.03], [dP(yB + 0.1) - 0.03, yB + 0.1]], side);
+    seam([[dB, sillY + 0.1], [dB, yB], [dB, yDoorTop]], side);
+    seam([[F.doorF + 0.06, sillY + 0.1], [dB, sillY + 0.1]], side);
+    const handle = (d, vertical) => vertical ? rbox(0.03, 0.17, 0.055, 0.014, plastic, side * (xS + 0.012), F.handleY, Z(d)) : rbox(0.03, 0.036, 0.17, 0.012, c.handles === 'black' ? plastic : paint, side * (xS + 0.012), F.handleY, Z(d));
+    handle(dB - (c.body === 'ducato' ? 0.09 : 0.16), c.body === 'ducato');
+    if (side > 0 || c.slideBoth) {
+      // sliding door with its handle and the rail it runs back on
+      const ySl = (F.gutter || yC) - 0.03;
+      seam([[sl0, sillY + 0.1], [sl0, yB], [sl0, ySl]], side); seam([[sl1, Math.max(sillY + 0.1, sl1 > dRA - archR - 0.06 ? archSeamY(sl1, dRA) : 0)], [sl1, yB], [sl1, ySl]], side);
+      seam([[sl0, sillY + 0.1], [Math.min(sl1, dRA - archR - 0.06), sillY + 0.1]], side); seam([[sl0, ySl], [sl1, ySl]], side);
+      handle(sl0 + (c.body === 'ducato' ? 0.09 : 0.16), c.body === 'ducato');
+      noShadow(bar(onSide(sl1 + 0.03, F.railY, side, 0.003), onSide(Math.min(L - 0.25, sl1 + (sl1 - sl0) + 0.02), F.railY, side, 0.003), 0.01, 0.034, plastic));
+    }
+    noShadow(rbox(0.012, 0.024, 0.05, 0.005, amberM, side * (xS + 0.004), F.swage ? F.swage + 0.07 : 1.0, Z(F.doorF - 0.14)));    // side repeater
+    if (c.hatch) { const [d0, d1, y0, y1] = c.hatch[side > 0 ? 'n' : 'o'] || []; if (d0) seam([[d0, y0], [d1, y0], [d1, y1], [d0, y1], [d0, y0]], side); }
+    // door mirror: a tall black housing on two short arms, with a domed mirror glass facing backwards
+    { const m = F.mirror, mx = side * (xS + m.out + m.w / 2), mz = Z(m.d), hm = c.mirrors === 'body' ? paint : plastic;
+      rbox(m.w, m.h, 0.12, 0.045, hm, mx, m.y, mz);
+      noShadow(add(mirrorGlassGeo(T, m.w - 0.04, m.h * 0.62, 0.03), mirrorM, mx, m.y + m.h * 0.13, mz - 0.063));
+      noShadow(add(mirrorGlassGeo(T, m.w - 0.04, m.h * 0.2, 0.02), mirrorM, mx, m.y - m.h * 0.33, mz - 0.063));
+      [m.armY, m.armY - 0.09].forEach((ay) => bar(V(side * (xS - 0.01), m.y + ay, Z(m.d + 0.06)), V(mx, m.y + ay, mz), 0.035, 0.05, plastic, 0.012));
+      noShadow(rbox(0.012, 0.02, 0.1, 0.004, amberM, mx + side * 0.005, m.y + m.h * 0.3, mz + 0.062)); }
+    // A-pillar, rear corner post and tail lamp
+    bar(V(side * (xS - 0.037), yB - 0.015, Z(dA0) - 0.01), V(side * (sx(yA1) - 0.037), yA1 - 0.005, Z(dA1)), 0.075, 0.11, paint, 0.03);
+    bar(V(side * (xS - 0.055), rearY0, rearZ + 0.06), V(side * (xS - 0.055), yB + 0.01, rearZ + 0.06), 0.11, 0.11, paint, 0.045);
+    bar(V(side * (xS - 0.055), yB - 0.01, rearZ + 0.06), V(side * (xR - 0.055), yC + 0.01, rearZ + 0.06), 0.11, 0.11, paint, 0.045);
+    { const y0 = F.lampR[0], y1 = F.lampR[1], ym = Math.max(y0, Math.min(y1, yB));
+      if (ym > y0) bar(V(side * (xS - 0.058), y0, rearZ + 0.034), V(side * (xS - 0.058), ym + 0.004, rearZ + 0.034), 0.1, 0.078, tailM, 0.014);
+      if (y1 > ym) bar(V(side * (xS - 0.058), ym - 0.004, rearZ + 0.034), V(side * (sx(y1) - 0.058), y1, rearZ + 0.034), 0.1, 0.078, tailM, 0.014); }
+    // rear bumper corner
+    rbox(0.12, F.bumpR[1] - F.bumpR[0] + (c.rearCorner || 0), 0.3, 0.04, trimM(c.bumperRear || 'black'), side * (xS - 0.05), (F.bumpR[0] + F.bumpR[1] + (c.rearCorner || 0)) / 2, rearZ + 0.16);
+    // graphics on the side (Toleno): short bars in three colours behind the door, and two slim lines high up
+    if (c.stripes) {
+      const sl = (d0, y0, len, hgt, leanD, m) => flat([[Z(d0), y0], [Z(d0 + len), y0], [Z(d0 + len - leanD), y0 + hgt], [Z(d0 - leanD), y0 + hgt]], m, side * (xS + 0.0035), side);
+      const base = sl1 + 0.16;
+      [[0, 0.5, 0.62, 0], [0.085, 0.0, 1.1, 1], [0.135, 0.1, 1.0, 2], [0.215, 0.32, 0.5, 0]].forEach(([dy, off, len, k]) => sl(base + off, 1.36 + dy, len, k === 1 ? 0.04 : 0.05, -0.07, stripeMs[k]));
+      sl(dB + 0.25, yC - 0.2, 1.3, 0.022, 0, stripeMs[0]); sl(dB + 0.75, yC - 0.27, 1.1, 0.022, 0, stripeMs[0]);
+      sl(dB - 0.075, F.winY1 - 0.04, 0.06, 0.07, 0, stripeMs[1]);
+    }
+    // rear side pod (MAN Manual): a glazed flare over the transverse bed
+    if (c.pod) { const podM = X(P({ color: '#1d1e22', metalness: 0.3, roughness: 0.25, clearcoat: 1 })), pd0 = L - 1.62, pd1 = L - 0.16, py0 = yB - 0.06, py1 = 2.1, pm = (pd0 + pd1) / 2;
+      const pb = rbox(0.34, py1 - py0, pd1 - pd0, 0.1, podM, side * (sx((py0 + py1) / 2) + 0.03), (py0 + py1) / 2, Z(pm)); pb.rotation.z = side * Math.atan(tl);
+      const px2 = side * (sx((py0 + py1) / 2) + 0.203);
+      noShadow(rbox(0.012, 0.2, 0.4, 0.03, side > 0 ? tintOutB : tintOutF, px2, (py0 + py1) / 2 + 0.02, Z(pd1 - 0.36)));
+      noShadow(rbox(0.012, 0.34, 0.17, 0.03, side > 0 ? tintOutB : tintOutF, px2, (py0 + py1) / 2 + 0.02, Z(pd0 + 0.36))); }
+  });
+  if (thinGeos.length) { noShadow(add(mergeGeos(T, thinGeos), plastic, 0, 0, 0)); thinGeos.forEach((x) => x.dispose()); }
+  pools.forEach(({ mat, list }) => { const m = noShadow(add(mergeGeos(T, list), mat, 0, 0, 0)); if (mat === gap.core || mat === gap.halo) m.receiveShadow = false; list.forEach((x) => x.dispose()); });
+  gapGeos.forEach((gl, k) => { const m = noShadow(add(mergeGeos(T, gl), k ? gap.core : gap.halo, 0, 0, 0)); m.receiveShadow = false; gl.forEach((x) => x.dispose()); });
+
+  // ----- roof skin, headlining, windscreen and its surround
+  const crownAt = (au) => au <= 0.84 ? 1 : Math.sqrt(Math.max(0, 1 - Math.pow((au - 0.84) / 0.16, 2)));
+  const roofPt = (sec, u) => { const au = Math.abs(u); return V(sx(sec[3]) * u, sec[3] + (sec[2] - sec[3]) * crownAt(au), Z(sec[0] + (sec[1] - sec[0]) * Math.pow(au, 2.4))); };
+  const uAll = []; for (let j = 0; j <= 32; j++) uAll.push(-Math.cos(Math.PI * j / 32));
+  const flatSec = (d, dy) => [d, d, H - (dy || 0), yC - (dy || 0) * 0.2];
+  loft(brow.concat([flatSec(F.capEnd + 0.4), flatSec(L - 0.2), flatSec(L - 0.08), flatSec(L - 0.035, 0.04)]).map((s) => uAll.map((u) => roofPt(s, u))), paintD);
+  { const cw = xR - 0.2, zF = Z(F.capEnd - 0.02), zR = rearZ + 0.1;
+    const sg = new T.PlaneGeometry(2 * cw, zF - zR); sg.rotateX(Math.PI / 2); add(sg, ceiling, 0, yCeil, (zF + zR) / 2);
+    [-1, 1].forEach((sd) => loft([[V(sd * cw, yCeil, zF), V(sd * (xR - 0.062), yC - 0.02, zF)], [V(sd * cw, yCeil, zR), V(sd * (xR - 0.062), yC - 0.02, zR)]], ceiling));
+    // over the cab the headlining follows the rising roof
+    const rows = []; brow.forEach((b, i) => { if (i % 2 === 0) { const y = b[2] - 0.07, hw = sx(b[3]) - 0.2, ye = b[3] - 0.03, d = b[0] + 0.05 + (i === 0 ? 0.03 : 0); rows.push([V(-(sx(b[3]) - 0.062), ye, Z(b[1] + 0.05)), V(-hw, y, Z(d)), V(hw, y, Z(d)), V(sx(b[3]) - 0.062, ye, Z(b[1] + 0.05))]); } }); loft(rows, ceiling); }
+  const wsPt = (ug, v) => {
+    const xb = (xS - 0.072) * ug, xt = (sx(yA1) - 0.062) * ug, cb = nosePt(CD0, cowlY, cowlDrop, xb / xS), bz = Math.sin(Math.PI * v) * 0.02, yt = yWT - (yWT - yA1) * Math.pow(Math.abs(ug), 3);
+    return V(xb + (xt - xb) * v, cb.y + 0.004 + (yt - cb.y - 0.004) * v + bz * 0.6, cb.z + (Z(headD(xt / sx(yA1))) - cb.z) * v + bz * 0.8);
+  };
+  { const rows = []; for (let i = 0; i <= 16; i++) { const row = []; for (let j = 0; j <= 6; j++) row.push(wsPt(-1 + i / 8, j / 6)); rows.push(row); } noShadow(loft(rows, cabOutF)); noShadow(loft(rows, cabInB)); }
+  { const us = []; for (let i = 0; i <= 16; i++) us.push(-0.96 + 0.12 * i); // scuttle panel, wipers, the dark band along the top of the screen
+    noShadow(loft([us.map((u) => nosePt(CD0, cowlY + 0.012, cowlDrop, u)), us.map((u) => nosePt(CD0 - 0.1, cowlY - 0.036, cowlDrop * 0.8, u))], plasticD));
+    const wp = (ug, v) => wsPt(ug, v).add(V(0, 0.012, 0.012));
+    noShadow(bar(wp(-0.8, 0.03), wp(-0.06, 0.1), 0.014, 0.02, plastic)); noShadow(bar(wp(-0.02, 0.03), wp(0.7, 0.1), 0.014, 0.02, plastic));
+    const rows = []; for (let i = 0; i <= 16; i++) rows.push([wsPt(-1 + i / 8, 0.93).add(V(0, 0.003, 0.003)), wsPt(-1 + i / 8, 1).add(V(0, 0.003, 0.003))]); noShadow(loft(rows, gloss)); }
+  // roof equipment
+  { const r = c.roof || {};
+    (r.solar || [[L - 1.55, 1.5, 0.95]]).forEach(([d, len, w, x]) => rbox(w, 0.035, len, 0.015, solarM, x || 0, H + 0.022, Z(d)));
+    (r.vents || [[dB + 1.5, 0.5, 0.5]]).forEach(([d, len, w, x]) => { rbox(w, 0.075, len, 0.035, white, x || 0, H + 0.03, Z(d)); noShadow(rbox(w - 0.14, 0.02, len - 0.14, 0.008, glassSide, x || 0, H + 0.07, Z(d))); });
+    if (r.dome) { const dm = add(new T.SphereGeometry(0.2, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2), white, r.dome[1], H + 0.02, Z(r.dome[0])); dm.scale.y = 0.5; add(new T.CylinderGeometry(0.03, 0.04, 0.08, 10), white, r.dome[1], H + 0.03, Z(r.dome[0])); }
+    if (r.aerial !== false) { const a = bar(V(0, yWT + (H - yWT) * capF(0.42) - 0.01, Z(F.HD0 + (F.capEnd - F.HD0) * 0.42)), V(0, yWT + (H - yWT) * capF(0.42) + 0.2, Z(F.HD0 + (F.capEnd - F.HD0) * 0.42 + 0.12)), 0.012, 0.012, plastic); a.castShadow = false; }
+    if (r.rail) [-1, 1].forEach((sd) => bar(V(sd * (xR - 0.12), H + 0.03, Z(L - 2.6)), V(sd * (xR - 0.12), H + 0.03, Z(L - 0.5)), 0.03, 0.03, steel, 0.01)); }
+  // awning cassette along the roof edge on the door side
+  const awnX = sx(yC - 0.06) + 0.075, awnY = yC - 0.06, awnZ0 = rearZ + 0.5, awnZ1 = Z(dB) - 0.25;
+  rbox(0.12, 0.11, awnZ1 - awnZ0, 0.04, awningM, awnX, awnY, (awnZ0 + awnZ1) / 2);
+
+  // ----- tail: bumper, twin rear doors
+  const bRearM = trimM(c.bumperRear || 'black');
+  rbox(W - 0.02, F.bumpR[1] - F.bumpR[0], 0.2, 0.05, bRearM, 0, (F.bumpR[0] + F.bumpR[1]) / 2, rearZ + 0.07);
+  noShadow(box(W - 0.5, 0.012, 0.16, plastic, 0, F.bumpR[1] + 0.004, rearZ + 0.06));
+  box(2 * xR - 0.2, 0.1, 0.07, paint, 0, yC - 0.05, rearZ + 0.06);
+  { const sec = flatSec(L - 0.035, 0.04), pts = uAll.map((u) => { const q = roofPt(sec, u); return [q.x, q.y]; }); pts.push([xR - 0.1, yC - 0.1], [-(xR - 0.1), yC - 0.1]); add(new T.ShapeGeometry(toPath(pts, T.Shape)), paintD, 0, 0, rearZ + 0.036); }   // closes the back of the roof above the doors
+  noShadow(rbox(0.34, 0.03, 0.03, 0.01, tailM, 0, yC - 0.04, rearZ + 0.018));
+  const doors = [];
+  {
+    const y0 = F.doorY0, y1 = yC - 0.1, hingeX = xS - 0.112, dw = hingeX - 0.005, e = (y) => Math.max(0, y - yB) * tl;
+    const wy0 = c.rearWin === false ? 0 : Math.max(F.winY0, yB + 0.03), wy1 = Math.min(F.winY1, y1 - 0.2);
+    [-1, 1].forEach((side) => {
+      const pivot = new T.Group(); pivot.position.set(side * hingeX, 0, rearZ + 0.03); g.add(pivot);
+      const dir = -side, sh = toPath([[dir * 0, y0], [dir * dw, y0], [dir * dw, y1], [dir * e(y1), y1], [dir * 0, yB]], T.Shape);
+      const wp = wy0 ? [[dir * (e(wy0) + 0.1), wy0], [dir * (dw - 0.09), wy0], [dir * (dw - 0.09), wy1], [dir * (e(wy1) + 0.1), wy1]] : null;
+      if (wp) sh.holes.push(toPath(wp, T.Path));
+      const dg = new T.ExtrudeGeometry(sh, { depth: 0.03, bevelEnabled: true, bevelThickness: 0.008, bevelSize: 0.008, bevelSegments: 2 }); dg.translate(0, 0, -0.023);
+      add(dg, paint, 0, 0, 0, pivot);
+      if (wp) noShadow(add(new T.ShapeGeometry(toPath(wp, T.Shape)), glassSide, 0, 0, -0.012, pivot));
+      if (side < 0) { rbox(0.16, 0.04, 0.035, 0.012, plastic, dir * (dw - 0.16), F.handleY, -0.045, pivot); noShadow(rbox(0.52, 0.11, 0.012, 0.008, plateR, dir * dw * 0.52, y0 + 0.16, -0.035, pivot)); noShadow(rbox(0.6, 0.15, 0.012, 0.01, plastic, dir * dw * 0.52, y0 + 0.16, -0.03, pivot)); }
+      [y0 + 0.2, y1 - 0.25].forEach((hy) => rbox(0.035, 0.09, 0.03, 0.01, plastic, dir * 0.01, hy, -0.03, pivot));
+      doors.push({ pivot, axis: 'y', open: side < 0 ? 1.75 : -1.75 });
+    });
+  }
+
+  // ----- floor, underbody, wheels
+  { const hw = xS - 0.06, s = toPath([[-hw, rearZ + 0.02], [-hw, rAx - 0.47], [-0.62, rAx - 0.47], [-0.62, rAx + 0.47], [-hw, rAx + 0.47], [-hw, Z(dA0 + 0.1)], [hw, Z(dA0 + 0.1)], [hw, rAx + 0.47], [0.62, rAx + 0.47], [0.62, rAx - 0.47], [hw, rAx - 0.47], [hw, rearZ + 0.02]], T.Shape);
+    const fg = new T.ExtrudeGeometry(s, { depth: 0.04, bevelEnabled: false }); fg.rotateX(Math.PI / 2); add(fg, floorM, 0, floorY, 0); }
+  box(W - 0.62, 0.24, L - 0.9, plastic, 0, sillY, -0.1);
   const wheels = [];
   const tyreGeo = (() => {
-    const pts = [], r0 = wheelR * 0.68, wdt = 0.125;
-    for (let i = 0; i <= 16; i++) { const a = -Math.PI / 2 + (i / 16) * Math.PI, rx = wheelR - 0.045 + Math.cos(a) * 0.045, y = Math.sin(a) * wdt; pts.push(new T.Vector2(i === 0 || i === 16 ? r0 : Math.max(r0, rx), y)); }
+    const pts = [], r0 = wheelR * 0.66, wdt = F.tyreW;
+    for (let i = 0; i <= 16; i++) { const a = -Math.PI / 2 + (i / 16) * Math.PI, rx = wheelR - 0.05 + Math.cos(a) * 0.05, y = Math.sin(a) * wdt; pts.push(new T.Vector2(i === 0 || i === 16 ? r0 : Math.max(r0, rx), y)); }
     return new T.LatheGeometry(pts, 72);
   })();
   [fAx, rAx].forEach((z) => [-1, 1].forEach((side) => {
-    const wg = new T.Group(); wg.position.set(side * (W / 2 - 0.14), wheelR, z); g.add(wg); wheels.push(wg);
+    const wg = new T.Group(); wg.position.set(side * wx, wheelR, z); g.add(wg); wheels.push(wg);
     const t = add(tyreGeo, tyreM, 0, 0, 0, wg); t.rotation.z = Math.PI / 2;
-    const rim = add(new T.CylinderGeometry(wheelR * 0.68, wheelR * 0.68, 0.2, 64), satin, 0, 0, 0, wg); rim.rotation.z = Math.PI / 2;
-    const lip = add(new T.TorusGeometry(wheelR * 0.66, 0.014, 10, 72), c.wheels === 'dark' ? darkRim : c.wheels === 'steel' ? steelRim : rimM, side * 0.1, 0, 0, wg); lip.rotation.y = Math.PI / 2;
-    const ws = c.wheels || 'alloy', spokeM = ws === 'dark' ? darkRim : rimM;
-    if (ws === 'steel' || ws === 'cover') {
-      const face = add(new T.CylinderGeometry(wheelR * 0.62, wheelR * 0.62, 0.02, 48), ws === 'cover' ? coverM : steelRim, side * 0.1, 0, 0, wg); face.rotation.z = Math.PI / 2;
-      const cap = add(new T.CylinderGeometry(wheelR * 0.17, wheelR * 0.2, 0.04, 24), ws === 'cover' ? rimM : satin, side * 0.115, 0, 0, wg); cap.rotation.z = Math.PI / 2;
-      for (let k = 0; k < (ws === 'cover' ? 12 : 8); k++) { const a = (k / (ws === 'cover' ? 12 : 8)) * Math.PI * 2, r0 = wheelR * 0.42; const hole = add(new T.BoxGeometry(0.012, ws === 'cover' ? 0.11 : 0.05, ws === 'cover' ? 0.02 : 0.05), satin, side * 0.111, Math.cos(a) * r0, Math.sin(a) * r0, wg); hole.rotation.x = -a; }
-    } else for (let k = 0; k < 10; k++) {
-      const sg = rboxGeo(T, 0.025, wheelR * 0.56, 0.035, 0.008); sg.translate(0, wheelR * 0.32, 0);
-      const sp = add(sg, spokeM, side * 0.095, 0, 0, wg); sp.rotation.x = (k / 10) * Math.PI * 2;
+    const rim = add(new T.CylinderGeometry(wheelR * 0.66, wheelR * 0.66, 0.19, 64), satin, 0, 0, 0, wg); rim.rotation.z = Math.PI / 2;
+    const ws = c.wheels || 'alloy', fo = F.tyreW - 0.022, spokeM = ws === 'dark' ? darkRim : rimM;
+    const lip = add(new T.TorusGeometry(wheelR * 0.64, 0.014, 10, 72), ws === 'dark' ? rimM : ws === 'steel' ? steelRim : ws === 'steelS' ? coverM : rimM, side * fo, 0, 0, wg); lip.rotation.y = Math.PI / 2;
+    if (ws === 'steel' || ws === 'steelS') {
+      const fm = ws === 'steelS' ? coverM : steelRim;
+      const face = add(new T.CylinderGeometry(wheelR * 0.6, wheelR * 0.62, 0.02, 48), fm, side * (fo - 0.012), 0, 0, wg); face.rotation.z = Math.PI / 2;
+      const dish = add(new T.CylinderGeometry(wheelR * 0.3, wheelR * 0.4, 0.045, 32), fm, side * (fo + 0.012), 0, 0, wg); dish.rotation.z = Math.PI / 2;
+      const cap = add(new T.CylinderGeometry(wheelR * 0.15, wheelR * 0.17, 0.03, 24), ws === 'steelS' ? rimM : satin, side * (fo + 0.04), 0, 0, wg); cap.rotation.z = Math.PI / 2;
+      for (let k = 0; k < 10; k++) { const a = (k / 10) * Math.PI * 2, r0 = wheelR * 0.5; const hole = add(new T.CylinderGeometry(0.02, 0.02, 0.012, 10), satin, side * (fo - 0.002), Math.cos(a) * r0, Math.sin(a) * r0, wg); hole.rotation.z = Math.PI / 2; }
+    } else for (let k = 0; k < (ws === 'dark' ? 5 : 10); k++) {
+      const n = ws === 'dark' ? 5 : 10, sg = rboxGeo(T, 0.025, wheelR * 0.56, ws === 'dark' ? 0.075 : 0.036, 0.008); sg.translate(0, wheelR * 0.32, 0);
+      const sp = add(sg, spokeM, side * (fo - 0.006), 0, 0, wg); sp.rotation.x = (k / n) * Math.PI * 2;
     }
-    const hub = add(new T.CylinderGeometry(0.07, 0.07, 0.04, 24), rimM, side * 0.1, 0, 0, wg); hub.rotation.z = Math.PI / 2;
+    const hub = add(new T.CylinderGeometry(0.065, 0.065, 0.04, 24), ws === 'steel' ? satin : rimM, side * fo, 0, 0, wg); hub.rotation.z = Math.PI / 2;
   }));
 
-  [-1, 1].forEach((side) => rbox(0.11, topY - sillY - 0.06, 0.11, 0.05, paint, side * (W / 2 - 0.05), (topY + sillY) / 2 - 0.01, rearZ + 0.05));
-
-  // --- rear doors / tailgate
-  const doors = [];
-  const doorY0 = sillY + 0.2, doorY1 = topY - 0.02;
-  if (c.doors === 'barn') {
-    [-1, 1].forEach((side) => {
-      const pivot = new T.Group(); pivot.position.set(side * W / 2, 0, rearZ); g.add(pivot);
-      const dw = W / 2 - 0.012, dir = -side, wy0 = doorY1 - 0.85, wy1 = doorY1 - 0.18;
-      rbox(dw, wy0 - doorY0, 0.045, 0.012, paint, dir * dw / 2, (doorY0 + wy0) / 2, 0, pivot);
-      rbox(dw, doorY1 - wy1, 0.045, 0.012, paint, dir * dw / 2, (wy1 + doorY1) / 2, 0, pivot);
-      rbox(0.12, wy1 - wy0, 0.045, 0.012, paint, dir * 0.06, (wy0 + wy1) / 2, 0, pivot);
-      rbox(0.12, wy1 - wy0, 0.045, 0.012, paint, dir * (dw - 0.06), (wy0 + wy1) / 2, 0, pivot);
-      noShadow(box(dw - 0.22, wy1 - wy0, 0.01, glassSide, dir * dw / 2, (wy0 + wy1) / 2, 0, pivot));
-      rbox(0.035, 0.18, 0.04, 0.012, satin, dir * (dw - 0.1), 1.2, -0.04, pivot);
-      doors.push({ pivot, axis: 'y', open: side < 0 ? 1.75 : -1.75 });
-    });
-  } else {
-    const pivot = new T.Group(); pivot.position.set(0, topY, rearZ); g.add(pivot);
-    const dh = topY - doorY0, wy0 = -0.6 * dh, wy1 = -0.1;
-    rbox(W - 0.02, 0.4 * dh, 0.05, 0.015, paint, 0, -0.8 * dh, 0, pivot);
-    rbox(W - 0.02, 0.1, 0.05, 0.015, paint, 0, -0.05, 0, pivot);
-    noShadow(box(W - 0.3, wy1 - wy0, 0.01, glassSide, 0, (wy0 + wy1) / 2, 0, pivot));
-    rbox(0.13, wy1 - wy0, 0.05, 0.015, paint, W / 2 - 0.075, (wy0 + wy1) / 2, 0, pivot);
-    rbox(0.13, wy1 - wy0, 0.05, 0.015, paint, -W / 2 + 0.075, (wy0 + wy1) / 2, 0, pivot);
-    doors.push({ pivot, axis: 'x', open: 1.35 });
-  }
-
-  // --- cab interior
-  const Wi = W - 0.16;
-  const seatZ = wsBaseZ - 0.95;
-  rbox(Wi, 0.3, 0.6, 0.08, satin, 0, bonnetH + 0.04, wsBaseZ - 0.24);
-  const scr = rbox(0.36, 0.22, 0.03, 0.015, screenM, 0.12, bonnetH + 0.27, wsBaseZ - 0.5); scr.rotation.x = -0.35;
-  const wheel = add(new T.TorusGeometry(0.19, 0.022, 14, 48), plastic, -0.45, bonnetH + 0.1, wsBaseZ - 0.62); wheel.rotation.x = -0.45;
-  rbox(0.12, 0.1, 0.05, 0.03, satin, -0.45, bonnetH + 0.1, wsBaseZ - 0.61).rotation.x = -0.45;
-  const col = box(0.06, 0.06, 0.35, plastic, -0.45, bonnetH + 0.02, wsBaseZ - 0.44); col.rotation.x = 0.45;
+  // ----- cab (right-hand drive)
+  const wi = (y) => sx(y) - 0.085;                                                   // inner half-width at height y
+  const Wi = 2 * wi(floorY), seatZ = Z(F.seatD), dashD = CD0 + F.dash, dashY = cowlY - 0.02;
+  { const s = new T.Shape(); s.moveTo(-Wi / 2, Z(dashD)); s.lineTo(Wi / 2, Z(dashD)); for (let i = 0; i <= 12; i++) { const x = Wi / 2 - Wi * i / 12; s.lineTo(x, Z(cowlD(x / xS) + 0.04)); } s.closePath();
+    const dg = new T.ExtrudeGeometry(s, { depth: 0.3, bevelEnabled: false }); dg.rotateX(Math.PI / 2); add(dg, plastic, 0, dashY, 0); }
+  box(Wi, dashY - 0.3 - floorY + 0.02, 0.05, plastic, 0, (dashY - 0.3 + floorY) / 2, Z(dashD - 0.22));
+  box(Wi, 0.03, dashD - 0.2 - dA0, plastic, 0, floorY + 0.005, Z((dashD - 0.2 + dA0 + 0.1) / 2 + 0.15));
+  rbox(0.38, 0.09, 0.22, 0.03, satin, -0.45, dashY + 0.02, Z(dashD - 0.14));
+  const scr = rbox(0.3, 0.18, 0.02, 0.01, screenM, 0.04, dashY - 0.12, Z(dashD + 0.008)); scr.rotation.x = -0.12;
+  const sw = add(new T.TorusGeometry(0.195, 0.021, 14, 48), plastic, -0.45, dashY - 0.08, Z(dashD + 0.17)); sw.rotation.x = -0.55;
+  rbox(0.12, 0.1, 0.05, 0.03, satin, -0.45, dashY - 0.08, Z(dashD + 0.16)).rotation.x = -0.55;
+  bar(V(-0.45, dashY - 0.2, Z(dashD - 0.06)), V(-0.45, dashY - 0.085, Z(dashD + 0.155)), 0.06, 0.06, plastic);
   const seat = (x, z) => {
     const s = new T.Group(); s.position.set(x, 0, z); g.add(s);
     box(0.36, 0.34, 0.36, plastic, 0, floorY + 0.17, 0, s);
@@ -1048,70 +1209,78 @@ function buildVan(T, c) {
   };
   seat(-0.45, seatZ); seat(0.45, seatZ);
 
-  // --- living area
-  const livingFront = seatZ - 0.42;
+  // ----- living area
+  const livingFront = seatZ - 0.42, topY = yCeil;
   const res = { floorY, H, W, L, seatZ, rearZ, livingFront, pop: false };
-  const lockers = (z0, z1, side) => {
-    rbox(0.36, 0.38, z1 - z0, 0.02, wood, side * (Wi / 2 - 0.18), topY - 0.24, (z0 + z1) / 2);
-    noShadow(box(0.02, 0.012, z1 - z0 - 0.1, ledM, side * (Wi / 2 - 0.37), topY - 0.43, (z0 + z1) / 2));
+  // furniture that stands over a rear wheel box is cut round it, so nothing shows inside the wheel arch
+  const wbZ0 = rAx - archR - 0.05, wbZ1 = rAx + archR + 0.05, wbTop = archC + archR + 0.05;
+  const fbox = (w, y0, y1, z0, z1, r, mat, x) => {
+    const part = (a, b, lo) => { if (b - a > 0.02 && y1 - lo > 0.02) rbox(w, y1 - lo, b - a, Math.min(r, (y1 - lo) / 2.2), mat, x, (lo + y1) / 2, (a + b) / 2); };
+    if (Math.abs(x) + w / 2 < 0.6 || z1 <= wbZ0 || z0 >= wbZ1 || y0 >= wbTop) return part(z0, z1, y0);
+    part(z0, Math.min(z1, wbZ0), y0); part(Math.max(z0, wbZ0), Math.min(z1, wbZ1), wbTop); part(Math.max(z0, wbZ1), z1, y0);
   };
-  const lamp = (x, z) => noShadow(add(new T.CylinderGeometry(0.06, 0.06, 0.012, 20), lampM, x, topY - 0.045, z));
+  const lockers = (z0, z1, side) => {
+    const lx = side * (wi(topY - 0.05) - 0.18);
+    rbox(0.36, 0.38, z1 - z0, 0.02, wood, lx, topY - 0.21, (z0 + z1) / 2);
+    noShadow(box(0.02, 0.012, z1 - z0 - 0.1, ledM, lx - side * 0.19, topY - 0.4, (z0 + z1) / 2));
+  };
+  const lamp = (x, z) => noShadow(add(new T.CylinderGeometry(0.06, 0.06, 0.012, 20), lampM, x, topY - 0.012, z));
   const pillows = (list) => list.forEach((p) => rbox(p[3] || 0.55, 0.13, p[4] || 0.38, 0.06, sheet, p[0], p[1], p[2]));
-
   {
     const garage = c.layout === 'northsouth' ? 0.72 : 0.92;
-    const bedTop = floorY + garage + 0.18;
+    const bedTop = floorY + garage + 0.18, bw2 = wi(bedTop + 0.1) - 0.01;          // half-width available at bed height
     let bedFront, bedPos;
     if (c.layout === 'northsouth') {
-      const bw = 1.38, bl = 1.95, bx = Wi / 2 - bw / 2, z0 = rearZ + 0.08, z1 = z0 + bl;
-      rbox(bw, garage, bl, 0.015, wood, bx, floorY + garage / 2, (z0 + z1) / 2);
+      const bw = 1.38, bl = 1.95, bx = bw2 - bw / 2, z0 = rearZ + 0.12, z1 = z0 + bl;
+      fbox(bw, floorY, floorY + garage, z0, z1, 0.015, wood, bx);
       rbox(bw, 0.19, bl, 0.07, sheet, bx, bedTop - 0.09, (z0 + z1) / 2);
       rbox(bw - 0.04, 0.09, bl * 0.66, 0.045, duvet, bx, bedTop + 0.03, z0 + bl * 0.33);
       rbox(bw - 0.08, 0.05, 0.34, 0.025, throwM, bx, bedTop + 0.085, z0 + 0.35);
       pillows([[bx - 0.32, bedTop + 0.06, z1 - 0.25], [bx + 0.32, bedTop + 0.06, z1 - 0.25]]);
-      rbox(0.45, 0.72, 0.55, 0.015, wood, -Wi / 2 + 0.23, floorY + 0.36, z0 + 0.3);
+      fbox(0.42, floorY, floorY + 0.72, z0, z0 + 0.55, 0.015, wood, -(wi(floorY + 0.72) - 0.22));
       bedFront = z1; bedPos = { pos: [bx, bedTop + 0.42, z1 - 0.3], yaw: Math.PI, pitch: -0.12 };
     } else {
-      const d = c.bedDepth || 1.4, z0 = rearZ + 0.08, z1 = z0 + d;
-      rbox(Wi, garage, d, 0.015, wood, 0, floorY + garage / 2, (z0 + z1) / 2);
-      rbox(Wi, 0.19, d, 0.07, sheet, 0, bedTop - 0.09, (z0 + z1) / 2);
-      rbox(Wi - 0.6, 0.09, d - 0.06, 0.045, duvet, 0.27, bedTop + 0.03, (z0 + z1) / 2);
-      rbox(0.32, 0.05, d - 0.1, 0.025, throwM, Wi / 2 - 0.25, bedTop + 0.085, (z0 + z1) / 2);
-      const px = -Wi / 2 + 0.3;
+      const d = c.bedDepth || 1.4, z0 = rearZ + 0.12, z1 = z0 + d, bw = 2 * bw2, mw = c.pod ? 2 * (xS + 0.08) : bw;
+      fbox(bw / 2 - 0.005, floorY, floorY + garage, z0, z1, 0.015, wood, bw / 4); fbox(bw / 2 - 0.005, floorY, floorY + garage, z0, z1, 0.015, wood, -bw / 4);
+      rbox(mw, 0.19, c.pod ? Math.min(d, 1.22) : d, 0.07, sheet, 0, bedTop - 0.09, c.pod ? z0 + 0.08 + Math.min(d, 1.22) / 2 : (z0 + z1) / 2);
+      if (c.pod && d > 1.22) rbox(bw, 0.19, d, 0.07, sheet, 0, bedTop - 0.09, (z0 + z1) / 2);
+      rbox(bw - 0.6, 0.09, d - 0.06, 0.045, duvet, 0.27, bedTop + 0.03, (z0 + z1) / 2);
+      rbox(0.32, 0.05, d - 0.1, 0.025, throwM, bw / 2 - 0.25, bedTop + 0.085, (z0 + z1) / 2);
+      const px = -bw / 2 + 0.3;
       pillows([[px, bedTop + 0.06, z0 + d * 0.28, 0.38, 0.55], [px, bedTop + 0.06, z0 + d * 0.72, 0.38, 0.55]]);
       bedFront = z1; bedPos = { pos: [-0.35, bedTop + 0.4, z1 - 0.1], yaw: Math.PI * 0.94, pitch: -0.14 };
     }
     const kSide = c.layout === 'northsouth' ? -1 : 1;
-    const kz0 = bedFront + 0.04, kz1 = Math.min(kz0 + 1.25, livingFront - (c.dinette ? 1.25 : 0.1));
-    const kx = kSide * (Wi / 2 - 0.28);
-    rbox(0.56, 0.9, kz1 - kz0, 0.015, wood, kx, floorY + 0.45, (kz0 + kz1) / 2);
+    const kz0 = bedFront + 0.04, kz1 = Math.min(kz0 + 1.25, kSide > 0 ? Z(sl0 + 0.75) : livingFront - 0.1);
+    const kx = kSide * (wi(floorY + 0.93) - 0.28);
+    fbox(0.56, floorY, floorY + 0.9, kz0, kz1, 0.015, wood, kx);
     rbox(0.58, 0.035, kz1 - kz0 + 0.02, 0.01, worktop, kx, floorY + 0.915, (kz0 + kz1) / 2);
     rbox(0.34, 0.02, 0.4, 0.008, steel, kx, floorY + 0.94, kz0 + 0.3);
     const tap = add(new T.TorusGeometry(0.1, 0.012, 8, 24, Math.PI), steel, kx + kSide * 0.18, floorY + 0.94, kz0 + 0.3); tap.rotation.y = Math.PI / 2;
     [0, 1].forEach((i) => add(new T.CylinderGeometry(0.085, 0.085, 0.012, 24), plastic, kx, floorY + 0.94, kz1 - 0.24 - i * 0.26));
     rbox(0.02, 0.5, 0.48, 0.008, steel, kx - kSide * 0.29, floorY + 0.3, (kz0 + kz1) / 2);
     if (c.bath) {
-      const bs = -kSide, bz0 = kz0, bz1 = kz0 + 0.9, bh = topY - floorY - 0.06, bx = bs * (Wi / 2 - 0.42);
-      rbox(0.84, bh, bz1 - bz0, 0.02, white, bx, floorY + bh / 2, (bz0 + bz1) / 2);
-      noShadow(rbox(0.012, bh - 0.25, 0.62, 0.006, S({ color: '#e7e3dc', roughness: 0.5 }), bx - bs * 0.425, floorY + (bh - 0.25) / 2 + 0.08, (bz0 + bz1) / 2));
-      rbox(0.03, 0.14, 0.03, 0.01, steel, bx - bs * 0.44, floorY + 1.0, bz0 + 0.18);
+      const bs = -kSide, bz0 = kz0, bz1 = kz0 + (c.bathLen || 0.9), bh = topY - floorY - 0.02, bx = bs * (wi(topY) - 0.38);
+      fbox(0.76, floorY, floorY + bh, bz0, bz1, 0.02, white, bx);
+      noShadow(rbox(0.012, bh - 0.25, 0.62, 0.006, S({ color: '#e7e3dc', roughness: 0.5 }), bx - bs * 0.385, floorY + (bh - 0.25) / 2 + 0.08, (bz0 + bz1) / 2));
+      rbox(0.03, 0.14, 0.03, 0.01, steel, bx - bs * 0.4, floorY + 1.0, bz0 + 0.18);
     }
     if (c.dinette) {
-      const tz = livingFront - 0.5;
-      rbox(0.62, 0.035, 0.75, 0.012, wood, 0.42, floorY + 0.72, tz);
-      add(new T.CylinderGeometry(0.03, 0.03, 0.7, 12), steel, 0.42, floorY + 0.36, tz);
-      rbox(0.9, 0.42, 0.45, 0.05, fabric, 0.45, floorY + 0.21, tz - 0.62);
-      const bb = rbox(0.9, 0.55, 0.12, 0.05, fabric, 0.45, floorY + 0.68, tz - 0.8); bb.rotation.x = 0.1;
+      const tz = livingFront - 0.4, dx = -(wi(floorY + 0.8) - 0.5);                // half dinette behind the driver's seat, clear of the sliding door
+      rbox(0.62, 0.035, 0.75, 0.012, wood, dx + 0.03, floorY + 0.72, tz);
+      add(new T.CylinderGeometry(0.03, 0.03, 0.7, 12), steel, dx + 0.03, floorY + 0.36, tz);
+      rbox(0.9, 0.42, 0.45, 0.05, fabric, dx, floorY + 0.21, tz - 0.56);
+      const bb = rbox(0.9, 0.55, 0.12, 0.05, fabric, dx, floorY + 0.68, tz - 0.74); bb.rotation.x = 0.1;
     }
-    lockers(rearZ + 0.1, kz1, 1); lockers(rearZ + 0.1, kz1, -1);
+    lockers(rearZ + 0.14, kz1, 1); lockers(rearZ + 0.14, kz1, -1);
     lamp(0, rearZ + 0.9); lamp(0, (kz0 + kz1) / 2); lamp(0, livingFront - 0.4);
     Object.assign(res, { bed: bedPos, living: { pos: [-0.05, floorY + 1.6, livingFront - 0.15], yaw: Math.PI, pitch: -0.2 } });
   }
-  res.driver = { pos: [-0.45, floorY + 1.16, seatZ - 0.24], yaw: 0, pitch: -0.06 };
-  res.passenger = { pos: [0.45, floorY + 1.16, seatZ - 0.24], yaw: 0.35, pitch: -0.06 };
+  res.driver = { pos: [-0.45, floorY + F.eye, seatZ - 0.24], yaw: 0, pitch: -0.06 };
+  res.passenger = { pos: [0.45, floorY + F.eye, seatZ - 0.24], yaw: 0.35, pitch: -0.06 };
   res.lights = [[0, topY - 0.25, rearZ + 1.0], [0, topY - 0.25, livingFront - 0.6]];
   res.glow = [tintOutF, tintOutB];
-  res.group = g; res.doors = doors; res.mats = mats; res.texs = texs; res.wheels = wheels; res.topY = topY; res.cabDoorRear = cabDoorRear; res.awningY = topY - 0.02;
+  res.group = g; res.doors = doors; res.mats = mats; res.texs = texs; res.wheels = wheels; res.topY = topY; res.cabDoorRear = Z(dB); res.awningY = awnY; res.awningX = awnX + 0.03;
   res.refl = refl; res.setEnv = (t) => { refl.forEach((m) => { m.envMap = t; }); };
   return res;
 }
