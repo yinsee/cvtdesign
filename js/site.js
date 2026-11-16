@@ -640,6 +640,7 @@ const VIEWS = [
   ['passenger', 'Passenger seat'],
   ['living', 'Living area'],
   ['bed', 'Lying in bed'],
+  ['bath', 'Bathroom'],
   ['camp', 'Camping']
 ];
 const SKY = { top: '#4f79ad', horizon: '#f0d7b8', bottom: '#b9ad97', sun: [0.62, 0.32, -0.25] };
@@ -735,15 +736,161 @@ function paleReflections(m, keep) {
   m.customProgramCacheKey = () => 'pale' + keep.toFixed(2);
   return m;
 }
-// door-mirror glass: a slightly domed pane facing backwards, as on a real van, so it shows a wide slice of the scene behind
+// door-mirror glass: a slightly domed pane facing backwards, as on a real van, so it shows a wide slice of the scene behind.
+// A grid (not just an outline), so the dome really bulges towards the viewer: its middle stands proud of the housing behind it
 function mirrorGlassGeo(T, w, h, r) {
-  const sh = new T.Shape(), x = w / 2, y = h / 2;
-  sh.moveTo(-x + r, -y); sh.lineTo(x - r, -y); sh.quadraticCurveTo(x, -y, x, -y + r); sh.lineTo(x, y - r); sh.quadraticCurveTo(x, y, x - r, y);
-  sh.lineTo(-x + r, y); sh.quadraticCurveTo(-x, y, -x, y - r); sh.lineTo(-x, -y + r); sh.quadraticCurveTo(-x, -y, -x + r, -y);
-  const g = new T.ShapeGeometry(sh, 6); g.rotateY(Math.PI);
-  const p = g.attributes.position, n = g.attributes.normal, v = new T.Vector3();
-  for (let i = 0; i < p.count; i++) { const u = p.getX(i) / x, t = p.getY(i) / y; v.set(u * 0.3, t * 0.22, -1).normalize(); n.setXYZ(i, v.x, v.y, v.z); p.setZ(i, 0.003 * (u * u + t * t)); }
+  const g = new T.PlaneGeometry(2, 2, 10, 10); g.rotateY(Math.PI);
+  const p = g.attributes.position, n = g.attributes.normal, v = new T.Vector3(), e = Math.max(3, Math.min(10, 0.9 * Math.min(w, h) / Math.max(1e-3, r)));
+  for (let i = 0; i < p.count; i++) {
+    let u = p.getX(i), t = p.getY(i);
+    // the square grid is drawn in to a rounded rectangle
+    const m = Math.max(Math.abs(u), Math.abs(t)), q = Math.pow(Math.pow(Math.abs(u), e) + Math.pow(Math.abs(t), e), 1 / e); if (q > 1e-6) { u *= m / q; t *= m / q; }
+    v.set(u * 0.3, t * 0.22, -1).normalize(); n.setXYZ(i, v.x, v.y, v.z); p.setXYZ(i, u * w / 2, t * h / 2, -0.004 * Math.max(0, 1 - (u * u + t * t) / 2));
+  }
   return g;
+}
+
+// ---------- things that open. A part is anything that can be tapped in the look-inside views: it has a position 0..1 that eases
+// towards 'want', a set(k) that moves it, and one or more unseen boxes round it that taps are tested against (they double as the hover highlight)
+function partKit(T, res, mats) {
+  const hitM = new T.MeshBasicMaterial({ color: '#ffc98a', transparent: true, opacity: 0.3, depthWrite: false, blending: T.AdditiveBlending }); mats.push(hitM);
+  res.parts = []; res.hitM = hitM;
+  return (o) => {
+    const p = Object.assign({ t: 0, k: 0, want: 0, dur: 0.55, proxies: [] }, o);
+    (o.boxes || []).forEach((b) => { const m = new T.Mesh(new T.BoxGeometry(b[0], b[1], b[2]), hitM); m.position.set(b[3], b[4], b[5]); m.visible = false; m.castShadow = false; m.receiveShadow = false; m.renderOrder = 6; m.userData.part = p; (b[6] || o.obj).add(m); p.proxies.push(m); });
+    delete p.boxes;
+    if (o.obj) o.obj.userData.owner = p;
+    res.parts.push(p); return p;
+  };
+}
+// merge geometries keeping texture coordinates and vertex colours (mergeGeos keeps positions and normals only)
+function mergeFull(T, list) {
+  const gs = list.map((g) => g.index ? g.toNonIndexed() : g); let n = 0; gs.forEach((g) => { n += g.attributes.position.count; });
+  const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), uv = new Float32Array(n * 2), col = gs.some((g) => g.attributes.color) ? new Float32Array(n * 3).fill(1) : null; let o = 0;
+  gs.forEach((g, i) => { const a = g.attributes; pos.set(a.position.array, o * 3); if (a.normal) nor.set(a.normal.array, o * 3); if (a.uv) uv.set(a.uv.array, o * 2); if (col && a.color) col.set(a.color.array, o * 3); o += a.position.count; if (g !== list[i]) g.dispose(); });
+  const out = new T.BufferGeometry(); out.setAttribute('position', new T.BufferAttribute(pos, 3)); out.setAttribute('normal', new T.BufferAttribute(nor, 3)); out.setAttribute('uv', new T.BufferAttribute(uv, 2)); if (col) out.setAttribute('color', new T.BufferAttribute(col, 3));
+  return out;
+}
+function tintGeo(T, geo, hex) { const c = new T.Color(hex), n = geo.attributes.position.count, a = new Float32Array(n * 3); for (let i = 0; i < n; i++) { a[i * 3] = c.r; a[i * 3 + 1] = c.g; a[i * 3 + 2] = c.b; } geo.setAttribute('color', new T.BufferAttribute(a, 3)); return geo; }
+// meshes under root that share a material become one mesh (see-through ones are left alone)
+function compactGroup(T, root) {
+  const buckets = new Map();
+  root.children.slice().forEach((o) => { if (!o.isMesh || o.userData.part || o.material.transparent || o.children.length) return; o.updateMatrix(); const g0 = o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone(); g0.applyMatrix4(o.matrix); const k = o.material.uuid + (o.castShadow ? 's' : 'n'); if (!buckets.has(k)) buckets.set(k, { m: o.material, cs: o.castShadow, rs: o.receiveShadow, list: [] }); buckets.get(k).list.push(g0); root.remove(o); o.geometry.dispose(); });
+  buckets.forEach((b) => { const mesh = new T.Mesh(mergeFull(T, b.list), b.m); b.list.forEach((x) => x.dispose()); mesh.castShadow = b.cs; mesh.receiveShadow = b.rs; root.add(mesh); });
+}
+// Doors that open are cut out of the finished body side like a pastry cutter: every triangle of the side's skin (panel, lining, glass,
+// trim, shut lines) is split along the door's outline, and the pieces inside it are moved to a group of their own that can swing or slide.
+// polys: convex outlines [[z, y], ...] (a door may be the union of several); xIn(y): how far out a triangle must lie to count as skin;
+// meshes marked userData.keep stay on the body, and those marked userData.door === tag go to the door whole
+function cutDoor(T, g, polys, side, xIn, pivot, tag, swap) {
+  const grp = new T.Group(); grp.position.copy(pivot);
+  let z0 = 1e9, z1 = -1e9, y0 = 1e9, y1 = -1e9, xm = 1e9;
+  polys.forEach((p) => p.forEach(([z, y]) => { z0 = Math.min(z0, z); z1 = Math.max(z1, z); y0 = Math.min(y0, y); y1 = Math.max(y1, y); xm = Math.min(xm, xIn(y)); }));
+  const edges = polys.map((p) => { let ar = 0; p.forEach((a, i) => { const b = p[(i + 1) % p.length]; ar += a[0] * b[1] - b[0] * a[1]; }); const sg = ar > 0 ? 1 : -1; return p.map((a, i) => { const b = p[(i + 1) % p.length]; return [a[0], a[1], b[0] - a[0], b[1] - a[1], sg]; }); });
+  const f = (e, v) => e[4] * (e[2] * (v[1] - e[1]) - e[3] * (v[2] - e[0]));
+  const mix = (a, b, t) => { const o = new Array(8); for (let i = 0; i < 8; i++) o[i] = a[i] + (b[i] - a[i]) * t; return o; };
+  const split = (poly, e) => { const keep = [], drop = []; for (let i = 0; i < poly.length; i++) { const a = poly[i], b = poly[(i + 1) % poly.length], fa = f(e, a), fb = f(e, b); if (fa >= 0) keep.push(a); if (fa <= 0) drop.push(a); if ((fa < 0 && fb > 0) || (fa > 0 && fb < 0)) { const m = mix(a, b, fa / (fa - fb)); keep.push(m); drop.push(m); } } return [keep, drop]; };
+  const area = (p) => { let s = 0; for (let i = 1; i < p.length - 1; i++) s += Math.abs((p[i][2] - p[0][2]) * (p[i + 1][1] - p[0][1]) - (p[i + 1][2] - p[0][2]) * (p[i][1] - p[0][1])) + Math.abs((p[i][0] - p[0][0]) * (p[i + 1][1] - p[0][1]) - (p[i + 1][0] - p[0][0]) * (p[i][1] - p[0][1])); return s; };
+  const fan = (p, out) => { for (let i = 1; i < p.length - 1; i++) out.push(p[0], p[i], p[i + 1]); };
+  const mk = (vs, dx, dy, dz) => { const n = vs.length, pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), uv = new Float32Array(n * 2); vs.forEach((v, i) => { pos[i * 3] = v[0] - dx; pos[i * 3 + 1] = v[1] - dy; pos[i * 3 + 2] = v[2] - dz; nor[i * 3] = v[3]; nor[i * 3 + 1] = v[4]; nor[i * 3 + 2] = v[5]; uv[i * 2] = v[6]; uv[i * 2 + 1] = v[7]; }); const o = new T.BufferGeometry(); o.setAttribute('position', new T.BufferAttribute(pos, 3)); o.setAttribute('normal', new T.BufferAttribute(nor, 3)); o.setAttribute('uv', new T.BufferAttribute(uv, 2)); return o; };
+  const bb = new T.Box3();
+  g.children.slice().forEach((mesh) => {
+    if (!mesh.isMesh || mesh.userData.keep) return;
+    if (mesh.userData.door) { if (mesh.userData.door === tag) { mesh.position.sub(pivot); grp.add(mesh); } return; }
+    mesh.updateMatrix(); const g0 = mesh.geometry; if (!g0.boundingBox) g0.computeBoundingBox();
+    bb.copy(g0.boundingBox).applyMatrix4(mesh.matrix);
+    if ((side > 0 ? bb.max.x < xm : bb.min.x > -xm) || bb.max.z < z0 || bb.min.z > z1 || bb.max.y < y0 || bb.min.y > y1) return;
+    const geo = g0.index ? g0.toNonIndexed() : g0.clone(); geo.applyMatrix4(mesh.matrix);
+    const P = geo.attributes.position.array, N = geo.attributes.normal ? geo.attributes.normal.array : null, U = geo.attributes.uv ? geo.attributes.uv.array : null, ins = [], out = [];
+    const vert = (i) => [P[i * 3], P[i * 3 + 1], P[i * 3 + 2], N ? N[i * 3] : 0, N ? N[i * 3 + 1] : 1, N ? N[i * 3 + 2] : 0, U ? U[i * 2] : 0, U ? U[i * 2 + 1] : 0];
+    for (let i = 0; i < P.length / 3; i += 3) {
+      const tri = [vert(i), vert(i + 1), vert(i + 2)];
+      if (!tri.every((v) => side * v[0] > xIn(v[1])) || Math.max(tri[0][2], tri[1][2], tri[2][2]) < z0 || Math.min(tri[0][2], tri[1][2], tri[2][2]) > z1) { out.push(tri[0], tri[1], tri[2]); continue; }
+      let rest = [tri]; const got = [];
+      edges.forEach((es) => { const next = []; rest.forEach((r) => { let cur = r; for (let k = 0; k < es.length && cur.length >= 3; k++) { const sp = split(cur, es[k]); if (sp[1].length >= 3) next.push(sp[1]); cur = sp[0]; } if (cur.length >= 3) { if (area(cur) > 1e-9) got.push(cur); else next.push(cur); } }); rest = next; });
+      if (!got.length) { out.push(tri[0], tri[1], tri[2]); continue; }
+      got.forEach((q) => fan(q, ins)); rest.forEach((q) => { if (area(q) > 1e-10) fan(q, out); });
+    }
+    geo.dispose();
+    if (!ins.length) return;
+    const mat = (swap && swap.get(mesh.material)) || mesh.material;
+    const dm = new T.Mesh(mk(ins, pivot.x, pivot.y, pivot.z), mat); dm.castShadow = mesh.castShadow; dm.receiveShadow = mesh.receiveShadow; dm.renderOrder = mesh.renderOrder; grp.add(dm);
+    g0.dispose();
+    if (out.length) { mesh.geometry = mk(out, 0, 0, 0); mesh.material = mat; mesh.position.set(0, 0, 0); mesh.quaternion.identity(); mesh.scale.set(1, 1, 1); mesh.updateMatrix(); } else g.remove(mesh);
+  });
+  compactGroup(T, grp);
+  g.add(grp); return grp;
+}
+// a soft spray or stream of water: points that fall along a line and fan out, drawn with the soft glow sprite. Costs nothing until it is turned on
+function waterFx(T, n, from, to, spread0, spread1, size, tex) {
+  const pos = new Float32Array(n * 3), seed = new Float32Array(n * 3); for (let i = 0; i < n * 3; i++) seed[i] = hash2(i * 1.37, 7.1 + i * 0.11);
+  const geo = new T.BufferGeometry(); geo.setAttribute('position', new T.BufferAttribute(pos, 3));
+  const mat = new T.PointsMaterial({ map: tex, color: '#dff1ff', size, sizeAttenuation: true, transparent: true, opacity: 0, depthWrite: false });
+  const pts = new T.Points(geo, mat); pts.visible = false; pts.frustumCulled = false; pts.raycast = () => {};
+  const dx = to[0] - from[0], dy = to[1] - from[1], dz = to[2] - from[2];
+  pts.userData.run = (k, time) => {
+    pts.visible = k > 0.01; mat.opacity = 0.8 * k; if (!pts.visible) return;
+    for (let i = 0; i < n; i++) { const s = (time * (0.9 + 0.5 * seed[i * 3]) + seed[i * 3 + 1] * 7) % 1, q = s * s * 0.55 + s * 0.45, a = seed[i * 3 + 2] * 6.283 + i, r = (spread0 + (spread1 - spread0) * q) * Math.sqrt(seed[i * 3 + 1]);
+      pos[i * 3] = from[0] + dx * q + Math.cos(a) * r; pos[i * 3 + 1] = from[1] + dy * q; pos[i * 3 + 2] = from[2] + dz * q + Math.sin(a) * r; }
+    geo.attributes.position.needsUpdate = true;
+  };
+  return pts;
+}
+
+// furniture that opens is built in a frame of its own standing against a side wall: x runs along the wall, y is up and z points out into
+// the aisle (the furniture's front face is z = 0). frame(s, ...): s is the side of the van the wall is on; t counts from the frame's rear end
+function furnKit(T, g, part, S, wood) {
+  const itemM = S({ color: '#ffffff', vertexColors: true, roughness: 0.6 });
+  const frame = (s, xFace, y0, zRear, len) => { const G = new T.Group(); G.position.set(xFace, y0, s > 0 ? zRear : zRear + len); G.rotation.y = -s * Math.PI / 2; g.add(G); return { G, len, s, dir: s > 0 ? 1 : -1, X: (t) => s > 0 ? t : len - t, L: new Map() }; };
+  const toWorld = (fr, x, y, z) => [fr.G.position.x - fr.s * z, fr.G.position.y + y, fr.G.position.z + fr.s * x];
+  // fixed pieces are gathered per material and merged into one mesh each when the frame is sealed; col tints a piece of itemM
+  const put = (fr, mat, geo, x, y, z, col) => { geo.translate(x, y, z); if (col) tintGeo(T, geo, col); if (!fr.L.has(mat)) fr.L.set(mat, []); fr.L.get(mat).push(geo); return geo; };
+  const pbox = (fr, mat, w, h, d, x, y, z, col) => put(fr, mat, new T.BoxGeometry(w, h, d), x, y, z, col);
+  const pcyl = (fr, mat, r, h, x, y, z, col, r2, lie) => { const q = new T.CylinderGeometry(r2 === undefined ? r : r2, r, h, 14); if (lie === 'x') q.rotateZ(Math.PI / 2); else if (lie === 'z') q.rotateX(Math.PI / 2); return put(fr, mat, q, x, y, z, col); };
+  const seal = (fr) => { fr.L.forEach((list, mat) => { const m = new T.Mesh(mergeFull(T, list), mat); list.forEach((x) => x.dispose()); m.castShadow = !mat.transparent; m.receiveShadow = true; fr.G.add(m); }); fr.L.clear(); };
+  // a door or drawer front on a frame, from t0 to t1 along the wall and y0 to y1 up. how: 'r' / 'f' hinged on its rear / front edge,
+  // 't' on its top edge (a lift-up flap), 'd' a drawer that slides out. fill(sub, f) adds whatever moves with it (handles, a drawer's box and contents)
+  const front = (fr, o) => {
+    const xa = fr.X(o.t0), xb = fr.X(o.t1), w = Math.abs(xb - xa) - 0.006, h = o.y1 - o.y0 - 0.006, how = o.how, th = o.th || 0.018, z0 = o.z || 0;
+    const piv = new T.Group(), sub = { G: piv, L: new Map() }; fr.G.add(piv);
+    const hx = how === 'r' ? fr.dir : how === 'f' ? -fr.dir : 0;        // which way the panel runs from its hinge
+    piv.position.set(hx ? fr.X(how === 'r' ? o.t0 : o.t1) + hx * 0.003 : (xa + xb) / 2, how === 't' ? o.y1 - 0.003 : (o.y0 + o.y1) / 2, z0);
+    const px = hx * w / 2, py = how === 't' ? -h / 2 : 0, f = { piv, sub, w, h, px, py, th, hx };
+    put(sub, o.mat || wood, rboxGeo(T, w, h, th, 0.005), px, py, th / 2 + 0.001);
+    if (o.handle !== false) { if (how === 'd' || how === 't') pbox(sub, itemM, Math.min(0.16, w * 0.5), 0.012, 0.02, px, py + (how === 't' ? -h * 0.3 : h * 0.2), th + 0.011, '#c4c8cd'); else pbox(sub, itemM, 0.012, Math.min(0.16, h * 0.4), 0.02, px + hx * (w / 2 - 0.035), py + (o.handleY || 0), th + 0.011, '#c4c8cd'); }
+    if (o.fill) o.fill(sub, f);
+    seal(sub);
+    const ang = o.angle || 1.75, out = o.out || 0.3;
+    const set = how === 'd' ? (k) => { piv.position.z = z0 + out * k; } : how === 't' ? (k) => { piv.rotation.x = -ang * k; } : (k) => { piv.rotation.y = -hx * ang * k; };
+    f.p = part({ id: o.id, label: o.label, obj: piv, zone: o.zone, dur: o.dur || (how === 'd' ? 0.5 : 0.6), set, boxes: [[w + 0.01, h + 0.01, th + 0.03, px, py, th / 2 + 0.004]] });
+    return f;
+  };
+  // the open box of a drawer behind its front (bottom, sides and back), in the drawer's own frame
+  const drawerBox = (sub, f, dep) => { const c = '#d6bb90', y0 = f.py - f.h / 2 + 0.02, hh = f.h * 0.62, w = f.w - 0.05; pbox(sub, itemM, w, 0.008, dep, f.px, y0, -dep / 2, c); [-1, 1].forEach((s) => pbox(sub, itemM, 0.01, hh, dep, f.px + s * w / 2, y0 + hh / 2, -dep / 2, c)); pbox(sub, itemM, w, hh, 0.01, f.px, y0 + hh / 2, -dep + 0.005, c); return y0 + 0.004; };
+  // the inside of a fridge: a white liner that lights up as the door opens, shelves and a few things to eat and drink
+  const fridgeM = S({ color: '#f1f4f6', roughness: 0.4, emissive: '#fff3d6', emissiveIntensity: 0, side: T.DoubleSide });
+  const fridge = (fr, xc, y0, w, h, dep) => {
+    const b = new T.BoxGeometry(w, h, dep), idx = Array.from(b.index.array); idx.splice(24, 6); b.setIndex(idx); put(fr, fridgeM, b, xc, y0 + h / 2, -dep / 2 - 0.004);
+    const sy = [y0 + h * 0.36, y0 + h * 0.68]; sy.forEach((y) => pbox(fr, fridgeM, w - 0.01, 0.008, dep - 0.03, xc, y, -dep / 2 - 0.01));
+    pbox(fr, fridgeM, w * 0.4, 0.012, 0.03, xc, y0 + h - 0.014, -0.05);
+    const z = -dep * 0.45, u = w / 2 - 0.05;
+    pcyl(fr, itemM, 0.035, 0.2, xc - u * 0.8, y0 + 0.11, z, '#f4f4ee'); pcyl(fr, itemM, 0.02, 0.03, xc - u * 0.8, y0 + 0.225, z, '#2f6fc0');     // milk
+    pbox(fr, itemM, 0.07, 0.19, 0.07, xc - u * 0.2, y0 + 0.105, z, '#f08a24'); pcyl(fr, itemM, 0.03, 0.17, xc + u * 0.35, y0 + 0.095, z, '#3d7a3a'); pcyl(fr, itemM, 0.03, 0.17, xc + u * 0.85, y0 + 0.095, z + 0.02, '#7a4a1e');
+    pbox(fr, itemM, 0.12, 0.05, 0.09, xc - u * 0.5, sy[0] + 0.03, z, '#f2d24a'); pcyl(fr, itemM, 0.04, 0.08, xc + u * 0.3, sy[0] + 0.045, z, '#c0392b'); pbox(fr, itemM, 0.1, 0.06, 0.1, xc + u * 0.8, sy[0] + 0.035, z, '#e9e4d8');
+    if (h > 0.6) { pbox(fr, itemM, 0.16, 0.06, 0.1, xc - u * 0.4, sy[1] + 0.035, z, '#7fb04a'); pcyl(fr, itemM, 0.035, 0.07, xc + u * 0.5, sy[1] + 0.04, z, '#e8b7c2'); }
+    return (sub, f) => { pbox(sub, itemM, f.w - 0.03, f.h - 0.03, 0.012, f.px, f.py, -0.006, '#eef1f3'); pbox(sub, itemM, f.w - 0.06, 0.012, 0.06, f.px, f.py - f.h * 0.22, -0.04, '#eef1f3'); pbox(sub, itemM, f.w - 0.06, 0.05, 0.008, f.px, f.py - f.h * 0.22 + 0.025, -0.068, '#eef1f3'); pcyl(sub, itemM, 0.024, 0.15, f.px - f.hx * f.w * 0.15, f.py - f.h * 0.22 + 0.08, -0.04, '#6fb7d9'); pcyl(sub, itemM, 0.022, 0.12, f.px + f.hx * f.w * 0.12, f.py - f.h * 0.22 + 0.066, -0.04, '#d94f3a'); };
+  };
+  const lit = (f) => { const s0 = f.p.set; f.p.set = (k) => { s0(k); fridgeM.emissiveIntensity = 0.75 * Math.min(1, k * 3); }; return f; };
+  // what is kept in a cupboard: 'k' crockery, mugs and food, 'b' clothes, books and towels
+  const stock = (fr, kind, i, xc, w, y, zc) => {
+    const u = w / 2 - 0.07;
+    if (kind === 'k' && i % 3 === 0) { for (let j = 0; j < 5; j++) pcyl(fr, itemM, 0.085, 0.012, xc - u * 0.5, y + 0.008 + j * 0.014, zc, j % 2 ? '#f3f1ea' : '#e6e2d6'); for (let j = 0; j < 3; j++) pcyl(fr, itemM, 0.045, 0.04, xc + u * 0.6, y + 0.02 + j * 0.03, zc, '#9fc3cf', 0.065); }
+    else if (kind === 'k' && i % 3 === 1) { ['#d9654f', '#e9c46a', '#2a9d8f', '#f4f1ea'].forEach((c, j) => { const x = xc - u + j * u * 0.66; pcyl(fr, itemM, 0.035, 0.085, x, y + 0.043, zc + (j % 2) * 0.05, c); pbox(fr, itemM, 0.012, 0.045, 0.03, x, y + 0.045, zc + (j % 2) * 0.05 + 0.045, c); }); }
+    else if (kind === 'k') { pbox(fr, itemM, 0.14, 0.24, 0.06, xc - u * 0.6, y + 0.12, zc, '#d8572a'); pcyl(fr, itemM, 0.04, 0.11, xc, y + 0.055, zc, '#b33a3a'); pcyl(fr, itemM, 0.04, 0.11, xc + u * 0.45, y + 0.055, zc + 0.03, '#3f7f4f'); pcyl(fr, itemM, 0.045, 0.14, xc + u * 0.9, y + 0.07, zc, '#e8dcc0'); pcyl(fr, itemM, 0.047, 0.02, xc + u * 0.9, y + 0.15, zc, '#8a5a2b'); }
+    else if (i % 2 === 0) { ['#3b5b8c', '#e9e4d8', '#b85c5c', '#58735a'].forEach((c, j) => pbox(fr, itemM, 0.24, 0.045, 0.2, xc - u * 0.45, y + 0.023 + j * 0.047, zc, c)); ['#e6dfcf', '#8fb3c9'].forEach((c, j) => pcyl(fr, itemM, 0.055, 0.2, xc + u * 0.65, y + 0.055 + j * 0.105, zc, c, undefined, 'z')); }
+    else { ['#7a3b2e', '#2f4f6f', '#c9a227', '#3f6b4f', '#8c8c8c', '#b5523b'].forEach((c, j) => pbox(fr, itemM, 0.03, 0.2 + (j % 3) * 0.015, 0.14, xc - u + j * 0.034, y + 0.1 + (j % 3) * 0.0075, zc, c)); pbox(fr, itemM, 0.2, 0.09, 0.16, xc + u * 0.5, y + 0.045, zc, '#d9c9a8'); pbox(fr, itemM, 0.2, 0.012, 0.16, xc + u * 0.5, y + 0.096, zc, '#b79f76'); }
+  };
+  return { itemM, frame, toWorld, put, pbox, pcyl, seal, front, drawerBox, fridge, lit, stock };
 }
 
 // ---------- the van
@@ -1069,13 +1216,15 @@ function buildVan(T, c) {
     if (c.hatch) { const [d0, d1, y0, y1] = c.hatch[side > 0 ? 'n' : 'o'] || []; if (d0) seam([[d0, y0], [d1, y0], [d1, y1], [d0, y1], [d0, y0]], side); }
     // door mirror: a tall black housing on two short arms, with a domed mirror glass facing backwards
     { const m = F.mirror, mx = side * (xS + m.out + m.w / 2), mz = Z(m.d), hm = c.mirrors === 'body' ? paint : plastic;
-      rbox(m.w, m.h, 0.12, 0.045, hm, mx, m.y, mz);
-      noShadow(add(mirrorGlassGeo(T, m.w - 0.04, m.h * 0.62, 0.03), mirrorM, mx, m.y + m.h * 0.13, mz - 0.063));
-      noShadow(add(mirrorGlassGeo(T, m.w - 0.04, m.h * 0.2, 0.02), mirrorM, mx, m.y - m.h * 0.33, mz - 0.063));
-      [m.armY, m.armY - 0.09].forEach((ay) => bar(V(side * (xS - 0.01), m.y + ay, Z(m.d + 0.06)), V(mx, m.y + ay, mz), 0.035, 0.05, plastic, 0.012));
-      noShadow(rbox(0.012, 0.02, 0.1, 0.004, amberM, mx + side * 0.005, m.y + m.h * 0.3, mz + 0.062)); }
+      const onDoor = (o) => { o.userData.door = 'cab' + side; return o; };
+      onDoor(rbox(m.w, m.h, 0.12, 0.045, hm, mx, m.y, mz));
+      // the glass stands just proud of the housing's back face (it used to sit inside it, so the housing showed through the middle)
+      onDoor(noShadow(add(mirrorGlassGeo(T, m.w - 0.04, m.h * 0.62, 0.03), mirrorM, mx, m.y + m.h * 0.13, mz - 0.0615)));
+      onDoor(noShadow(add(mirrorGlassGeo(T, m.w - 0.04, m.h * 0.2, 0.02), mirrorM, mx, m.y - m.h * 0.33, mz - 0.0615)));
+      [m.armY, m.armY - 0.09].forEach((ay) => onDoor(bar(V(side * (xS - 0.01), m.y + ay, Z(m.d + 0.02)), V(mx, m.y + ay, mz + 0.01), 0.035, 0.05, plastic, 0.012)));
+      onDoor(noShadow(rbox(0.012, 0.02, 0.1, 0.004, amberM, mx + side * 0.005, m.y + m.h * 0.3, mz + 0.062))); }
     // A-pillar, rear corner post and tail lamp
-    bar(V(side * (xS - 0.037), yB - 0.015, Z(dA0) - 0.01), V(side * (sx(yA1) - 0.037), yA1 - 0.005, Z(dA1)), 0.075, 0.11, paint, 0.03);
+    bar(V(side * (xS - 0.037), yB - 0.015, Z(dA0) - 0.01), V(side * (sx(yA1) - 0.037), yA1 - 0.005, Z(dA1)), 0.075, 0.11, paint, 0.03).userData.keep = true;
     bar(V(side * (xS - 0.055), rearY0, rearZ + 0.06), V(side * (xS - 0.055), yB + 0.01, rearZ + 0.06), 0.11, 0.11, paint, 0.045);
     bar(V(side * (xS - 0.055), yB - 0.01, rearZ + 0.06), V(side * (xR - 0.055), yC + 0.01, rearZ + 0.06), 0.11, 0.11, paint, 0.045);
     { const y0 = F.lampR[0], y1 = F.lampR[1], ym = Math.max(y0, Math.min(y1, yB));
@@ -1101,6 +1250,28 @@ function buildVan(T, c) {
   if (thinGeos.length) { noShadow(add(mergeGeos(T, thinGeos), plastic, 0, 0, 0)); thinGeos.forEach((x) => x.dispose()); }
   pools.forEach(({ mat, list }) => { const m = noShadow(add(mergeGeos(T, list), mat, 0, 0, 0)); if (mat === gap.core || mat === gap.halo) m.receiveShadow = false; list.forEach((x) => x.dispose()); });
   gapGeos.forEach((gl, k) => { const m = noShadow(add(mergeGeos(T, gl), k ? gap.core : gap.halo, 0, 0, 0)); m.receiveShadow = false; gl.forEach((x) => x.dispose()); });
+
+  // ----- doors that open: the cab doors and the sliding door are cut out of the finished sides (see cutDoor), each hung on its own hinge or rail
+  const PK = {}, part = partKit(T, PK, mats);
+  {
+    const bY = sillY + 0.1, R = archR + 0.055, xIn = (y) => sx(y) - 0.1, zy = (p) => p.map(([d, y]) => [Z(d), y]), swap = new Map([[paint, paintD]]);
+    const dTop = (d) => { let y = yC - 0.03; for (let i = 1; i < brow.length; i++) if (d >= brow[i - 1][1] && d <= brow[i][1]) y = brow[i - 1][3] + (brow[i][3] - brow[i - 1][3]) * (d - brow[i - 1][1]) / (brow[i][1] - brow[i - 1][1]) - 0.03; return y; };
+    const yTop = Math.min(dTop(dB), (F.gutter || yC) - 0.02), ySl = (F.gutter || yC) - 0.03;
+    // the cab door's outline: round the back of the front wheel arch, up the shut line, forward to the foot of the A-pillar and up along it
+    const aD = F.fo + Math.sqrt(Math.max(0, R * R - Math.pow(bY - archC, 2))), aY = archC + Math.sqrt(Math.max(0, R * R - Math.pow(F.doorF - F.fo, 2))), am = (Math.atan2(aY - archC, F.doorF - F.fo) + Math.atan2(bY - archC, aD - F.fo)) / 2;
+    const q1 = [dP(yB + 0.1) - 0.03, yB + 0.1], q2 = [dP(yTop) - 0.03, yTop];
+    const cabPolys = [zy([[dB, bY], [aD, bY], [F.fo + R * Math.cos(am), archC + R * Math.sin(am)], [F.doorF, aY], [F.doorF, yB - 0.03], [dB, yB - 0.03]]), zy([[F.doorF, yB - 0.03], [dB, yB - 0.03], [dB, yTop], q2, q1])];
+    [-1, 1].forEach((side) => {
+      const cab = cutDoor(T, g, cabPolys, side, xIn, V(side * xS, 0, Z(q1[0])), 'cab' + side, swap);
+      part({ id: side < 0 ? 'cab-driver' : 'cab-passenger', label: side < 0 ? "Driver's door" : 'Passenger door', obj: cab, ext: true, dur: 0.75, set: (k) => { cab.rotation.y = -side * 1.12 * k; }, boxes: [[0.08, yTop - bY, dB - F.doorF, -side * 0.02, (yTop + bY) / 2, Z((dB + F.doorF) / 2) - Z(q1[0])]] });
+      if (side > 0 || c.slideBoth) {
+        const sd = cutDoor(T, g, [zy([[sl0, bY], [sl1, bY], [sl1, ySl], [sl0, ySl]])], side, xIn, V(0, 0, 0), 'slide' + side, swap);
+        const travel = Math.min(L - 0.25 - sl1, sl1 - sl0, c.pod ? L - 1.64 - sl1 : 9) - 0.04;
+        // it pops out of its opening first, then runs back along the rail
+        part({ id: 'slide', label: 'Sliding door', obj: sd, ext: true, dur: 0.95, set: (k) => { const o = Math.min(1, k / 0.2); sd.position.set(side * 0.078 * o * (2 - o), 0, -travel * Math.max(0, (k - 0.1) / 0.9)); }, boxes: [[0.09, ySl - bY, sl1 - sl0, side * (xS - 0.03), (ySl + bY) / 2, Z((sl0 + sl1) / 2)]] });
+      }
+    });
+  }
 
   // ----- roof skin, headlining, windscreen and its surround
   const crownAt = (au) => au <= 0.84 ? 1 : Math.sqrt(Math.max(0, 1 - Math.pow((au - 0.84) / 0.16, 2)));
@@ -1156,6 +1327,7 @@ function buildVan(T, c) {
       if (side < 0) { rbox(0.16, 0.04, 0.035, 0.012, plastic, dir * (dw - 0.16), F.handleY, -0.045, pivot); noShadow(rbox(0.52, 0.11, 0.012, 0.008, plateR, dir * dw * 0.52, y0 + 0.16, -0.035, pivot)); noShadow(rbox(0.6, 0.15, 0.012, 0.01, plastic, dir * dw * 0.52, y0 + 0.16, -0.03, pivot)); }
       [y0 + 0.2, y1 - 0.25].forEach((hy) => rbox(0.035, 0.09, 0.03, 0.01, plastic, dir * 0.01, hy, -0.03, pivot));
       doors.push({ pivot, axis: 'y', open: side < 0 ? 1.75 : -1.75 });
+      part({ id: side < 0 ? 'rear-right' : 'rear-left', label: 'Rear doors', obj: pivot, ext: true, auto: true, dur: 0.85, set: (k) => { pivot.rotation.y = (side < 0 ? 1.75 : -1.75) * k; }, boxes: [[dw, y1 - y0, 0.07, dir * dw / 2, (y0 + y1) / 2, -0.012]] });
     });
   }
 
@@ -1219,10 +1391,31 @@ function buildVan(T, c) {
     if (Math.abs(x) + w / 2 < 0.6 || z1 <= wbZ0 || z0 >= wbZ1 || y0 >= wbTop) return part(z0, z1, y0);
     part(z0, Math.min(z1, wbZ0), y0); part(Math.max(z0, wbZ0), Math.min(z1, wbZ1), wbTop); part(Math.max(z0, wbZ1), z1, y0);
   };
-  const lockers = (z0, z1, side) => {
-    const lx = side * (wi(topY - 0.05) - 0.18);
-    rbox(0.36, 0.38, z1 - z0, 0.02, wood, lx, topY - 0.21, (z0 + z1) / 2);
-    noShadow(box(0.02, 0.012, z1 - z0 - 0.1, ledM, lx - side * 0.19, topY - 0.4, (z0 + z1) / 2));
+  const FK = furnKit(T, g, part, S, wood), { itemM, frame, toWorld, put, pbox, pcyl, seal, front, drawerBox, stock } = FK;
+  // overhead lockers: a run of lift-up flaps with a shelf of things behind each, and the reading-light strip underneath
+  const lockers = (z0, z1, side, kind) => {
+    const len = z1 - z0; if (len < 0.3) return;
+    const lx = side * (wi(topY - 0.05) - 0.18), LF = frame(side, lx - side * 0.18, topY - 0.4, z0, len), n = Math.max(1, Math.round(len / 0.68)), dep = 0.36;
+    pbox(LF, wood, len, 0.018, dep, len / 2, 0.009, -dep / 2); pbox(LF, wood, len, 0.018, dep, len / 2, 0.371, -dep / 2); pbox(LF, wood, len, 0.38, 0.012, len / 2, 0.19, -dep + 0.006);
+    for (let i = 0; i <= n; i++) pbox(LF, wood, 0.018, 0.38, dep, LF.X(Math.min(len - 0.009, Math.max(0.009, len * i / n))), 0.19, -dep / 2);
+    for (let i = 0; i < n; i++) { const t0 = len * i / n, t1 = len * (i + 1) / n;
+      front(LF, { id: 'locker-' + (side > 0 ? 'n' : 'o') + i, label: 'Overhead locker', t0: t0 + 0.004, t1: t1 - 0.004, y0: 0.006, y1: 0.376, how: 't', angle: 1.3, handle: false });
+      stock(LF, kind, i, LF.X((t0 + t1) / 2), t1 - t0 - 0.04, 0.02, -dep / 2 + 0.02); }
+    seal(LF);
+    noShadow(box(0.02, 0.012, len - 0.1, ledM, lx - side * 0.19, topY - 0.4, (z0 + z1) / 2));
+  };
+  // a tall wardrobe: hanging rail, a shelf above and one below, one full-height door
+  const wardrobe = (side, zRear, len) => {
+    const dep = 0.52, hgt = topY - floorY - 0.03, WF = frame(side, side * (wi(topY) - dep), floorY, zRear, len), X = WF.X;
+    [0.01, len - 0.01].forEach((t) => pbox(WF, wood, 0.02, hgt, dep, X(t), hgt / 2, -dep / 2));
+    pbox(WF, wood, len, hgt, 0.012, len / 2, hgt / 2, -dep + 0.006); pbox(WF, wood, len, 0.02, dep, len / 2, hgt - 0.01, -dep / 2); pbox(WF, wood, len, 0.085, 0.02, len / 2, 0.0425, -0.03);
+    [0.09, 0.42, 1.52].forEach((y) => pbox(WF, wood, len - 0.03, 0.015, dep - 0.03, len / 2, y, -dep / 2));
+    pcyl(WF, itemM, 0.011, len - 0.04, len / 2, 1.44, -dep / 2, '#c4c8cd', undefined, 'x');
+    ['#2f4f6f', '#b85c5c', '#e9e4d8', '#58735a', '#c9a227'].forEach((c, j) => { const x = 0.07 + j * (len - 0.14) / 4, hh = 0.62 + (j % 3) * 0.12; pbox(WF, itemM, 0.028, hh, 0.36, x, 1.41 - hh / 2, -dep / 2, c); pbox(WF, itemM, 0.006, 0.05, 0.006, x, 1.435, -dep / 2, '#8d9299'); });
+    pbox(WF, itemM, 0.1, 0.09, 0.26, len * 0.3, 0.143, -dep / 2, '#5a3d2b'); pbox(WF, itemM, 0.1, 0.09, 0.26, len * 0.3 + 0.12, 0.143, -dep / 2, '#5a3d2b'); pbox(WF, itemM, 0.16, 0.14, 0.28, len * 0.72, 0.5, -dep / 2, '#3a4a5c');
+    stock(WF, 'b', 0, len / 2, len - 0.04, 1.53, -dep / 2 + 0.02);
+    front(WF, { id: 'wardrobe', label: 'Wardrobe', t0: 0.004, t1: len - 0.004, y0: 0.088, y1: hgt - 0.012, how: 'r', angle: 1.7, handleY: -0.12 });
+    seal(WF);
   };
   const lamp = (x, z) => noShadow(add(new T.CylinderGeometry(0.06, 0.06, 0.012, 20), lampM, x, topY - 0.012, z));
   const pillows = (list) => list.forEach((p) => rbox(p[3] || 0.55, 0.13, p[4] || 0.38, 0.06, sheet, p[0], p[1], p[2]));
@@ -1253,17 +1446,105 @@ function buildVan(T, c) {
     const kSide = c.layout === 'northsouth' ? -1 : 1;
     const kz0 = bedFront + 0.04, kz1 = Math.min(kz0 + 1.25, kSide > 0 ? Z(sl0 + 0.75) : livingFront - 0.1);
     const kx = kSide * (wi(floorY + 0.93) - 0.28);
-    fbox(0.56, floorY, floorY + 0.9, kz0, kz1, 0.015, wood, kx);
+    // the kitchen unit is a carcass with real fronts: a cupboard under the sink, a fridge with a cutlery drawer over it, two deep drawers under the hob
+    { const kd = 0.56, KF = frame(kSide, kx - kSide * 0.28, floorY, kz0, kz1 - kz0), kl = KF.len, X = KF.X, b1 = kl * 0.34, b2 = b1 + Math.min(0.5, kl * 0.4);
+      [0.011, b1, b2, kl - 0.011].forEach((t) => pbox(KF, wood, 0.02, 0.88, kd - 0.004, X(t), 0.45, -kd / 2));
+      pbox(KF, wood, kl, 0.88, 0.012, kl / 2, 0.45, -kd + 0.008); pbox(KF, wood, kl, 0.085, 0.02, kl / 2, 0.0425, -0.03); pbox(KF, wood, kl, 0.012, kd - 0.02, kl / 2, 0.889, -kd / 2); pbox(KF, wood, kl - 0.02, 0.012, kd - 0.02, kl / 2, 0.091, -kd / 2);
+      pbox(KF, wood, b1 - 0.02, 0.015, kd - 0.08, X(b1 / 2), 0.5, -kd / 2 - 0.03);
+      // under the sink: washing-up things below, pans and a kettle on the shelf
+      pcyl(KF, itemM, 0.045, 0.24, X(b1 * 0.3), 0.217, -0.12, '#3f7fbf'); pcyl(KF, itemM, 0.04, 0.2, X(b1 * 0.62), 0.197, -0.14, '#5aa469'); pbox(KF, itemM, 0.1, 0.05, 0.07, X(b1 * 0.5), 0.122, -0.06, '#f2d24a');
+      pcyl(KF, itemM, 0.1, 0.08, X(b1 * 0.36), 0.548, -0.2, '#33363b'); pcyl(KF, itemM, 0.012, 0.16, X(b1 * 0.36), 0.56, -0.07, '#1c1d20', undefined, 'z'); pcyl(KF, itemM, 0.07, 0.13, X(b1 * 0.72), 0.573, -0.22, '#c9ccd1', 0.05);
+      front(KF, { id: 'k-cupboard', label: 'Kitchen cupboard', t0: 0.006, t1: b1, y0: 0.088, y1: 0.882, how: 'r', angle: 1.8, handleY: 0.2 });
+      FK.lit(front(KF, { id: 'fridge', label: 'Fridge', t0: b1, t1: b2, y0: 0.088, y1: 0.63, how: 'r', angle: 1.9, mat: steel, th: 0.022, handleY: 0.1, fill: FK.fridge(KF, X((b1 + b2) / 2), 0.1, b2 - b1 - 0.03, 0.52, kd - 0.09) }));
+      front(KF, { id: 'k-cutlery', label: 'Cutlery drawer', t0: b1, t1: b2, y0: 0.636, y1: 0.882, how: 'd', out: 0.32, fill: (sub, f) => { const y = drawerBox(sub, f, 0.42); [-0.12, -0.06, 0, 0.06].forEach((dx, j) => pbox(sub, itemM, 0.035, 0.012, 0.2, f.px + dx, y + 0.008, -0.16, j % 2 ? '#d4d8dc' : '#bfc4c9')); pbox(sub, itemM, 0.08, 0.03, 0.14, f.px + 0.14, y + 0.017, -0.2, '#b5523b'); } });
+      [[0.088, 0.484, 'Pan drawer'], [0.49, 0.882, 'Crockery drawer']].forEach(([y0, y1, label], i) => front(KF, { id: 'k-drawer' + i, label, t0: b2, t1: kl - 0.006, y0, y1, how: 'd', out: 0.36, fill: (sub, f) => { const y = drawerBox(sub, f, 0.44), u = f.w / 2 - 0.12;
+        if (i === 0) { pcyl(sub, itemM, 0.1, 0.09, f.px - u * 0.5, y + 0.047, -0.15, '#2f3237'); pcyl(sub, itemM, 0.085, 0.07, f.px + u * 0.6, y + 0.037, -0.3, '#3b3e44'); pcyl(sub, itemM, 0.012, 0.15, f.px - u * 0.5, y + 0.07, -0.3, '#1c1d20', undefined, 'z'); }
+        else { for (let j = 0; j < 6; j++) pcyl(sub, itemM, 0.09, 0.012, f.px - u * 0.5, y + 0.008 + j * 0.014, -0.14, j % 2 ? '#f3f1ea' : '#e2ded2'); for (let j = 0; j < 4; j++) pcyl(sub, itemM, 0.05, 0.04, f.px + u * 0.6, y + 0.02 + j * 0.028, -0.3, '#f3f1ea', 0.07); } } }));
+      seal(KF); }
     rbox(0.58, 0.035, kz1 - kz0 + 0.02, 0.01, worktop, kx, floorY + 0.915, (kz0 + kz1) / 2);
     rbox(0.34, 0.02, 0.4, 0.008, steel, kx, floorY + 0.94, kz0 + 0.3);
     const tap = add(new T.TorusGeometry(0.1, 0.012, 8, 24, Math.PI), steel, kx + kSide * 0.18, floorY + 0.94, kz0 + 0.3); tap.rotation.y = Math.PI / 2;
     [0, 1].forEach((i) => add(new T.CylinderGeometry(0.085, 0.085, 0.012, 24), plastic, kx, floorY + 0.94, kz1 - 0.24 - i * 0.26));
-    rbox(0.02, 0.5, 0.48, 0.008, steel, kx - kSide * 0.29, floorY + 0.3, (kz0 + kz1) / 2);
     if (c.bath) {
-      const bs = -kSide, bz0 = kz0, bz1 = kz0 + (c.bathLen || 0.9), bh = topY - floorY - 0.02, bx = bs * (wi(topY) - 0.38);
-      fbox(0.76, floorY, floorY + bh, bz0, bz1, 0.02, white, bx);
-      noShadow(rbox(0.012, bh - 0.25, 0.62, 0.006, S({ color: '#e7e3dc', roughness: 0.5 }), bx - bs * 0.385, floorY + (bh - 0.25) / 2 + 0.08, (bz0 + bz1) / 2));
-      rbox(0.03, 0.14, 0.03, 0.01, steel, bx - bs * 0.4, floorY + 1.0, bz0 + 0.18);
+      // the washroom: a wet room with its own walls and bifold door. Toilet, fold-down basin, tap, mirror cabinet and light stand in a column
+      // on the outside wall, facing the door, so they read at a glance on a phone held upright; the shower is beside them
+      const D = 0.76, bs = -kSide, bz0 = kz0, len = c.bathLen || 0.9, bz1 = bz0 + len, bh = topY - floorY - 0.02;
+      const BF = frame(bs, bs * (wi(topY) - D), floorY, bz0, len), X = BF.X, dir = BF.dir, wz = -D + 0.015, G = BF.G;
+      const d0 = len < 0.8 ? 0.12 : 0.14, dw = Math.min(0.56, len - 0.3), d1 = d0 + dw, tC = Math.min(len - 0.24, len * 0.5 + 0.08), tR = 0.15, xC = X(tC), xR = X(tR), Z2 = 'bath';
+      const doorM = S({ color: '#e7e3dc', roughness: 0.5 }), mirM = S({ color: '#8f999e', metalness: 1, roughness: 0.22, envMapIntensity: 0.6 }), lampB = S({ color: '#fff4dd', emissive: '#ffe9c4', emissiveIntensity: 0.12 });
+      const skyM = S({ color: '#6f8fb8', emissive: '#bcd8ff', emissiveIntensity: 0.5 }), wallB = S({ color: '#86a3a9', roughness: 0.65, envMapIntensity: 0.55 });
+      // a clear shower curtain: nearly see-through, with soft folds
+      const curT = dataTex(T, 128, (u) => { const f = Math.pow(Math.abs(Math.sin(u * Math.PI * 11)), 6); return [225 + 25 * f, 236 + 15 * f, 242 + 10 * f, 16 + 62 * f]; }, 1, 1); texs.push(curT);
+      const curtM = S({ color: '#ffffff', map: curT, roughness: 0.5, transparent: true, side: DS, depthWrite: false });
+      const waterM = new T.MeshBasicMaterial({ color: '#cfe9ff', transparent: true, opacity: 0, depthWrite: false }); mats.push(waterM);
+      const spT = glowTex(T); texs.push(spT);
+      // walls, ceiling and the shower tray
+      [0.01, len - 0.01].forEach((t) => pbox(BF, wallB, 0.02, bh, D, X(t), bh / 2, -D / 2));
+      pbox(BF, wallB, len, bh, 0.015, len / 2, bh / 2, -D + 0.0075); pbox(BF, white, len, 0.012, D, len / 2, bh - 0.006, -D / 2);
+      pbox(BF, wallB, d0, bh, 0.02, X(d0 / 2), bh / 2, -0.01); pbox(BF, wallB, len - d1, bh, 0.02, X((d1 + len) / 2), bh / 2, -0.01); pbox(BF, wallB, dw, bh - 1.86, 0.02, X((d0 + d1) / 2), (bh + 1.86) / 2, -0.01); pbox(BF, wallB, dw, 0.06, 0.02, X((d0 + d1) / 2), 0.03, -0.01);
+      pbox(BF, white, len - 0.04, 0.05, D - 0.04, len / 2, 0.025, -D / 2); pbox(BF, itemM, len - 0.14, 0.004, D - 0.14, len / 2, 0.052, -D / 2, '#dfe4e6'); pcyl(BF, itemM, 0.028, 0.004, len / 2, 0.056, -D * 0.35, '#8d949b');
+      // outside, the room is white like the rest of the cabinetry
+      [-0.002, len + 0.002].forEach((t) => pbox(BF, white, 0.004, bh, D, X(t), bh / 2, -D / 2)); pbox(BF, white, d0, bh, 0.004, X(d0 / 2), bh / 2, 0.002); pbox(BF, white, len - d1, bh, 0.004, X((d1 + len) / 2), bh / 2, 0.002); pbox(BF, white, dw, bh - 1.86, 0.004, X((d0 + d1) / 2), (bh + 1.86) / 2, 0.002);
+      // where the room stands over a rear wheel the arch is boxed in as a step
+      const ov = Math.min(len - 0.02, wbZ1 - bz0); if (ov > 0.03 && bz1 > wbZ0) pbox(BF, white, ov + 0.02, wbTop - floorY + 0.02, 0.34, X((ov + 0.02) / 2), (wbTop - floorY + 0.02) / 2, wz + 0.17);
+      // cassette toilet: bench, cistern, seat and bowl, and a lid that lifts
+      put(BF, white, rboxGeo(T, 0.36, 0.4, 0.46, 0.05), xC, 0.25, wz + 0.23); put(BF, white, rboxGeo(T, 0.38, 0.36, 0.14, 0.03), xC, 0.61, wz + 0.07);
+      { const ring = new T.TorusGeometry(0.135, 0.027, 8, 24); ring.rotateX(Math.PI / 2); ring.scale(1, 0.6, 1.18); put(BF, white, ring, xC, 0.462, wz + 0.3);
+        const bowl = new T.CircleGeometry(0.125, 20); bowl.rotateX(-Math.PI / 2); bowl.scale(1, 1, 1.18); put(BF, itemM, bowl, xC, 0.458, wz + 0.3, '#2f3a45'); }
+      pbox(BF, itemM, 0.07, 0.012, 0.04, xC, 0.796, wz + 0.07, '#6aa5d8'); pcyl(BF, itemM, 0.05, 0.1, X(len - 0.075), 0.7, -0.4, '#fbfbf7', undefined, 'x');
+      { const lid = new T.Group(); lid.position.set(xC, 0.495, wz + 0.15); G.add(lid); const m = new T.Mesh(rboxGeo(T, 0.34, 0.022, 0.36, 0.01), white); m.position.set(0, 0, 0.18); m.castShadow = true; lid.add(m);
+        part({ id: 'toilet', label: 'Cassette toilet', obj: lid, zone: Z2, dur: 0.6, set: (k) => { lid.rotation.x = -1.58 * k; }, boxes: [[0.37, 0.07, 0.38, 0, 0, 0.18]] }); }
+      // fold-down basin (stowed upright against the wall) with a mixer tap over it
+      const basin = new T.Group(); basin.position.set(xC, 0.86, wz + 0.02); G.add(basin);
+      { const sub = { G: basin, L: new Map() }; put(sub, white, rboxGeo(T, 0.36, 0.3, 0.065, 0.02), 0, 0.15, 0.0375);
+        const bowl = new T.CircleGeometry(0.105, 20); bowl.rotateY(Math.PI); bowl.scale(1.35, 1, 1); put(sub, itemM, bowl, 0, 0.16, 0.003, '#a9b9c4'); const dr = new T.CircleGeometry(0.014, 10); dr.rotateY(Math.PI); put(sub, itemM, dr, 0, 0.16, 0.002, '#7d868d'); seal(sub); }
+      const basinP = part({ id: 'basin', label: 'Fold-down basin', obj: basin, zone: Z2, dur: 0.6, set: (k) => { basin.rotation.x = Math.PI / 2 * k; }, boxes: [[0.38, 0.32, 0.09, 0, 0.15, 0.04]] });
+      put(BF, steel, rboxGeo(T, 0.07, 0.07, 0.02, 0.008), xC, 1.21, wz + 0.01); pbox(BF, steel, 0.022, 0.022, 0.13, xC, 1.215, wz + 0.075); pbox(BF, steel, 0.022, 0.034, 0.022, xC, 1.193, wz + 0.129); pbox(BF, steel, 0.014, 0.05, 0.014, xC, 1.265, wz + 0.035);
+      { const wg = new T.CylinderGeometry(0.006, 0.008, 1, 8); wg.translate(0, -0.5, 0); const w = new T.Mesh(wg, waterM); w.position.set(xC, 1.178, wz + 0.129); w.visible = false; w.castShadow = false; w.raycast = () => {}; G.add(w);
+        const tapP = part({ id: 'tap', label: 'Hot and cold running water', zone: Z2, dur: 0.3, set: () => {}, boxes: [[0.14, 0.15, 0.2, xC, 1.22, wz + 0.09, G]],
+          fx: (k, time) => { w.visible = k > 0.01; waterM.opacity = 0.6 * k; w.scale.set(1 + 0.18 * Math.sin(time * 37), 0.315 * Math.min(1, k * 1.6), 1 + 0.18 * Math.cos(time * 29)); } });
+        tapP.link = (want) => { if (want) basinP.want = 1; }; basinP.link = (want) => { if (!want) tapP.want = 0; }; }
+      // mirror cabinet with toiletries behind the mirror, and the light over it
+      { const cy = 1.5, cw = 0.4, ch = 0.38, cd = 0.12;
+        [-1, 1].forEach((s) => pbox(BF, white, 0.012, ch, cd, xC + s * (cw / 2 - 0.006), cy, wz + cd / 2)); [-1, 0, 1].forEach((s) => pbox(BF, white, cw - 0.02, 0.01, cd - 0.01, xC, cy + s * (ch / 2 - 0.005), wz + cd / 2));
+        [['#4fa3a0', 0.022, 0.12, -0.13], ['#e9c46a', 0.018, 0.09, -0.07], ['#d9654f', 0.02, 0.1, 0.02], ['#f4f1ea', 0.03, 0.07, 0.11]].forEach(([col, r, h, dx]) => pcyl(BF, itemM, r, h, xC + dx, cy + 0.005 + h / 2, wz + 0.06, col));
+        pcyl(BF, itemM, 0.03, 0.08, xC - 0.1, cy - ch / 2 + 0.05, wz + 0.06, '#8fb3c9'); pbox(BF, itemM, 0.008, 0.13, 0.008, xC - 0.105, cy - ch / 2 + 0.09, wz + 0.06, '#d9654f'); pbox(BF, itemM, 0.008, 0.13, 0.008, xC - 0.09, cy - ch / 2 + 0.09, wz + 0.065, '#2a9d8f'); pbox(BF, itemM, 0.12, 0.04, 0.06, xC + 0.07, cy - ch / 2 + 0.03, wz + 0.06, '#f4f1ea');
+        const mp = new T.Group(); mp.position.set(xC + dir * cw / 2, cy, wz + cd + 0.001); G.add(mp); const m = new T.Mesh(rboxGeo(T, cw, ch, 0.014, 0.004), mirM); m.position.set(-dir * cw / 2, 0, 0.007); mp.add(m);
+        const bk = new T.Mesh(new T.PlaneGeometry(cw - 0.01, ch - 0.01), white); bk.rotation.y = Math.PI; bk.position.set(-dir * cw / 2, 0, -0.0005); mp.add(bk);
+        part({ id: 'mirror', label: 'Mirror cabinet', obj: mp, zone: Z2, dur: 0.6, set: (k) => { mp.rotation.y = dir * 1.9 * k; }, boxes: [[cw + 0.01, ch + 0.01, 0.04, -dir * cw / 2, 0, 0.007]] });
+        const lm = new T.Mesh(rboxGeo(T, 0.34, 0.035, 0.045, 0.012), lampB); lm.position.set(xC, 1.735, wz + 0.03); G.add(lm);
+        res.bathK = 0; part({ id: 'bath-light', label: 'Washroom light', zone: Z2, dur: 0.25, set: (k) => { lampB.emissiveIntensity = 0.12 + 3.4 * k; res.bathK = k; }, boxes: [[0.38, 0.08, 0.09, xC, 1.735, wz + 0.04, G]] }); }
+      // shower: mixer, riser rail, hose and head; a soft spray, and a curtain that draws along the door wall while it runs
+      { pcyl(BF, steel, 0.009, 0.76, xR, 1.36, wz + 0.04); [1.0, 1.73].forEach((y) => pbox(BF, steel, 0.024, 0.024, 0.04, xR, y, wz + 0.02)); pcyl(BF, steel, 0.034, 0.05, xR, 0.98, wz + 0.03, null, undefined, 'z'); pbox(BF, steel, 0.016, 0.07, 0.016, xR, 0.98, wz + 0.065);
+        pbox(BF, steel, 0.02, 0.02, 0.13, xR, 1.71, wz + 0.1); const hd = new T.CylinderGeometry(0.03, 0.065, 0.03, 16); hd.rotateX(0.45); put(BF, steel, hd, xR, 1.695, wz + 0.175);
+        const hose = new T.TubeGeometry(new T.CatmullRomCurve3([V(xR, 0.95, wz + 0.04), V(xR - dir * 0.05, 0.78, wz + 0.07), V(xR - dir * 0.075, 1.2, wz + 0.06), V(xR - dir * 0.03, 1.61, wz + 0.05), V(xR, 1.7, wz + 0.07)]), 20, 0.006, 6); put(BF, itemM, hose, 0, 0, 0, '#b9bec4');
+        pbox(BF, steel, len - 0.06, 0.012, 0.012, len / 2, 1.93, -0.045);
+        const sm = softMat(T, '#cfe4ff', 'smoothstep(0.0, 0.12, vY) * (0.3 + 0.7 * vY)'); sm.uniforms.uOp.value = 0; mats.push(sm);
+        const cone = new T.Mesh(new T.ConeGeometry(0.2, 1.62, 24, 1, true), sm); cone.position.set(xR + dir * 0.025, 0.07 + 0.81, wz + 0.275); cone.rotation.x = 0.1; cone.visible = false; cone.castShadow = false; cone.raycast = () => {}; G.add(cone);
+        const spray = waterFx(T, PERF.low ? 48 : 150, [xR, 1.67, wz + 0.19], [xR + dir * 0.05, 0.07, wz + 0.36], 0.025, 0.17, 0.055, spT); G.add(spray);
+        const cg = new T.PlaneGeometry(1, 1.84, 28, 1); cg.translate(0.5, 0, 0); { const p = cg.attributes.position; for (let i = 0; i < p.count; i++) p.setZ(i, 0.013 * Math.sin(p.getX(i) * 44)); cg.computeVertexNormals(); }
+        const cur = new T.Mesh(cg, curtM); cur.position.set(X(0.03), 1.0, -0.045); cur.scale.x = dir * 0.1; cur.castShadow = false; cur.raycast = () => {}; G.add(cur);
+        part({ id: 'shower', label: 'Hot shower', zone: Z2, dur: 0.8, set: (k) => { cur.scale.x = dir * (0.1 + (len - 0.16) * k); }, fx: (k, time) => { spray.userData.run(k, time); cone.visible = k > 0.01; sm.uniforms.uOp.value = 0.42 * k * (0.9 + 0.1 * Math.sin(time * 9)); }, boxes: [[0.2, 0.24, 0.28, xR, 1.68, wz + 0.13, G], [0.12, 0.76, 0.1, xR, 1.34, wz + 0.05, G]] }); }
+      // towel on a rail, and a rooflight with a pleated blind
+      pbox(BF, steel, 0.02, 0.02, 0.34, X(len - 0.045), 1.5, -0.4); pbox(BF, itemM, 0.03, 0.56, 0.3, X(len - 0.062), 1.23, -0.4, '#d9654f'); pbox(BF, itemM, 0.034, 0.05, 0.3, X(len - 0.062), 1.05, -0.4, '#f4f1ea');
+      part({ id: 'towel', label: 'Towel rail', zone: Z2, info: true, set: () => {}, boxes: [[0.08, 0.6, 0.34, X(len - 0.06), 1.24, -0.4, G]] });
+      { const vx = len / 2, vz = -D / 2, vy = bh - 0.012; [[0, 0.165, 0.37, 0.04], [0, -0.165, 0.37, 0.04], [0.165, 0, 0.04, 0.29], [-0.165, 0, 0.04, 0.29]].forEach(([dx, dz, w, d]) => pbox(BF, white, w, 0.03, d, vx + dx, vy - 0.014, vz + dz));
+        const pane = new T.Mesh(new T.PlaneGeometry(0.3, 0.3), skyM); pane.rotation.x = Math.PI / 2; pane.position.set(vx, vy - 0.002, vz); pane.castShadow = false; G.add(pane);
+        const bg = new T.PlaneGeometry(1, 0.3, 20, 1); bg.translate(0.5, 0, 0); bg.rotateX(Math.PI / 2); { const p = bg.attributes.position; for (let i = 0; i < p.count; i++) p.setY(i, -0.005 * Math.abs(Math.sin(p.getX(i) * 31.4))); bg.computeVertexNormals(); }
+        const blind = new T.Mesh(bg, ceiling); blind.position.set(vx - 0.15, vy - 0.008, vz); blind.scale.x = 0.3; blind.castShadow = false; blind.raycast = () => {}; G.add(blind);
+        part({ id: 'vent', label: 'Roof vent', zone: Z2, dur: 0.7, set: (k) => { blind.scale.x = 0.3 * (1 - 0.92 * k); }, boxes: [[0.38, 0.06, 0.38, vx, vy - 0.03, vz, G]] }); res.skyGlow = [skyM]; }
+      seal(BF);
+      // bifold door: two leaves hinged together, folding out against the jamb
+      { const lw = dw / 2 - 0.004, A = new T.Group(), B = new T.Group(); A.position.set(X(d0) + dir * 0.004, 0.06, -0.01); B.position.set(dir * (lw + 0.004), 0, 0); G.add(A); A.add(B);
+        [A, B].forEach((q) => { const m = new T.Mesh(rboxGeo(T, lw, 1.8, 0.02, 0.006), doorM); m.position.set(dir * lw / 2, 0.9, 0); m.castShadow = true; m.receiveShadow = true; q.add(m); });
+        { const h = new T.Mesh(rboxGeo(T, 0.02, 0.12, 0.052, 0.006), steel); h.position.set(dir * (lw - 0.05), 1.0, 0); B.add(h); }
+        part({ id: 'bath-door', label: 'Washroom door', obj: A, dur: 0.7, set: (k) => { A.rotation.y = -dir * 1.46 * k; B.rotation.y = dir * 2.92 * k; }, boxes: [[lw + 0.01, 1.81, 0.05, dir * lw / 2, 0.9, 0], [lw + 0.01, 1.81, 0.05, dir * lw / 2, 0.9, 0, B]] }); }
+      // an ultra-wide view from the doorway, tipped down: floor to shower head in one frame, clear of the buttons along the bottom
+      res.bath = { pos: toWorld(BF, X((d0 + d1) / 2), 1.36, 0.28), yaw: bs * Math.PI / 2, pitch: -0.36, fov: 96 };
+      res.bathLight = toWorld(BF, len / 2, bh - 0.5, -D / 2 + 0.16);
+      // a wardrobe ahead of the washroom where there is room for one
+      if (c.layout === 'northsouth') { if (livingFront - 0.08 - kz1 > 0.4) wardrobe(kSide, kz1 + 0.01, 0.45); }
+      else { const lim = (c.dinette ? livingFront - 1.2 : livingFront - 0.1) - bz1 - 0.02; if (lim > 0.36) wardrobe(bs, bz1 + 0.01, Math.min(0.5, lim)); }
     }
     if (c.dinette) {
       const tz = livingFront - 0.4, dx = -(wi(floorY + 0.8) - 0.5);                // half dinette behind the driver's seat, clear of the sliding door
@@ -1272,7 +1553,7 @@ function buildVan(T, c) {
       rbox(0.9, 0.42, 0.45, 0.05, fabric, dx, floorY + 0.21, tz - 0.56);
       const bb = rbox(0.9, 0.55, 0.12, 0.05, fabric, dx, floorY + 0.68, tz - 0.74); bb.rotation.x = 0.1;
     }
-    lockers(rearZ + 0.14, kz1, 1); lockers(rearZ + 0.14, kz1, -1);
+    lockers(rearZ + 0.14, kz1, kSide, 'k'); lockers(rearZ + 0.14, c.bath ? kz0 - 0.01 : kz1, -kSide, 'b');
     lamp(0, rearZ + 0.9); lamp(0, (kz0 + kz1) / 2); lamp(0, livingFront - 0.4);
     Object.assign(res, { bed: bedPos, living: { pos: [-0.05, floorY + 1.6, livingFront - 0.15], yaw: Math.PI, pitch: -0.2 } });
   }
@@ -1281,6 +1562,7 @@ function buildVan(T, c) {
   res.lights = [[0, topY - 0.25, rearZ + 1.0], [0, topY - 0.25, livingFront - 0.6]];
   res.glow = [tintOutF, tintOutB];
   res.group = g; res.doors = doors; res.mats = mats; res.texs = texs; res.wheels = wheels; res.topY = topY; res.cabDoorRear = Z(dB); res.awningY = awnY; res.awningX = awnX + 0.03;
+  res.parts = PK.parts; res.hitM = PK.hitM;
   res.refl = refl; res.setEnv = (t) => { refl.forEach((m) => { m.envMap = t; }); };
   return res;
 }
@@ -1503,11 +1785,12 @@ function buildPopVan(T, c) {
     }
     noShadow(rbox(0.012, 0.022, 0.045, 0.005, amberM, side * (xS + 0.004), 0.96, Z(1.12)));              // side repeater
     // door mirror: body-coloured housing on a black arm
-    rbox(0.09, 0.06, 0.075, 0.02, plastic, side * (xS + 0.025), yB + 0.045, Z(1.47));
-    rbox(0.19, 0.185, 0.11, 0.05, paint, side * (xS + 0.105), yB + 0.105, Z(1.465));
-    noShadow(add(mirrorGlassGeo(T, 0.158, 0.15, 0.035), mirrorM, side * (xS + 0.105), yB + 0.105, Z(1.465) - 0.063));
+    const onDoor = (o) => { o.userData.door = 'cab' + side; return o; };
+    onDoor(rbox(0.09, 0.06, 0.075, 0.02, plastic, side * (xS + 0.025), yB + 0.045, Z(1.47)));
+    onDoor(rbox(0.19, 0.185, 0.11, 0.05, paint, side * (xS + 0.105), yB + 0.105, Z(1.465)));
+    onDoor(noShadow(add(mirrorGlassGeo(T, 0.158, 0.15, 0.035), mirrorM, side * (xS + 0.105), yB + 0.105, Z(1.465) - 0.0565)));
     // A-pillar and rear corner post
-    bar(V(side * (xS - 0.037), yB - 0.015, Z(dA0) - 0.01), V(side * (xR - 0.037), yC - 0.005, Z(dA1)), 0.075, 0.1, paint, 0.03);
+    bar(V(side * (xS - 0.037), yB - 0.015, Z(dA0) - 0.01), V(side * (xR - 0.037), yC - 0.005, Z(dA1)), 0.075, 0.1, paint, 0.03).userData.keep = true;
     bar(V(side * (xS - 0.055), 0.36, rearZ + 0.06), V(side * (xS - 0.055), yB + 0.01, rearZ + 0.06), 0.11, 0.11, paint, 0.045);
     bar(V(side * (xS - 0.055), yB - 0.01, rearZ + 0.06), V(side * (xR - 0.055), yC + 0.02, rearZ + 0.165), 0.11, 0.11, paint, 0.045);
     bar(V(side * (xS - 0.058), 1.0, rearZ + 0.036), V(side * (xS - 0.058), yB + 0.005, rearZ + 0.036), 0.118, 0.078, tailM, 0.014);
@@ -1516,6 +1799,20 @@ function buildPopVan(T, c) {
 
   noShadow(add(mergeGeos(T, thinGeos), plastic, 0, 0, 0)); thinGeos.forEach((x) => x.dispose());
   gapGeos.forEach((gl, k) => { const m = noShadow(add(mergeGeos(T, gl), k ? gap.core : gap.halo, 0, 0, 0)); m.receiveShadow = false; gl.forEach((x) => x.dispose()); });
+
+  // ----- doors that open: the cab doors and the sliding door are cut out of the finished sides (see cutDoor)
+  const PK = {}, part = partKit(T, PK, mats);
+  {
+    const bY = 0.39, R = archR + 0.05, xIn = (y) => sx(y) - 0.1, zy = (p) => p.map(([d, y]) => [Z(d), y]), swap = new Map([[paint, paintD]]), yT = yC - 0.02, dF = 0.896, dR = 3.896;
+    const rx = Math.sqrt(R * R - Math.pow(bY - archC, 2)), up = (dd) => archC + Math.sqrt(Math.max(0, R * R - dd * dd)), am = (Math.atan2(bY - archC, -rx) + Math.atan2(up(3.52 - dR) - archC, 3.52 - dR)) / 2;
+    const cabPolys = [zy([[2.34, bY], [dF + rx, bY], [1.32, up(1.32 - dF)], [1.32, yB], [2.34, yB]]), zy([[1.27, yB], [2.34, yB], [2.34, yT], [dP(yT) - 0.03, yT]])];
+    [-1, 1].forEach((side) => {
+      const cab = cutDoor(T, g, cabPolys, side, xIn, V(side * xS, 0, Z(1.29)), 'cab' + side, swap);
+      part({ id: side < 0 ? 'cab-driver' : 'cab-passenger', label: side < 0 ? "Driver's door" : 'Passenger door', obj: cab, ext: true, dur: 0.75, set: (k) => { cab.rotation.y = -side * 1.12 * k; }, boxes: [[0.08, yT - bY, 1.02, -side * 0.02, (yT + bY) / 2, Z(1.83) - Z(1.29)]] });
+    });
+    const sd = cutDoor(T, g, [zy([[2.46, bY], [dR - rx, bY], [dR + R * Math.cos(am), archC + R * Math.sin(am)], [3.52, up(3.52 - dR)], [3.52, yT], [2.46, yT]])], 1, xIn, V(0, 0, 0), 'slide1', swap);
+    part({ id: 'slide', label: 'Sliding door', obj: sd, ext: true, dur: 0.95, set: (k) => { const o = Math.min(1, k / 0.2); sd.position.set(0.075 * o * (2 - o), 0, -1.0 * Math.max(0, (k - 0.1) / 0.9)); }, boxes: [[0.09, yT - bY, 1.06, xS - 0.03, (yT + bY) / 2, Z(2.99)]] });
+  }
 
   // ----- roof skin with the pop-top opening, windscreen and its surround
   const crownAt = (au) => au <= 0.8 ? 1 : Math.sqrt(Math.max(0, 1 - Math.pow((au - 0.8) / 0.2, 2)));
@@ -1567,6 +1864,7 @@ function buildPopVan(T, c) {
     noShadow(rbox(0.62, 0.04, 0.02, 0.008, satin, 0, by - 0.2, bz - 0.03, pivot));
     noShadow(rbox(0.52, 0.11, 0.012, 0.008, plateR, 0, by - 0.31, bz - 0.027, pivot));
     doors.push({ pivot, axis: 'x', open: 1.35 });
+    part({ id: 'tailgate', label: 'Tailgate', obj: pivot, ext: true, auto: true, dur: 0.9, set: (k) => { pivot.rotation.x = 1.35 * k; }, boxes: [[2 * hB, -by + lowH, 0.16, 0, (by - lowH) / 2, bz / 2]] });
   }
 
   // ----- floor, underbody, wheels
@@ -1627,16 +1925,30 @@ function buildPopVan(T, c) {
       if (Math.abs(x) + w / 2 < 0.55 || z1 <= wbZ0 || z0 >= wbZ1 || y0 >= wbTop) return part(z0, z1, y0);
       part(z0, Math.min(z1, wbZ0), y0); part(Math.max(z0, wbZ0), Math.min(z1, wbZ1), wbTop); part(Math.max(z0, wbZ1), z1, y0);
     };
-    fbox(kd, floorY, floorY + 0.84, kz0, kz1, 0.015, wood, kx);
+    // the kitchen: a fridge at the front end and two drawers along the top, clear of the bed; the rest is a closed base
+    const FK = furnKit(T, g, part, S, wood), { itemM, frame, pbox, pcyl, seal, front, drawerBox } = FK;
+    { const TF = frame(-1, kx + kd / 2, floorY, kz0, kz1 - kz0), kl = TF.len, X = TF.X, fb = kl - 0.44, dy = 0.6, dep = kd - 0.08;
+      fbox(kd, floorY, floorY + dy, kz0, kz1 - 0.44, 0.015, wood, kx);
+      [fb + 0.01, kl - 0.011].forEach((t) => pbox(TF, wood, 0.02, 0.83, kd - 0.004, X(t), 0.415, -kd / 2));
+      pbox(TF, wood, 0.44, 0.83, 0.012, X(kl - 0.22), 0.415, -kd + 0.008); pbox(TF, wood, 0.44, 0.08, 0.02, X(kl - 0.22), 0.04, -0.03);
+      [0.011, fb / 2].forEach((t) => pbox(TF, wood, 0.02, 0.83 - dy, kd - 0.004, X(t), (0.83 + dy) / 2, -kd / 2)); pbox(TF, wood, fb, 0.83 - dy, 0.012, X(fb / 2), (0.83 + dy) / 2, -kd + 0.008);
+      pbox(TF, wood, kl, 0.012, kd - 0.02, kl / 2, 0.832, -kd / 2);
+      FK.lit(front(TF, { id: 'fridge', label: 'Fridge', t0: fb + 0.004, t1: kl - 0.006, y0: 0.085, y1: 0.826, how: 'r', angle: 1.9, mat: steel, th: 0.022, handleY: 0.12, fill: FK.fridge(TF, X(kl - 0.22), 0.1, 0.39, 0.7, kd - 0.07) }));
+      [0, 1].forEach((i) => front(TF, { id: 'k-drawer' + i, label: i ? 'Cutlery drawer' : 'Kitchen drawer', t0: i ? fb / 2 : 0.006, t1: i ? fb : fb / 2, y0: dy + 0.004, y1: 0.826, how: 'd', out: Math.min(0.26, kd - 0.06), fill: (sub, f) => { const y = drawerBox(sub, f, dep);
+        if (i) { [-0.12, -0.06, 0, 0.06].forEach((dx, j) => pbox(sub, itemM, 0.035, 0.012, dep * 0.6, f.px + dx, y + 0.008, -dep / 2, j % 2 ? '#d4d8dc' : '#bfc4c9')); pbox(sub, itemM, 0.08, 0.03, dep * 0.4, f.px + 0.14, y + 0.017, -dep / 2, '#b5523b'); }
+        else { ['#d9654f', '#e9c46a', '#2a9d8f', '#f4f1ea'].forEach((col, j) => pcyl(sub, itemM, 0.035, 0.08, f.px - 0.15 + j * 0.1, y + 0.04, -dep / 2, col)); } } }));
+      seal(TF); }
     rbox(kd + 0.02, 0.03, kz1 - kz0 + 0.02, 0.008, worktop, kx, kTop + 0.015, (kz0 + kz1) / 2);
     rbox(kd * 0.66, 0.02, 0.36, 0.008, steel, kx, kTop + 0.034, kz0 + 0.32);
     const tap = add(new T.TorusGeometry(0.085, 0.011, 8, 24, Math.PI), steel, kx - kd * 0.3, kTop + 0.035, kz0 + 0.32); tap.rotation.y = Math.PI / 2;
     [0, 1].forEach((i) => add(new T.CylinderGeometry(Math.min(0.075, kd * 0.3), Math.min(0.075, kd * 0.3), 0.012, 24), plastic, kx, kTop + 0.037, kz1 - 0.2 - i * 0.22));
-    [0.3, 0.72].forEach((f) => noShadow(rbox(0.012, 0.02, 0.12, 0.005, steel, kx + kd / 2 + 0.006, floorY + 0.68, kz0 + (kz1 - kz0) * f)));
     // cupboards continue to the tailgate
     fbox(kd, floorY, floorY + 0.84, rearZ + 0.12, kz0, 0.015, wood, kx);
     rbox(kd + 0.02, 0.03, kz0 - (rearZ + 0.12), 0.008, wood, kx, kTop + 0.015, (kz0 + rearZ + 0.12) / 2);
-    if (c.microwave) { rbox(0.34, 0.25, 0.44, 0.012, satin, -0.565, kTop + 0.155, Z(4.4)); noShadow(rbox(0.01, 0.17, 0.27, 0.004, gloss, -0.39, kTop + 0.16, Z(4.36))); }
+    if (c.microwave) { rbox(0.34, 0.25, 0.44, 0.012, satin, -0.565, kTop + 0.155, Z(4.4));
+      const mz = Z(4.4), mw = { G: g, L: new Map() }; pbox(mw, itemM, 0.004, 0.19, 0.3, -0.3935, kTop + 0.16, mz - 0.045, '#0c0d0f'); pbox(mw, itemM, 0.005, 0.012, 0.22, -0.393, kTop + 0.083, mz - 0.045, '#c9cdd1'); seal(mw);
+      const mp = new T.Group(); mp.position.set(-0.39, kTop + 0.16, mz - 0.2); g.add(mp); const md = noShadow(rbox(0.012, 0.2, 0.31, 0.004, gloss, 0.006, 0, 0.155, mp));
+      part({ id: 'microwave', label: 'Microwave', obj: mp, dur: 0.5, set: (k) => { mp.rotation.y = 1.7 * k; }, boxes: [[0.03, 0.21, 0.32, 0.006, 0, 0.155]] }); }
     const bedW = c.wideBed ? 1.38 : 1.2, bedTop = floorY + 0.46, z0 = rearZ + 0.1, z1 = Z(2.94), bx = Wi / 2 - 0.01 - bedW / 2;
     fbox(bedW, floorY, bedTop - 0.14, z0, z1, 0.03, fabric, bx);
     rbox(bedW, 0.15, z1 - z0, 0.06, sheet, bx, bedTop - 0.075, (z0 + z1) / 2);
@@ -1720,12 +2032,13 @@ function buildPopVan(T, c) {
   Object.assign(res, {
     driver: { pos: [-0.42, 1.6, seatZ - 0.12], yaw: 0, pitch: -0.06 },
     passenger: { pos: [0.42, 1.6, seatZ - 0.12], yaw: 0.35, pitch: -0.06 },
-    living: { pos: [0.2, 1.72, Z(2.68)], yaw: Math.PI * 1.07, pitch: -0.08 },
+    living: { pos: [0.2, 1.72, Z(2.68)], yaw: 3.62, pitch: -0.4 },   // turned a little towards the kitchen, so its fridge and drawers are in reach of a tap
     bed: { pos: [0.12, H + 0.36, Z(2.9)], yaw: 0, pitch: 0.1 },                 // upstairs, looking out through the front window
     lights: [[0, 1.72, rearZ + 1.0], [0, 1.72, Z(2.7)]],
     glow: [tintOutF, tintOutB], setPop, roofBed: true,
     group: g, doors, mats, texs, wheels, topY: yC, cabDoorRear: Z(2.34), awningY: yC + 0.03, awningX: xR + 0.05
   });
+  res.parts = PK.parts; res.hitM = PK.hitM;
   res.refl = refl; res.setEnv = (t) => { refl.forEach((m) => { m.envMap = t; }); };
   return res;
 }
@@ -2319,7 +2632,7 @@ class Component extends DCLogic {
     super(props);
     const hero = props.hero === 'true' || props.hero === true;
     this.hero = hero;
-    this.state = { van: props.van || 'man-lwb-auto', view: hero ? 'drive' : 'camp', time: 'sunset', noGL: false };
+    this.state = { van: props.van || 'man-lwb-auto', view: hero ? 'drive' : 'camp', time: 'sunset', noGL: false, caption: '' };
     this.canvasRef = (el) => this.mount(el);
     this.sectionRef = (el) => { if (el) this.sectionEl = el; };
     this.v = null;
@@ -2391,9 +2704,11 @@ class Component extends DCLogic {
       pTop: new T.Color(), pHor: new T.Color(), pBot: new T.Color(), pFog: new T.Color(), pSun: new T.Color(), pDir: new T.Vector3(), tmpC: new T.Color(),
       mode: 'outside', theta: 0.85, phi: 1.22, radius: 11, yaw: 0, pitch: 0, fov: 45,
       pr: prMax, prMax, ftA: 0, ftN: 0, frame: 0, skyAcc: 99, shadowDirty: true, lastSun: new T.Vector3(), camSettled: false,
-      look: new T.Vector3(0, 1.2, 0), lastInteract: 0, doorT: 0, running: true, raf: 0, last: performance.now(), pointers: new Map()
+      look: new T.Vector3(0, 1.2, 0), lastInteract: 0, running: true, rc: new T.Raycaster(), ndc: new T.Vector2(), hover: null, lit: [], seen: {}, autoDoor: 0, partsMoving: false, fxOn: false, extOpen: 0, pulse: null, raf: 0, last: performance.now(), pointers: new Map()
     };
     this.bindInput(el);
+    // ?debug: the component is reachable from the console and from tests
+    try { if (/[?&]debug\b/.test(window.location.search) && (this.hero || !window.__van3d)) window.__van3d = this; } catch (e) {}
     this.loadVan(this.state.van);
     this.setView(this.state.view, true);
     this.resize();
@@ -2463,17 +2778,24 @@ class Component extends DCLogic {
     v.camp = buildCamp(v.T, v.van); v.scene.add(v.camp.group);
     v.van.lights.forEach((p, i) => v.inner[i].position.set(p[0], p[1], p[2]));
     v.contact.scale.set(v.van.W + 1.1, v.van.L + 1.6, 1);
-    v.doorT = 0; v.popT = undefined; v.bunkT = 0;
+    v.popT = undefined; v.bunkT = 0; v.autoDoor = 0; v.hitList = null; v.hover = null; v.lit = []; v.seen = {}; v.pulse = null; v.extOpen = 0; v.partsMoving = false; v.fxOn = false;
+    if (this.state.view === 'bath' && !v.van.bath) this.setState({ view: 'living' });
     this.setView(this.state.view, true);
   }
 
   setView(mode, snap) {
     const v = this.v; if (!v || !v.van) return;
+    if (!v.van[mode] && mode !== 'outside' && mode !== 'camp' && mode !== 'drive') mode = 'living';
     v.mode = mode;
+    // leaving the look-inside view shuts everything again; the washroom door opens and its light comes on as you step in; water never runs unwatched
+    { const P = v.van.parts, inside = mode !== 'drive' && mode !== 'outside';
+      P.forEach((q) => { if (!inside || (q.fx && mode !== 'bath')) q.want = 0; else if (mode === 'bath' && (q.id === 'bath-door' || q.id === 'bath-light')) q.want = 1; });
+      v.partsMoving = true; v.pulse = null; v.lit.forEach((m) => { m.visible = false; }); v.lit = []; v.hover = null; v.canvas.style.cursor = '';
+      if (inside && !v.seen[mode]) { v.seen[mode] = 1; v.pulse = -0.7; } }
     if (mode === 'outside') { v.radius = v.van.L * 1.25 + 3; v.phi = 1.3; v.fov = 40; }
     else if (mode === 'camp') { v.radius = v.van.L * 1.2 + 4.5; v.phi = 1.33; v.theta = 0.62; v.fov = 40; if (v.campT < 0.05) { v.tod = 15.5; v.jumpTo = null; } }
     else if (mode === 'drive') { v.fov = 26; }
-    else { const p = v.van[mode]; if (!p) return; v.yaw = p.yaw || 0; v.pitch = p.pitch || 0; v.fov = 72; }
+    else { const p = v.van[mode]; if (!p) return; v.yaw = p.yaw || 0; v.pitch = p.pitch || 0; v.fov = p.fov || 72; }
     if (snap) { const t = this.target(); v.camera.position.copy(t.pos); v.look.copy(t.look); v.camera.fov = v.fov; const o = this.offsetTarget(); v.offX = o[0]; v.offY = o[1]; v.camera.updateProjectionMatrix(); }
   }
 
@@ -2507,9 +2829,12 @@ class Component extends DCLogic {
 
   bindInput(el) {
     const v = this.v;
-    const down = (e) => { if (v.mode === 'drive') return; v.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY }); v.lastInteract = performance.now(); try { el.setPointerCapture(e.pointerId); } catch (x) {} };
+    const down = (e) => { if (v.mode === 'drive') return; v.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY }); v.lastInteract = performance.now(); try { el.setPointerCapture(e.pointerId); } catch (x) {}
+      // a press that neither moves more than a few pixels nor lasts long is a tap on a door or cupboard, not the start of a drag
+      v.tap = v.pointers.size === 1 ? { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now() } : null; };
     const move = (e) => {
-      if (!v.pointers.has(e.pointerId)) return;
+      if (!v.pointers.has(e.pointerId)) { if (e.pointerType === 'mouse' && !v.pointers.size) this.hoverAt(e.clientX, e.clientY); return; }
+      if (v.tap && Math.hypot(e.clientX - v.tap.x, e.clientY - v.tap.y) > 6) v.tap = null;
       const p = v.pointers.get(e.pointerId), dx = e.clientX - p.x, dy = e.clientY - p.y;
       if (v.pointers.size === 2) {
         const pts = [...v.pointers.values()];
@@ -2517,7 +2842,7 @@ class Component extends DCLogic {
         p.x = e.clientX; p.y = e.clientY;
         const after = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
         if (v.mode === 'outside' || v.mode === 'camp') v.radius = Math.min(v.van.L * 3, Math.max(v.van.L * 0.85, v.radius * (before / Math.max(after, 1))));
-        else v.fov = Math.min(85, Math.max(35, v.fov * (before / Math.max(after, 1))));
+        else v.fov = Math.min(v.mode === 'bath' ? 100 : 85, Math.max(35, v.fov * (before / Math.max(after, 1))));
         return;
       }
       p.x = e.clientX; p.y = e.clientY;
@@ -2525,19 +2850,71 @@ class Component extends DCLogic {
       else { v.yaw += dx * 0.005; v.pitch = Math.min(1.1, Math.max(-1.1, v.pitch + dy * 0.004)); }
       v.lastInteract = performance.now();
     };
-    const up = (e) => { v.pointers.delete(e.pointerId); };
+    const up = (e) => { const tp = v.tap; v.pointers.delete(e.pointerId); if (tp && tp.id === e.pointerId) { v.tap = null; if (e.type === 'pointerup' && performance.now() - tp.t < 300) this.tapAt(e.clientX, e.clientY, e.pointerType !== 'mouse'); } };
     const wheel = (e) => {
       if (v.mode === 'drive') return;
       e.preventDefault(); v.lastInteract = performance.now();
       if (v.mode === 'outside' || v.mode === 'camp') v.radius = Math.min(v.van.L * 3, Math.max(v.van.L * 0.85, v.radius * (1 + Math.sign(e.deltaY) * 0.08)));
-      else v.fov = Math.min(85, Math.max(35, v.fov + Math.sign(e.deltaY) * 3));
+      else v.fov = Math.min(v.mode === 'bath' ? 100 : 85, Math.max(35, v.fov + Math.sign(e.deltaY) * 3));
     };
     el.addEventListener('pointerdown', down);
     el.addEventListener('pointermove', move);
     el.addEventListener('pointerup', up);
     el.addEventListener('pointercancel', up);
+    el.addEventListener('pointerleave', () => { if (this.v) this.setHover(null); });
     el.addEventListener('wheel', wheel, { passive: false });
   }
+
+  // ----- doors, cupboards and washroom fittings that open when tapped (look-inside views only)
+  interactive() { const v = this.v; return !!(v && v.van && v.mode !== 'drive' && v.mode !== 'outside' && v.park >= 1 && !(v.speed > 0.01)); }
+  // which part is under a point of the canvas. Hovering asks cheaply (the parts' unseen boxes only); a tap also finds the first solid
+  // surface under the finger, so nothing is opened through a wall, and a box only counts if it sits at that surface
+  pick(cx, cy, full) {
+    const v = this.v, r = v.canvas.getBoundingClientRect();
+    v.ndc.set((cx - r.left) / r.width * 2 - 1, -((cy - r.top) / r.height * 2 - 1));
+    v.rc.setFromCamera(v.ndc, v.camera);
+    const orbit = v.mode === 'camp', ok = (p) => p && (!p.zone || p.zone === v.mode);
+    if (!v.hitList || v.hitMode !== v.mode) { v.hitMode = v.mode; v.hitList = []; v.van.parts.forEach((p) => { if (ok(p)) p.proxies.forEach((m) => v.hitList.push(m)); }); }
+    const hits = v.rc.intersectObjects(v.hitList, false);
+    if (!full) { for (const h of hits) { const p = h.object.userData.part; if (!orbit || p.ext) return p; } return null; }
+    let ds = Infinity, owner = null;
+    for (const h of v.rc.intersectObject(v.van.group, true)) {
+      const o = h.object; if (!o.isMesh || o.userData.part) continue;
+      const m = o.material; if (m.transparent && !(m.opacity > 0.5)) continue;
+      let vis = true, own = null; for (let q = o; q && q !== v.van.group; q = q.parent) { if (!q.visible) { vis = false; break; } if (!own && q.userData.owner) own = q.userData.owner; }
+      if (!vis) continue;
+      ds = h.distance; owner = own; break;
+    }
+    if (ok(owner)) return owner;
+    for (const h of hits) if (h.distance <= ds + 0.03 && (ds === Infinity || h.distance >= ds - 0.22)) return h.object.userData.part;
+    return null;
+  }
+  setHover(p) {
+    const v = this.v; if (!v || (v.hover === p && v.pulse == null)) return;
+    if (v.pulse != null && v.pulse > 0) { if (!p) return; v.pulse = null; }
+    v.hover = p; v.lit.forEach((m) => { m.visible = false; }); v.lit = p ? p.proxies.slice() : [];
+    v.lit.forEach((m) => { m.visible = true; }); if (v.van) v.van.hitM.opacity = 0.3;
+    v.canvas.style.cursor = p ? 'pointer' : '';
+  }
+  hoverAt(x, y) {
+    const v = this.v, now = performance.now(); if (now - (v.hoverT || 0) < 50) return; v.hoverT = now;
+    this.setHover(this.interactive() ? this.pick(x, y, false) : null);
+  }
+  tapAt(x, y, touch) {
+    if (!this.interactive()) return;
+    let p = this.pick(x, y, true);
+    // a finger is blunt: if it missed, try a ring of points round it
+    if (!p && touch) for (let i = 0; i < 6 && !p; i++) { const a = i * Math.PI / 3, px = x + Math.cos(a) * 16, py = y + Math.sin(a) * 16; if (this.pick(px, py, false)) p = this.pick(px, py, true); }
+    if (p) this.toggle(p, true);
+  }
+  toggle(p, user) {
+    const v = this.v;
+    if (!p.info) { p.want = p.want > 0.5 ? 0 : 1; if (p.link) p.link(p.want); v.partsMoving = true; }
+    v.lastInteract = performance.now();
+    if (user) this.say(p.label);
+  }
+  // a caption chip naming what was tapped; it clears itself
+  say(text) { clearTimeout(this.capT); this.setState({ caption: text }); this.capT = setTimeout(() => { if (!this.dead) this.setState({ caption: '' }); }, 3200); }
 
   resize() {
     const v = this.v; if (!v) return;
@@ -2553,9 +2930,9 @@ class Component extends DCLogic {
     const now = performance.now();
     if (!v.van) return;
     // parked, set up, nobody touching it: 30 frames a second is plenty for firelight and drifting clouds
-    const idle = v.mode !== 'drive' && v.park >= 1 && !(v.speed > 0) && v.setupT >= 1 && v.jumpTo == null && now - v.lastInteract > 2500 && v.camSettled;
+    const idle = v.mode !== 'drive' && v.park >= 1 && !(v.speed > 0) && v.setupT >= 1 && v.jumpTo == null && now - v.lastInteract > 2500 && v.camSettled && !v.partsMoving && v.pulse == null;
     if (idle && now - v.last < 31) return;
-    const rawDt = (now - v.last) / 1000, dt = Math.min(0.05, rawDt); v.last = now; v.frame++;
+    const rawDt = (now - v.last) / 1000, dt = Math.min(0.05, rawDt) * (v.dbgSpeed || 1); v.last = now; v.frame++; // (dbgSpeed: tests only, set through ?debug)
     const t0 = now / 1000, driving = v.mode === 'drive', ease = 1 - Math.exp(-dt * 4), g = v.van.group;
     // every look-inside view is parked up at camp: only the hero's driving shot is on the road
     const atCamp = v.mode !== 'drive' && v.mode !== 'outside';
@@ -2590,7 +2967,9 @@ class Component extends DCLogic {
     v.yawV = (v.yawV || 0) + (yawT - (v.yawV || 0)) * (1 - Math.exp(-dt * 7));
     g.rotation.y = v.yawV; g.position.x = lat; v.vx = lat;
     v.contact.position.x = lat;
-    v.van.lights.forEach((p, i) => v.inner[i].position.set(p[0] + lat, p[1], p[2]));
+    // in the washroom view one of the two cabin lights is the washroom's own
+    const bathL = v.mode === 'bath' && v.van.bathLight;
+    v.van.lights.forEach((p, i) => { const q = bathL && i === 1 ? v.van.bathLight : p; v.inner[i].position.set(q[0] + lat, q[1], q[2]); });
     // the camp is set out once the van has stopped, and packed away before it leaves
     const setWant = atCamp && v.park >= 1 && vel < 0.05;
     v.setupT = setWant ? Math.min(1, v.setupT + dt * 0.42) : Math.max(0, v.setupT - dt * 1.3);
@@ -2660,7 +3039,8 @@ class Component extends DCLogic {
       else { if (!v.envs[key]) v.envs[key] = WP.bakeSky(key === 'night' ? Object.assign({}, NIGHT, { sun: NIGHT.moon }) : DUSK); v.scene.environment = v.envs[key]; }
     } else v.scene.environment = WP.env;
     WP.roadGroup.visible = true;
-    v.inner.forEach((l) => { l.intensity = 2.2 + 3 * dark * ck; });
+    v.inner.forEach((l, i) => { l.intensity = (2.2 + 3 * dark * ck) * (bathL && i === 1 ? 0.04 + 0.3 * v.van.bathK : 1); });
+    if (v.van.skyGlow) v.van.skyGlow.forEach((m) => { m.emissiveIntensity = 0.04 + 0.75 * (1 - dark * ck); });
     if (v.van.glow) v.van.glow.forEach((m) => { m.emissiveIntensity = 0.55 * dark * ck; });
     const A = WP.arch; A.winM.emissiveIntensity = 0.05 + 2.4 * dark * ck; A.lampM.emissiveIntensity = 0.4 + 4 * dark * ck;
     if (A.beam) { A.beam.rotation.y = t0 * 0.9; A.beam.userData.m.uniforms.uOp.value = 0.55 * dark * ck; A.beam.visible = dark * ck > 0.05; A.glow.material.opacity = 0.25 + 0.75 * dark * ck; }
@@ -2712,12 +3092,31 @@ class Component extends DCLogic {
     // the sky is rendered into a cube map now and then (faster while the clock is jumping), not every frame
     v.skyAcc += dt;
     if (v.skyAcc > (v.jumpTo != null ? 0.08 : atCamp ? 0.3 : 1.0)) { v.worldParts.bakeView(); v.skyAcc = 0; }
-    const want = (v.mode === 'bed' || v.mode === 'camp') && v.setupT > 0.04 ? 1 : 0;
-    v.doorT += (want - v.doorT) * (1 - Math.exp(-dt * 3));
-    v.van.doors.forEach((d) => { d.pivot.rotation[d.axis] = d.open * v.doorT; });
+    // the rear doors open by themselves for the camping and lying-in-bed views, as before; after that they are the visitor's to open and shut.
+    // Every part eases towards where it was last asked to be; nothing here runs once they have all come to rest
+    const want = (v.mode === 'bed' || v.mode === 'camp') && v.setupT > 0.04 ? 1 : 0, P = v.van.parts;
+    if (want !== v.autoDoor) { v.autoDoor = want; P.forEach((p) => { if (p.auto) p.want = want; }); v.partsMoving = true; }
+    let extMoving = false;
+    if (v.partsMoving || v.fxOn) {
+      let mv = false, fx = false, sum = 0;
+      for (let i = 0; i < P.length; i++) {
+        const p = P[i];
+        if (p.t !== p.want) { p.t = p.want > p.t ? Math.min(p.want, p.t + dt / p.dur) : Math.max(p.want, p.t - dt / p.dur); p.k = p.t * p.t * (3 - 2 * p.t); p.set(p.k); mv = true; if (p.ext) extMoving = true; }
+        if (p.fx && (p.t > 0 || p.fxLive)) { p.fx(p.k, t0); p.fxLive = p.t > 0; if (p.t > 0) fx = true; }
+        if (p.ext) sum += p.k;
+      }
+      v.partsMoving = mv; v.fxOn = fx; v.extOpen = sum;
+    }
+    // the first time a view opens, everything that can be tapped glows once, softly
+    if (v.pulse != null) {
+      if (v.park >= 1 && v.setupT >= 1 && v.camSettled) v.pulse += dt;
+      const q = v.pulse / 1.6;
+      if (q >= 1) { v.pulse = null; v.lit.forEach((m) => { m.visible = false; }); v.lit = []; v.van.hitM.opacity = 0.3; }
+      else if (q > 0) { if (!v.lit.length) { const orbit = v.mode === 'camp'; P.forEach((p) => { if ((!p.zone || p.zone === v.mode) && (!orbit || p.ext) && (v.mode !== 'bath' || p.zone)) p.proxies.forEach((m) => { m.visible = true; v.lit.push(m); }); }); } v.van.hitM.opacity = 0.28 * Math.sin(Math.PI * q); }
+    }
     // shadows are redrawn only when something that casts one has moved, or the sun has
     const sunMoved = v.sun.position.distanceToSquared(v.lastSun) > 0.0004;
-    const moving = sp > 0.001 || Math.abs(v.yawV || 0) > 1e-4 || (v.setupT > 0 && v.setupT < 1) || (v.pOff > -999 && v.pOff !== 0) || Math.abs(v.doorT - want) > 0.002 || v.popMoving;
+    const moving = sp > 0.001 || Math.abs(v.yawV || 0) > 1e-4 || (v.setupT > 0 && v.setupT < 1) || (v.pOff > -999 && v.pOff !== 0) || extMoving || v.popMoving;
     if (v.shadowDirty || sunMoved || (moving && (sp < 0.001 || v.frame % 2 === 0))) { v.renderer.shadowMap.needsUpdate = true; v.lastSun.copy(v.sun.position); v.shadowDirty = false; }
     v.camSettled = v.camera.position.distanceToSquared(tg.pos) < 1e-4;
     this.reflect(dt, lat);
@@ -2736,7 +3135,7 @@ class Component extends DCLogic {
     const n = v.reflNow, s = v.reflSig, sp = v.sun.position, u = v.worldParts.skyMat.uniforms, c = v.camp, pv = v.pOff > -999;
     n[0] = sp.x * 0.008; n[1] = sp.y * 0.008; n[2] = sp.z * 0.008; n[3] = v.sun.intensity * 0.25; n[4] = v.hemi.intensity; n[5] = v.renderer.toneMappingExposure;
     n[6] = u.top.value.r; n[7] = u.top.value.g; n[8] = u.top.value.b; n[9] = u.horizon.value.r; n[10] = u.horizon.value.g; n[11] = u.horizon.value.b;
-    n[12] = lat * 0.4 + (pv ? v.pOff * 0.05 : -9); n[13] = pv ? v.setupT + (v.popT || 0) + v.doorT * 0.5 : 0;
+    n[12] = lat * 0.4 + (pv ? v.pOff * 0.05 : -9); n[13] = pv ? v.setupT + (v.popT || 0) + v.extOpen * 0.25 : 0;
     n[14] = c && pv ? (c.lightK || 0) * (c.bulbM.emissiveIntensity * 0.1 + 0.2) : 0; n[15] = v.scene.environment ? v.scene.environment.id : 0;
     let d = 0, moved = 0;
     for (let i = 0; i < 16; i++) { d = Math.max(d, Math.abs(n[i] - s[i])); }
@@ -2759,6 +3158,7 @@ class Component extends DCLogic {
     const spec = VAN_SPECS[s.van] || VAN_SPECS['man-lwb-auto'];
     const hero = this.hero, inside = hero && s.view !== 'drive';
     const viewIds = hero ? ['camp', 'driver', 'passenger', 'living', 'bed'] : ['camp', 'outside', 'driver', 'passenger', 'living', 'bed'];
+    if (spec.bath) viewIds.push('bath'); // only the vans with a washroom get the Bathroom view
     const hOn = 'min-h-[52px] shrink-0 rounded-full bg-brand px-5 text-[16px] font-bold text-white';
     const hOff = 'min-h-[52px] shrink-0 rounded-full bg-white/90 px-5 text-[16px] font-bold text-plum hover:bg-white';
     return {
@@ -2787,6 +3187,9 @@ class Component extends DCLogic {
       vanName: spec.name,
       viewLabel,
       hint: s.view === 'outside' || s.view === 'camp' ? 'Drag to rotate · scroll or pinch to zoom' : 'Drag to look around · scroll or pinch to zoom',
+      hint2: s.view === 'bath' ? 'Tap the shower, tap, toilet, mirror and light' : s.view === 'camp' ? 'Tap the doors to open them' : 'Tap cupboards and doors to open them',
+      hasHint2: s.view !== 'drive' && s.view !== 'outside',
+      caption: s.caption || '', hasCaption: !!s.caption && s.view !== 'drive',
       ariaLabel: '3D model of the ' + spec.name + ', ' + viewLabel.toLowerCase() + ' view, ' + (s.view !== 'drive' && s.view !== 'outside' ? 'parked up for the night with a campfire, chairs and string lights' : 'on the road') + ', setting: ' + ((ENVS[this.props.env] || ENVS[spec.env] || ENVS.loch).label),
       vanOptions: VAN_ORDER.map((id) => ({ id, name: VAN_SPECS[id].name })),
       pickVan: (e) => this.setState({ van: e.target.value }),

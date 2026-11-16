@@ -8,9 +8,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&amp;family=Lato:wght@400;700;900&amp;family=Lora:ital,wght@0,400;0,600;1,400&amp;display=swap">
-<link rel="stylesheet" href="assets/site.css?v=9">
+<link rel="stylesheet" href="assets/site.css?v=10">
 <script defer src="js/three.min.js?v=158b"></script>
-<script defer src="js/site.js?v=21"></script>
+<script defer src="js/site.js?v=22"></script>
 <script defer src="js/alpine.min.js"></script>
 <style>body{margin:0}[x-cloak]{display:none}</style>
 </head>
@@ -115,7 +115,8 @@
         <button type="button" @click="(V.exitInside)($event)" aria-label="Close the 3D view" class="pointer-events-auto inline-flex min-h-[48px] min-w-[48px] items-center justify-center gap-2 rounded-full bg-white px-3 sm:px-5 text-[16px] font-bold text-plum hover:bg-brand hover:text-white"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg><span class="sr-only sm:not-sr-only">Close</span></button>
         </div>
       </div>
-      <p class="m-0 mb-3 w-fit rounded-full bg-white/85 px-3 py-1.5 text-[14px] font-bold text-plum" x-text="V.hint"></p>
+      <template x-if="V.hasCaption"><span style="display:contents"><p role="status" class="m-0 mb-3 w-fit rounded-full bg-brand px-4 py-2 text-[17px] font-bold text-white shadow-lg" x-text="V.caption"></p></span></template>
+      <div class="mb-3 flex flex-wrap gap-2"><p class="m-0 w-fit rounded-full bg-white/85 px-3 py-1.5 text-[14px] font-bold text-plum" x-text="V.hint"></p><p class="m-0 w-fit rounded-full bg-white/85 px-3 py-1.5 text-[14px] font-bold text-plum" x-text="V.hint2"></p></div>
       <div role="group" aria-label="Choose a viewpoint" class="no-scrollbar pointer-events-auto -mx-5 flex gap-2 overflow-x-auto px-5 pb-1 md:mx-0 md:px-0">
         <template x-for="v in V.views">
           <button type="button" @click="(v.pick)($event)" :aria-pressed="v.pressed" :class="v.cls" x-text="v.label"></button>
@@ -133,6 +134,10 @@
     <div class="pointer-events-none absolute inset-x-0 top-0 flex flex-wrap items-start justify-between gap-2 p-4 sm:p-5">
       <p class="m-0 rounded-2xl bg-plum-deep/75 px-4 py-2 text-white backdrop-blur"><span class="block text-[13px] font-bold uppercase tracking-[0.14em] text-brand-rose" x-text="V.viewLabel"></span><span class="font-display text-[20px] font-bold leading-tight sm:text-[24px]" x-text="V.vanName"></span></p>
       <p class="m-0 hidden rounded-full bg-white/85 px-3 py-1.5 text-[14px] font-bold text-plum sm:block" x-text="V.hint"></p>
+    </div>
+    <div class="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-start gap-2 p-4 sm:p-5">
+      <template x-if="V.hasCaption"><span style="display:contents"><p role="status" class="m-0 w-fit rounded-full bg-brand px-4 py-2 text-[17px] font-bold text-white shadow-lg" x-text="V.caption"></p></span></template>
+      <template x-if="V.hasHint2"><span style="display:contents"><p class="m-0 w-fit rounded-full bg-white/85 px-3 py-1.5 text-[14px] font-bold text-plum" x-text="V.hint2"></p></span></template>
     </div>
     <template x-if="V.noGL"><span style="display:contents">
       <div class="absolute inset-0 flex items-center justify-center bg-plum-deep p-8 text-center text-[18px] text-white">The 3D view needs WebGL, which this browser has switched off. The photos show every van.</div>
